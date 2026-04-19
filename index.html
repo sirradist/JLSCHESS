@@ -203,74 +203,87 @@
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
-        const half = Math.ceil(allW.length / 2), ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
+        const half = Math.ceil(allW.length / 2);
+        
+        // [수정] 긴 단어가 자리를 먼저 선점하도록 글자 수 기준 내림차순 정렬
+        let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
+        const originalOrder = [...ws]; // 힌트 번호 유지를 위한 원본 순서 저장
+        ws.sort((a, b) => b.a.length - a.a.length);
         
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
 
-        let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
+        let grid, placed;
+        // [핵심] 모든 단어가 배치될 때까지 무한 루프 (최대 100회)
+        for(let attempt=0; attempt<100; attempt++) {
+            grid = Array(sz).fill().map(() => Array(sz).fill(null));
+            placed = [];
+            let successAll = true;
 
-        ws.forEach((w, idx) => {
-            let possibilities = [];
-            // 1. 교차점 탐색 로직 (기존 연결성 유지)
-            for(let r=0; r<sz; r++) {
-                for(let c=0; c<sz; c++) {
-                    for(let d of ['H', 'V']) {
-                        if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
-                            let over = 0, fail = false;
-                            for(let i=0; i<w.a.length; i++) {
-                                let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                if(grid[rr][cc]) {
-                                    if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                    else over += 100; // 교차 시 점수 대폭 부여
-                                }
-                            }
-                            if(!fail) possibilities.push({ r, c, d, over });
-                        }
-                    }
-                }
-            }
-
-            let best = null;
-            if(possibilities.length > 0) {
-                possibilities.sort((a,b) => b.over - a.over);
-                best = possibilities[0];
-            } else {
-                // 2. [핵심] 교차점이 없을 경우 무조건 빈자리 탐색 (1칸 단위 정밀 조사)
-                let found = false;
-                for(let r=0; r<sz && !found; r++) {
-                    for(let c=0; c<sz && !found; c++) {
+            for(let w of ws) {
+                let possibilities = [];
+                for(let r=0; r<sz; r++) {
+                    for(let c=0; c<sz; c++) {
                         for(let d of ['H', 'V']) {
-                            if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) {
-                                let can = true;
+                            if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
+                                let over = 0, fail = false;
                                 for(let i=0; i<w.a.length; i++) {
                                     let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                    if(grid[rr][cc]) { can = false; break; }
+                                    if(grid[rr][cc]) {
+                                        if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
+                                        else over += 100; 
+                                    }
                                 }
-                                if(can) { best = { r, c, d, over: 0 }; found = true; }
+                                if(!fail) possibilities.push({ r, c, d, over });
                             }
                         }
                     }
                 }
-            }
 
-            if(best) {
-                for(let i=0; i<w.a.length; i++) {
-                    let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
-                    let existing = grid[rr][cc];
-                    let charToSet = w.a[i];
-                    if(existing) {
-                        let chars = existing.char.split(',');
-                        if(!chars.includes(charToSet)) chars.push(charToSet);
-                        charToSet = chars.join(',');
+                let best = null;
+                if(possibilities.length > 0) {
+                    possibilities.sort((a,b) => b.over - a.over);
+                    best = possibilities[0];
+                } else {
+                    // 강제 배치 로직 (순차 전수조사)
+                    let found = false;
+                    for(let r=0; r<sz && !found; r++) {
+                        for(let c=0; c<sz && !found; c++) {
+                            for(let d of ['H', 'V']) {
+                                if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) {
+                                    let can = true;
+                                    for(let i=0; i<w.a.length; i++) {
+                                        let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
+                                        if(grid[rr][cc]) { can = false; break; }
+                                    }
+                                    if(can) { best = { r, c, d, over: 0 }; found = true; }
+                                }
+                            }
+                        }
                     }
-                    grid[rr][cc] = { char: charToSet, n: (i===0 ? idx+1 : (existing ? existing.n : null)), d: existing ? existing.d + best.d : best.d };
                 }
-                placed.push({ ...best, ...w, num: idx+1 });
-            }
-        });
 
-        // 렌더링 로직
+                if(best) {
+                    const originalIndex = originalOrder.indexOf(w);
+                    for(let i=0; i<w.a.length; i++) {
+                        let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
+                        let existing = grid[rr][cc];
+                        let charToSet = w.a[i];
+                        if(existing) {
+                            let chars = existing.char.split(',');
+                            if(!chars.includes(charToSet)) chars.push(charToSet);
+                            charToSet = chars.join(',');
+                        }
+                        grid[rr][cc] = { char: charToSet, n: (i===0 ? originalIndex+1 : (existing ? existing.n : null)), d: existing ? existing.d + best.d : best.d };
+                    }
+                    placed.push({ ...best, ...w, num: originalIndex+1 });
+                } else {
+                    successAll = false; break;
+                }
+            }
+            if(successAll) break;
+        }
+        
         let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 32px);">`;
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
@@ -282,7 +295,7 @@
             }
         }
         box.innerHTML = h + `</div>`;
-        hBox.innerHTML = ws.map((w,i) => {
+        hBox.innerHTML = originalOrder.map((w,i) => {
             const p = placed.find(pl => pl.num === i+1);
             return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d.includes('H')?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
         }).join('');
