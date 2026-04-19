@@ -206,7 +206,6 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [최종 수정] 단어 누락 방지 및 강제 배치 최적화 로직
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
@@ -216,25 +215,27 @@
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
         
         let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
-
+        
         ws.forEach((w, idx) => {
             let best = null;
             if(placed.length === 0) {
-                best = { r: 2, c: 2, d: 'H' }; // 첫 단어 위치
+                best = { r: 2, c: 2, d: 'H' };
             } else {
                 let possibilities = [];
-                for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
-                    for(let d of ['H','V']) {
-                        if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
-                            let over = 0, fail = false;
-                            for(let i=0; i<w.a.length; i++) {
-                                let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                if(grid[rr][cc]) {
-                                    if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                    else over++;
+                for(let r=0; r<sz; r++) {
+                    for(let c=0; c<sz; c++) {
+                        for(let d of ['H','V']) {
+                            if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
+                                let over = 0, fail = false;
+                                for(let i=0; i<w.a.length; i++) {
+                                    let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
+                                    if(grid[rr][cc]) {
+                                        if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
+                                        else over++;
+                                    }
                                 }
+                                if(!fail && over > 0) possibilities.push({ r, c, d, over });
                             }
-                            if(!fail && over > 0) possibilities.push({ r, c, d, over });
                         }
                     }
                 }
@@ -244,19 +245,19 @@
                 }
             }
 
-            // 배치 실패 시 빈 공간 강제 탐색
             if(!best) {
-                outer: for(let r=0; r<sz; r++) {
-                    for(let c=0; c<sz; c++) {
+                let found = false;
+                for(let r=0; r<sz && !found; r++) {
+                    for(let c=0; c<sz && !found; c++) {
                         if(c+w.a.length <= sz) {
                             let can = true;
                             for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
-                            if(can) { best = { r, c, d: 'H' }; break outer; }
+                            if(can) { best = { r, c, d: 'H' }; found = true; }
                         }
-                        if(r+w.a.length <= sz) {
+                        if(!found && r+w.a.length <= sz) {
                             let can = true;
                             for(let i=0; i<w.a.length; i++) if(grid[r+i][c]) { can = false; break; }
-                            if(can) { best = { r, c, d: 'V' }; break outer; }
+                            if(can) { best = { r, c, d: 'V' }; found = true; }
                         }
                     }
                 }
@@ -310,9 +311,9 @@
             } 
         });
         if(ok) { 
-            alert(curStage===1?"STAGE 1 완료! 다음 스테이지로 넘어갑니다.":"축하합니다! 모든 퍼즐을 완료했습니다."); 
+            alert(curStage===1?"STAGE 1 완료! 다음으로!":"학습 완료!"); 
             if(curStage===1){ document.getElementById('cw-check-btn').style.display='none'; document.getElementById('cw-next-btn').style.display='block'; } 
-        } else alert("틀린 칸이 있습니다. 확인해 보세요!");
+        } else alert("틀린 칸이 있어요!");
     }
     function nextStage() { curStage = 2; createCW(); }
 </script>
