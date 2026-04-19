@@ -12,10 +12,15 @@
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
         h1 { font-size: 1.5rem; color: var(--p); margin: 15px 0; font-weight: 800; }
-        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74,144,226,0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
         .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
+        
+        /* 교재 이미지 스타일 */
+        #book-image-container { display: none; margin-bottom: 15px; padding: 10px; background: #fff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #book-cover { max-width: 120px; border-radius: 10px; border: 1px solid #eee; }
+
         .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .tab-btn { padding: 12px; border-radius: 12px; border: none; background: #BDC3C7; color: #fff; font-weight: 800; cursor: pointer; }
         .tab-btn.active { background: var(--p); }
@@ -50,48 +55,40 @@
     <h1>🌟 CHESS VOCA Master</h1>
     <div class="setup-box">
         <select id="level"><option value="">레벨 선택</option><optgroup label="DS"><option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option><option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option><option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option></optgroup><optgroup label="LS"><option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option><option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option><option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option><option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option></optgroup><optgroup label="MS"><option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option><option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option></optgroup></select>
-        <div class="row"><select id="book"></select><select id="lesson"></select></div>
+        <div class="row">
+            <select id="book" onchange="updateBookImage()"></select>
+            <select id="lesson"></select>
+        </div>
         <button class="btn-main" onclick="startStudy()">START!</button>
     </div>
+
+    <div id="book-image-container">
+        <img id="book-cover" src="" alt="Book Cover">
+    </div>
+
     <div class="tab-menu" id="main-tabs"><button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button><button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button><button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button></div>
     <div id="lesson-subtitle"></div>
 
     <div id="study-area"><div style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
-    
     <div id="test-area"><button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
-    
-    <div id="puzzle-area">
-        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
-        <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 (완료) ✔️</button>
-        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button>
-        <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
-    </div>
+    <div id="puzzle-area"><div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div><div class="cw-wrap" id="cw-box"></div><button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 (완료) ✔️</button><button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button><div class="h-box" id="cw-hints" style="margin-top:15px;"></div></div>
 </div>
 
 <script>
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
 
-    // [음성 엔진 재검증 섹션]
     const synth = window.speechSynthesis;
     let engVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
-        // [여성 음성 고정 로직]
-        // 1순위: Google 보이스 중 'Female' 이름 포함
-        // 2순위: 'Google US English' (기본 여성인 경우가 많음)
-        // 3순위: 그 외 en-US 여성 음성
         engVoice = voices.find(v => v.name.includes('Google') && v.name.includes('Female')) || 
                    voices.find(v => v.name.includes('Google US English')) || 
                    voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) ||
                    voices.find(v => v.lang === 'en-US');
     }
-
-    if (synth.onvoiceschanged !== undefined) {
-        synth.onvoiceschanged = initVoices;
-    }
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
 
     function updateUI() {
@@ -100,6 +97,25 @@
         document.getElementById('book').innerHTML = (is2?[4,5,6]:c.b).map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
         const ls = is2?Array.from({length:10},(_,i)=>i+13):(Array.isArray(c.l)?c.l:Array.from({length:10},(_,i)=>i+1));
         document.getElementById('lesson').innerHTML = ls.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+        updateBookImage(); // 레벨 변경 시 이미지 업데이트
+    }
+
+    // [추가] 교재 이미지 업데이트 함수
+    function updateBookImage() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const container = document.getElementById('book-image-container');
+        const img = document.getElementById('book-cover');
+        
+        if (lv && bk) {
+            // 이미지 경로 규칙: data/DSB1_1.jpg (레벨_교재번호.jpg)
+            const imgPath = `data/${lv}_${bk}.jpg`;
+            img.src = imgPath;
+            img.onload = () => container.style.display = 'block';
+            img.onerror = () => container.style.display = 'none'; // 이미지 없으면 숨김
+        } else {
+            container.style.display = 'none';
+        }
     }
 
     async function startStudy() {
@@ -137,8 +153,19 @@
             const type = Math.random() > 0.5 ? "E2K" : "K2E";
             const q = type === "E2K" ? w.en : w.ko, ans = type === "E2K" ? w.ko : w.en;
             const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5);
-            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="this.classList.add('${o===ans?'ok':'no'}')">${o}</button>`).join('')}</div>`;
+            // [수정] 버튼 클릭 시 checkAnswer 호출하도록 변경
+            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
         }).join('');
+    }
+
+    // [추가] 테스트 정답 체크 및 TTS 재생 함수
+    function checkAnswer(btn, choice, correct, english) {
+        if(choice === correct) {
+            btn.classList.add('ok');
+            speak(english.split('-')[0].trim()); // 정답 시 해당 단어 영어 발음 재생
+        } else {
+            btn.classList.add('no');
+        }
     }
 
     function createCW() {
@@ -204,7 +231,7 @@
         if (engVoice) u.voice = engVoice;
         u.lang = 'en-US';
         u.rate = 0.9;
-        u.pitch = 1.1; // 여성 음성의 톤을 더 살리기 위해 살짝 높임
+        u.pitch = 1.1; 
         synth.speak(u);
     }
 
