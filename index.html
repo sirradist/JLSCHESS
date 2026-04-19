@@ -41,8 +41,8 @@
         .cell-num { position: absolute; top: 0px; left: 1px; font-size: 0.45rem; color: #999; font-weight: 700; }
         .h-box { text-align: left; background: #fff; padding: 15px; border-radius: 20px; }
         .h-item { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; color: #555; }
-        .btn-sub { background: var(--s); color: var(--t); padding: 10px; border-radius: 10px; border: none; font-weight: 800; margin-bottom: 10px; width: 100%; cursor: pointer; }
-        .stage-info { margin-bottom: 10px; font-weight: 800; color: var(--p); }
+        .btn-action { background: var(--s); color: var(--t); padding: 14px; border-radius: 15px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #D4B531; }
+        .btn-next { background: var(--ok); color: #fff; box-shadow: 0 4px 0 #529E5A; }
     </style>
 </head>
 <body>
@@ -55,20 +55,24 @@
     </div>
     <div class="tab-menu" id="main-tabs"><button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button><button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button><button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button></div>
     <div id="lesson-subtitle"></div>
+
     <div id="study-area"><div style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
-    <div id="test-area"><button class="btn-sub" onclick="renderTest()">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
+    
+    <div id="test-area"><button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
+    
     <div id="puzzle-area">
-        <div id="cw-stage-info" class="stage-info"></div>
+        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
         <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-main" id="btn-cw-check" onclick="checkCWAnswers()">정답 확인 (완료) ✔️</button>
-        <button class="btn-sub" id="btn-next-stage" onclick="nextCWStage()" style="display:none; margin-top:10px; background:var(--ok); color:#fff;">다음 스테이지로 ➡️</button>
+        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 (완료) ✔️</button>
+        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button>
         <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
     </div>
 </div>
+
 <script>
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
-    let cData = { words: [] }, curLv = "", curStage = 1, stageWords = [];
-    
+    let cData = { words: [] }, curLv = "", curStage = 1;
+
     function updateUI() {
         const v = document.getElementById('level').value; if(!v) return; curLv = v;
         const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
@@ -76,7 +80,7 @@
         const ls = is2?Array.from({length:10},(_,i)=>i+13):(Array.isArray(c.l)?c.l:Array.from({length:10},(_,i)=>i+1));
         document.getElementById('lesson').innerHTML = ls.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
     }
-    
+
     async function startStudy() {
         const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
         if(!v||!b||!l) return alert("선택 필수!");
@@ -90,7 +94,7 @@
             switchTab('study');
         } catch(e) { alert("데이터 로드 실패"); }
     }
-    
+
     function switchTab(t) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-'+t).classList.add('active');
@@ -100,12 +104,12 @@
         if(t==='test') renderTest(); 
         if(t==='puzzle') { curStage = 1; createCW(); }
     }
-    
+
     function renderStudy() {
         const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
         document.getElementById('study-list').innerHTML = cData.words.map(w => `<div class="card"><button class="tts-icon" onclick="speak('${w.en.split('-')[0].trim()}')">🔊</button><div class="word-content"><div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div><div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div></div></div>`).join('');
     }
-    
+
     function renderTest() {
         const list = [...cData.words].sort(() => Math.random() - 0.5).slice(0, 10);
         document.getElementById('test-list').innerHTML = list.map((w, i) => {
@@ -118,27 +122,26 @@
 
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
-        document.getElementById('btn-next-stage').style.display = 'none';
-        document.getElementById('btn-cw-check').style.display = 'block';
+        const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
+        const half = Math.ceil(allW.length / 2);
+        const ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
         
-        const allWords = cData.words.map(w => ({ ans: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), hint: w.ko }));
-        const half = Math.ceil(allWords.length / 2);
-        stageWords = (curStage === 1) ? allWords.slice(0, half) : allWords.slice(half);
-        
-        document.getElementById('cw-stage-info').innerText = `STAGE ${curStage} / 2 (${stageWords.length} Words)`;
-        
+        document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (단어 ${ws.length}개)`;
+        document.getElementById('cw-next-btn').style.display = 'none';
+        document.getElementById('cw-check-btn').style.display = 'block';
+
         let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
-        stageWords.forEach((w, idx) => {
+        ws.forEach(w => {
             let best = null;
             if(placed.length === 0) { best = { r: 7, c: 4, d: 'H' }; }
             else {
                 for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
                     ['H','V'].forEach(d => {
-                        if((d==='H' && c+w.ans.length<=sz) || (d==='V' && r+w.ans.length<=sz)) {
+                        if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
                             let over = 0, fail = false;
-                            for(let i=0; i<w.ans.length; i++) {
+                            for(let i=0; i<w.a.length; i++) {
                                 let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                if(grid[rr][cc]) { if(grid[rr][cc].char===w.ans[i]) over++; else fail=true; }
+                                if(grid[rr][cc]) { if(grid[rr][cc].char===w.a[i]) over++; else fail=true; }
                             }
                             if(!fail && over>0) best = { r, c, d };
                         }
@@ -146,43 +149,41 @@
                 }
             }
             if(!best) { best = { r: (placed.length*2)%sz, c: 1, d: 'H' }; }
-            for(let i=0; i<w.ans.length; i++) {
+            for(let i=0; i<w.a.length; i++) {
                 let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
-                grid[rr][cc] = { char: w.ans[i], n: (i===0?placed.length+1:(grid[rr][cc]?grid[rr][cc].n:null)) };
+                grid[rr][cc] = { char: w.a[i], n: (i===0?placed.length+1:(grid[rr][cc]?grid[rr][cc].n:null)) };
             }
             placed.push({ ...best, ...w });
         });
-        
+
         let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 28px);">`;
         for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
-            if(grid[r][c]) h += `<div class="cell" id="cell-${r}-${c}">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}"></div>`;
+            if(grid[r][c]) h += `<div class="cell" id="c-${r}-${c}">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}"></div>`;
             else h += `<div class="cell empty"></div>`;
         }
         box.innerHTML = h + `</div>`;
-        hBox.innerHTML = placed.map((p,i) => `<div class="h-item">${i+1}. ${p.hint} (${p.d==='H'?'가로':'세로'}, ${p.ans.length}자)</div>`).join('');
+        hBox.innerHTML = placed.map((p,i) => `<div class="h-item">${i+1}. ${p.h} (${p.d==='H'?'가로':'세로'}, ${p.a.length}자)</div>`).join('');
     }
 
-    function checkCWAnswers() {
-        const cells = document.querySelectorAll('.cell:not(.empty)');
-        let allCorrect = true;
-        cells.forEach(cell => {
-            const input = cell.querySelector('input');
-            if(input.value.toUpperCase() === input.dataset.ans) cell.classList.add('ok');
-            else { cell.classList.remove('ok'); allCorrect = false; }
+    function checkCW() {
+        const inputs = document.querySelectorAll('.cell input');
+        let allOk = true;
+        inputs.forEach(i => {
+            if(i.value.toUpperCase() === i.dataset.ans) i.parentElement.classList.add('ok');
+            else { i.parentElement.classList.remove('ok'); allOk = false; }
         });
-        if(allCorrect) {
-            alert(curStage === 1 ? "STAGE 1 완료! 다음으로 넘어가세요." : "모든 단어 학습 완료! 참 잘했어요!");
-            if(curStage === 1) document.getElementById('btn-next-stage').style.display = 'block';
-        } else alert("아직 틀린 칸이 있어요. 다시 확인해보세요!");
+        if(allOk) {
+            alert(curStage === 1 ? "STAGE 1 성공! 다음 단어들로 넘어갑니다." : "전부 맞혔어요! 참 잘했어요!");
+            if(curStage === 1) {
+                document.getElementById('cw-check-btn').style.display = 'none';
+                document.getElementById('cw-next-btn').style.display = 'block';
+            }
+        } else alert("틀린 칸이 있어요. 다시 확인해보세요!");
     }
 
-    function nextCWStage() { curStage = 2; createCW(); }
-    
+    function nextStage() { curStage = 2; createCW(); }
     function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; window.speechSynthesis.speak(u); }
-    
-    document.addEventListener('DOMContentLoaded', () => { 
-        document.getElementById('level').addEventListener('change', updateUI); 
-    });
+    document.addEventListener('DOMContentLoaded', () => { document.getElementById('level').addEventListener('change', updateUI); });
 </script>
 </body>
 </html>
