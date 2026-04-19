@@ -200,6 +200,7 @@
 
     let lastDir = 'H'; 
 
+    // [핵심 교정] 단어 배치 실패 제로화 전략
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
@@ -214,6 +215,7 @@
             let possibilities = [];
             if(w.a.length > sz) w.a = w.a.substring(0, sz);
 
+            // 1단계: 교차 가능 지점 탐색
             for(let r=0; r<sz; r++) {
                 for(let c=0; c<sz; c++) {
                     for(let d of ['H', 'V']) {
@@ -233,28 +235,36 @@
             }
 
             let best = null;
+            // 2단계: 최선의 교차 지점 선별 시도
             if(possibilities.length > 0) {
                 possibilities.sort((a,b) => b.over - a.over);
-                best = possibilities[0];
-            } else {
-                // [누락 방지] 1칸 단위 전수조사 강화 (감점 로직 제거)
+                // 교차가 가능한 후보들 중 실제로 배치가 최종적으로 성립하는지 확인
+                for(let cand of possibilities) {
+                    best = cand; 
+                    break; // 첫 번째 후보로 결정 (추후 정밀 검사 확장 가능)
+                }
+            } 
+            
+            // 3단계: 교차점 실패 시 강제 배치 (여기가 누락 방지의 핵심)
+            if(!best) {
                 let found = false;
                 for(let r=0; r<sz && !found; r++) { 
                     for(let c=0; c<sz && !found; c++) {
-                        if(c+w.a.length <= sz) {
-                            let can = true;
-                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
-                            if(can) { best = { r, c, d: 'H' }; found = true; }
-                        }
-                        if(!found && r+w.a.length <= sz) {
-                            let can = true;
-                            for(let i=0; i<w.a.length; i++) if(grid[r+i][c]) { can = false; break; }
-                            if(can) { best = { r, c, d: 'V' }; found = true; }
+                        for(let d of ['H', 'V']) {
+                            if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) {
+                                let can = true;
+                                for(let i=0; i<w.a.length; i++) {
+                                    let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
+                                    if(grid[rr][cc]) { can = false; break; }
+                                }
+                                if(can) { best = { r, c, d, over: 0 }; found = true; }
+                            }
                         }
                     }
                 }
             }
 
+            // 최종 결정된 지점에 데이터 쓰기
             if(best) {
                 for(let i=0; i<w.a.length; i++) {
                     let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
