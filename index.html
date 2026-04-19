@@ -20,14 +20,17 @@
         .setup-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         .controls { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; justify-content: center; gap: 20px; border: 1px solid #eee; }
         .word-list { display: grid; gap: 10px; }
         .word-card { background: var(--card); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; }
-        .word-text { font-size: 1.1rem; font-weight: 700; width: 200px; color: #1a73e8; }
+        .word-text { font-size: 1.1rem; font-weight: 700; width: 220px; color: #1a73e8; }
         .mean-text { font-size: 1rem; color: #5f6368; flex: 1; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
         .tts-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-        #status-area { font-size: 0.9rem; margin-bottom: 10px; color: #666; }
+        #status-area { font-size: 0.9rem; margin-bottom: 10px; color: #666; font-weight: bold; }
+        #progress-bar { width: 100%; height: 5px; background: #eee; border-radius: 5px; margin-top: 5px; display: none; }
+        #progress-fill { width: 0%; height: 100%; background: #34a853; border-radius: 5px; transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -35,7 +38,8 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">음성 엔진 준비 중...</div>
+        <div id="status-area">내부 모델 로딩 대기 중...</div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
     <div class="setup-box">
@@ -59,7 +63,7 @@
         </select>
         <select id="book"></select>
         <select id="lesson"></select>
-        <button id="btn-study" onclick="fetchAndLoad()">학습 시작</button>
+        <button id="btn-study" onclick="fetchAndLoad()" disabled>학습 시작</button>
     </div>
 
     <div id="controls" class="controls">
@@ -75,10 +79,112 @@
     let kokoro = null;
     let words = [];
 
-    // TTS 초기화
+    // --- 수정한 로컬 로딩 로직 ---
     async function initTTS() {
         const status = document.getElementById('status-area');
+        const pBar = document.getElementById('progress-bar');
+        const pFill = document.getElementById('progress-fill');
+        
         try {
             if (window.KokoroWeb) {
+                pBar.style.display = "block";
+                status.innerText = "Repository 내부 모델 파일 로딩 중...";
+                
+                // 본인 리포지토리에 저장된 model.onnx를 직접 호출
                 kokoro = await window.KokoroWeb.new({ 
-                    model: '
+                    model: './model.onnx' 
+                });
+
+                pFill.style.width = "100%";
+                status.innerHTML = "<span style='color:#34a853'>✅ 내부 음성 엔진 준비 완료</span>";
+                document.getElementById('btn-study').disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+            status.innerText = "⚠️ 내부 모델 로딩 실패 (시스템 음성 모드)";
+            document.getElementById('btn-study').disabled = false;
+        }
+    }
+    
+    // 페이지 로드 후 엔진 초기화 시작
+    window.onload = initTTS;
+
+    // 레벨 데이터 및 나머지 기능 (기존 유지)
+    const CONFIG = {
+        DS: { books: [1,2,3], lessons: 10, hasDef: false },
+        DSD: { books: [1,2,3], lessons: 10, hasDef: true },
+        LS: { books: [1,2,3], lessons: 10, hasDef: true },
+        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17], hasDef: true }
+    };
+
+    function updateUIByLevel() {
+        const lv = document.getElementById('level').value;
+        if(!lv) return;
+        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : (lv.startsWith("DSD") ? "DSD" : "DS"));
+        const config = CONFIG[type];
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : config.books;
+        document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
+        let lHtml = "";
+        if(lv.endsWith("2") && !lv.startsWith("MS")) {
+            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        } else if (Array.isArray(config.lessons)) {
+            lHtml = config.lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+        } else {
+            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        }
+        document.getElementById('lesson').innerHTML = lHtml;
+        document.getElementById('lblDef').style.display = config.hasDef ? "flex" : "none";
+    }
+
+    async function fetchAndLoad() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const ls = document.getElementById('lesson').value;
+        try {
+            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            words = await res.json();
+            document.getElementById('controls').style.display = "flex";
+            renderWords();
+        } catch(e) { alert("JSON 파일 로드 실패"); }
+    }
+
+    function renderWords() {
+        const area = document.getElementById('display-area');
+        const hE = document.getElementById('chkEng').checked;
+        const hK = document.getElementById('chkKor').checked;
+        const hD = document.getElementById('chkDef').checked;
+        const lv = document.getElementById('level').value;
+        const showDef = lv.startsWith("DSD") || lv.startsWith("LS") || lv.startsWith("MS");
+
+        area.innerHTML = words.map((w, idx) => `
+            <div class="word-card">
+                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
+                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
+                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
+                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
+                ${showDef ? `<div class="def-text ${hD ? 'hidden' : ''}" onclick="playEnglish('${w.def}'); this.classList.toggle('hidden');">${w.def || ''}</div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    async function playEnglish(text) {
+        if (!text) return;
+        const cleanText = text.replace(/-/g, ',');
+        if (kokoro) {
+            const audio = await kokoro.generate(cleanText, { voice: 'af_bella' });
+            audio.play();
+        } else {
+            const utter = new SpeechSynthesisUtterance(cleanText);
+            utter.lang = 'en-US';
+            window.speechSynthesis.speak(utter);
+        }
+    }
+
+    function playKorean(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        window.speechSynthesis.speak(utter);
+    }
+</script>
+</body>
+</html>
