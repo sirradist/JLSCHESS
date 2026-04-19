@@ -29,8 +29,6 @@
         .card { background: var(--c); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); text-align: left; }
         .word-text { font-size: 1.25rem; font-weight: 800; color: var(--p); }
         .mean-text { font-size: 1.05rem; font-weight: 700; color: #636e72; }
-        .hidden { background: var(--s) !important; color: transparent !important; border-radius: 8px; cursor: pointer; position: relative; min-height: 1.2em; }
-        .hidden::after { content: '?'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: 800; }
         .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #DFF9FB; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; }
         .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); }
         .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; }
@@ -200,7 +198,6 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [로직 수정] 방향 인식 및 교차점 무결성 해결
     let lastDir = 'H'; 
 
     function createCW() {
@@ -235,9 +232,29 @@
                 }
             }
 
+            let best = null;
             if(possibilities.length > 0) {
                 possibilities.sort((a,b) => b.over - a.over);
-                const best = possibilities[0];
+                best = possibilities[0];
+            } else {
+                let found = false;
+                for(let r=0; r<sz && !found; r++) { 
+                    for(let c=0; c<sz && !found; c++) {
+                        if(c+w.a.length <= sz) {
+                            let can = true;
+                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
+                            if(can) { best = { r, c, d: 'H' }; found = true; }
+                        }
+                        if(!found && r+w.a.length <= sz) {
+                            let can = true;
+                            for(let i=0; i<w.a.length; i++) if(grid[r+i][c]) { can = false; break; }
+                            if(can) { best = { r, c, d: 'V' }; found = true; }
+                        }
+                    }
+                }
+            }
+
+            if(best) {
                 for(let i=0; i<w.a.length; i++) {
                     let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
                     let existing = grid[rr][cc];
@@ -254,21 +271,6 @@
                     };
                 }
                 placed.push({ ...best, ...w, num: idx+1 });
-            } else {
-                let found = false;
-                for(let r=0; r<sz && !found; r++) { 
-                    for(let c=0; c<sz && !found; c++) {
-                        if(c+w.a.length <= sz) {
-                            let can = true;
-                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
-                            if(can) { 
-                                for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null), d: 'H' };
-                                placed.push({ r, c, d: 'H', ...w, num: idx+1 });
-                                found = true;
-                            }
-                        }
-                    }
-                }
             }
         });
         
@@ -291,6 +293,7 @@
 
     function setDir(el) {
         const d = el.dataset.dir;
+        // 교차점이면 현재 흐름(lastDir)을 유지하고, 아니면 단어의 유일한 방향으로 설정
         if(d.length === 1) lastDir = d; 
     }
 
