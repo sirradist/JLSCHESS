@@ -1,0 +1,25 @@
+{
+  "subtitle": "Do you like winter?",
+  "words": [
+    { "en": "snowman", "ko": "눈사람", "def": "" },
+    { "en": "throw - threw", "ko": "던지다", "def": "" },
+    { "en": "snowball", "ko": "눈뭉치, 눈덩이", "def": "" },
+    { "en": "favorite", "ko": "가장 좋아하는", "def": "" },
+    { "en": "picnic", "ko": "소풍", "def": "" },
+    { "en": "ride - rode", "ko": "타다", "def": "" },
+    { "en": "friend", "ko": "친구", "def": "" },
+    { "en": "dive - dove", "ko": "물 속으로 뛰어들다", "def": "" },
+    { "en": "fly - flew", "ko": "날리다, 날다", "def": "" },
+    { "en": "read - read", "ko": "읽다", "def": "" },
+    { "en": "like - liked", "ko": "좋아하다", "def": "" },
+    { "en": "activity", "ko": "움직임, 활동", "def": "" },
+    { "en": "snowball fight", "ko": "눈싸움", "def": "" },
+    { "en": "skiing", "ko": "스키 타기", "def": "" },
+    { "en": "snowboarding", "ko": "스노보드 타기", "def": "" },
+    { "en": "sport", "ko": "운동, 스포츠", "def": "" },
+    { "en": "weekend", "ko": "주말", "def": "" },
+    { "en": "forget - forgot", "ko": "잊다", "def": "" },
+    { "en": "boots", "ko": "부츠, 장화", "def": "" },
+    { "en": "mittens", "ko": "벙어리 장갑", "def": "" }
+  ]
+}
