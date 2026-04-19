@@ -1,0 +1,25 @@
+{
+  "subtitle": "The Three Little Pigs",
+  "words": [
+    { "en": "straw", "ko": "지푸라기", "def": "" },
+    { "en": "rest - rested", "ko": "쉬다", "def": "" },
+    { "en": "chop - chopped", "ko": "(도끼, 칼 등으로) 자르다, 베다", "def": "" },
+    { "en": "shoddy", "ko": "부실한", "def": "" },
+    { "en": "wooden", "ko": "나무로 된", "def": "" },
+    { "en": "plan", "ko": "계획", "def": "" },
+    { "en": "brick", "ko": "벽돌", "def": "" },
+    { "en": "blow - blew", "ko": "(입으로) 불다", "def": "" },
+    { "en": "scared", "ko": "무서워하는", "def": "" },
+    { "en": "yell - yelled", "ko": "소리 지르다", "def": "" },
+    { "en": "shake - shook", "ko": "흔들리다", "def": "" },
+    { "en": "fat", "ko": "뚱뚱한", "def": "" },
+    { "en": "slowly", "ko": "천천히", "def": "" },
+    { "en": "tie - tied", "ko": "묶다", "def": "" },
+    { "en": "know - knew", "ko": "알다", "def": "" },
+    { "en": "carry - carried", "ko": "옮기다, 나르다", "def": "" },
+    { "en": "tired", "ko": "피곤한, 지친", "def": "" },
+    { "en": "suddenly", "ko": "갑자기", "def": "" },
+    { "en": "punch - punched", "ko": "주먹으로 치다", "def": "" },
+    { "en": "own", "ko": "자신의", "def": "" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "subtitle": "Mary and Her Bucket",
+  "words": [
+    { "en": "bucket", "ko": "양동이", "def": "" },
+    { "en": "hill", "ko": "언덕", "def": "" },
+    { "en": "well", "ko": "우물", "def": "" },
+    { "en": "empty", "ko": "비어 있는", "def": "" },
+    { "en": "full", "ko": "가득 찬", "def": "" },
+    { "en": "reach - reached", "ko": "~에 닿다, 도달하다", "def": "" },
+    { "en": "bottom", "ko": "맨 아래 부분", "def": "" },
+    { "en": "heavy", "ko": "무거운", "def": "" },
+    { "en": "pull - pulled", "ko": "끌어당기다", "def": "" },
+    { "en": "careful", "ko": "주의 깊은, 조심하는", "def": "" },
+    { "en": "spill - spilled", "ko": "엎지르다, 쏟다", "def": "" },
+    { "en": "unlucky", "ko": "불운한, 운이 없는", "def": "" },
+    { "en": "slip - slipped", "ko": "미끄러지다", "def": "" },
+    { "en": "rock", "ko": "바위", "def": "" },
+    { "en": "wet", "ko": "젖은", "def": "" },
+    { "en": "dry", "ko": "마른, 건조한", "def": "" },
+    { "en": "shoe", "ko": "신발", "def": "" },
+    { "en": "sock", "ko": "양말", "def": "" },
+    { "en": "puddle", "ko": "물웅덩이", "def": "" },
+    { "en": "dirty", "ko": "더러운", "def": "" }
+  ]
+}

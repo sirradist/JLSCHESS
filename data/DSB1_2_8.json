@@ -1,0 +1,25 @@
+{
+  "subtitle": "What did you eat?",
+  "words": [
+    { "en": "drink - drank", "ko": "마시다", "def": "" },
+    { "en": "morning", "ko": "아침", "def": "" },
+    { "en": "eat - ate", "ko": "먹다", "def": "" },
+    { "en": "French fries", "ko": "감자 튀김", "def": "" },
+    { "en": "afternoon", "ko": "오후", "def": "" },
+    { "en": "fast food", "ko": "패스트푸드", "def": "" },
+    { "en": "restaurant", "ko": "식당, 레스토랑", "def": "" },
+    { "en": "ice cream", "ko": "아이스크림", "def": "" },
+    { "en": "evening", "ko": "저녁", "def": "" },
+    { "en": "shop", "ko": "가게, 상점", "def": "" },
+    { "en": "fun", "ko": "재미", "def": "" },
+    { "en": "mall", "ko": "쇼핑 몰", "def": "" },
+    { "en": "movie", "ko": "영화", "def": "" },
+    { "en": "arcade", "ko": "오락실", "def": "" },
+    { "en": "lunch", "ko": "점심 식사", "def": "" },
+    { "en": "spaghetti", "ko": "스파게티", "def": "" },
+    { "en": "meatballs", "ko": "고기완자, 미트볼", "def": "" },
+    { "en": "Italian", "ko": "이탈리아의", "def": "" },
+    { "en": "too much", "ko": "과도하게", "def": "" },
+    { "en": "hour", "ko": "1시간", "def": "" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "subtitle": "How much is it?",
+  "words": [
+    { "en": "want - wanted", "ko": "원하다", "def": "" },
+    { "en": "hat", "ko": "모자", "def": "" },
+    { "en": "twelve", "ko": "12, 열 둘", "def": "" },
+    { "en": "twenty", "ko": "20, 스물", "def": "" },
+    { "en": "dollar", "ko": "달러", "def": "" },
+    { "en": "sale", "ko": "세일, 할인 판매", "def": "" },
+    { "en": "great", "ko": "정말 좋은", "def": "" },
+    { "en": "shoes", "ko": "신발", "def": "" },
+    { "en": "fifteen", "ko": "15, 열 다섯", "def": "" },
+    { "en": "twenty-five", "ko": "25, 스물 다섯", "def": "" },
+    { "en": "shopkeeper", "ko": "가게 주인(운영자)", "def": "" },
+    { "en": "help - helped", "ko": "돕다, 거들다", "def": "" },
+    { "en": "buy - bought", "ko": "사다, 구입하다", "def": "" },
+    { "en": "new", "ko": "새로운, 새로 산", "def": "" },
+    { "en": "T-shirt", "ko": "티셔츠", "def": "" },
+    { "en": "before", "ko": "전에", "def": "" },
+    { "en": "cheap", "ko": "(값이) 싼", "def": "" },
+    { "en": "pants", "ko": "바지", "def": "" },
+    { "en": "expensive", "ko": "비싼", "def": "" },
+    { "en": "total", "ko": "총, 합계", "def": "" }
+  ]
+}
