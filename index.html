@@ -32,7 +32,7 @@
         .hidden { background: var(--s) !important; color: transparent !important; border-radius: 8px; cursor: pointer; position: relative; min-height: 1.2em; }
         .hidden::after { content: '?'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: 800; }
         .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #DFF9FB; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; }
-        .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); }
         .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; }
         .q-opt { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #E1E8EE; background: #fff; font-weight: 700; text-align: left; margin-bottom: 8px; }
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
@@ -92,52 +92,36 @@
     <div id="lesson-subtitle"></div>
     <div id="study-area"><div id="study-options" style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
     <div id="test-area"><button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
-    <div id="puzzle-area">
-        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
-        <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button>
-        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button>
-        <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
-    </div>
+    <div id="puzzle-area"><div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div><div class="cw-wrap" id="cw-box"></div><button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button><button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button><div class="h-box" id="cw-hints" style="margin-top:15px;"></div></div>
 </div>
 
 <script>
     const CONFIG = { DS: { b: [1,2,3], l: 12 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
-    let cData = { words: [] }, curLv = "", curStage = 1;
+    let cData = { words: [] }, curLv = "";
 
-    // [로직 개편] 레벨 선택 시
     function updateUI() {
-        const v = document.getElementById('level').value;
-        const bSel = document.getElementById('book');
+        const v = document.getElementById('level').value, bSel = document.getElementById('book');
         if(!v) { bSel.innerHTML = ""; document.getElementById('lesson').innerHTML = ""; return; }
         curLv = v;
         const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
         const books = is2 ? [4,5,6] : c.b;
         bSel.innerHTML = books.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
-        updateUIByBook(); // 교재 목록 생성 후 레슨 목록 생성 강제 호출
+        updateUIByBook();
     }
 
-    // [로직 개편] 교재 선택 시 (레슨 목록 생성)
     function updateUIByBook() {
-        const v = document.getElementById('level').value;
-        const b = parseInt(document.getElementById('book').value);
-        const lSel = document.getElementById('lesson');
+        const v = document.getElementById('level').value, b = parseInt(document.getElementById('book').value), lSel = document.getElementById('lesson');
         if(!v || isNaN(b)) return;
-
-        const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS");
-        const is2 = v.endsWith("2") && t !== "MS";
+        const is2 = v.endsWith("2") && !v.startsWith("MS");
         let lessons = [];
 
-        if (v.startsWith("DSD")) {
-            // DSD 로직: 권당 4개 레슨
+        // [핵심 로직] DS 모든 레벨(DSB, DSC, DSD)에 대해 권당 4개 레슨 적용
+        if (v.startsWith("DS")) {
             const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1;
             lessons = Array.from({length: 4}, (_, i) => start + i);
-        } else if (v.startsWith("DSB") || v.startsWith("DSC")) {
-            // DSB, DSC 로직: 1~12 / 13~24
-            lessons = is2 ? Array.from({length: 12}, (_, i) => i + 13) : Array.from({length: 12}, (_, i) => i + 1);
         } else {
-            // 그 외 LS, MS 등 기존 로직
-            const c = CONFIG[t];
+            // LS, MS는 기존 로직 유지
+            const t = v.startsWith("MS")?"MS":"LS", c = CONFIG[t];
             lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1));
         }
 
@@ -169,17 +153,15 @@
     function speak(t) {
         synth.cancel();
         const u = new SpeechSynthesisUtterance(t.replace(/\s*-\s*/g, ", "));
-        u.lang = 'en-US';
-        if (engVoice) u.voice = engVoice;
-        u.rate = 0.8; u.pitch = 1.1;
-        synth.speak(u);
+        u.lang = 'en-US'; if (engVoice) u.voice = engVoice;
+        u.rate = 0.8; u.pitch = 1.1; synth.speak(u);
     }
 
     async function startStudy() {
         const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
         if(!v||!b||!l) return alert("모두 선택하세요!");
         
-        // [DSD 예외처리] 11, 12, 23, 24번 레슨 시험 없음 안내
+        // [예외 처리] DSD 레벨만 11, 12, 23, 24 시험 제한 (DSB, DSC는 허용)
         if (v.startsWith("DSD") && [11, 12, 23, 24].includes(parseInt(l))) {
             alert("해당 레슨은 단어 시험이 없습니다.");
             return;
