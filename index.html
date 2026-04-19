@@ -6,18 +6,26 @@
     <title>CHESS VOCA Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     
+    <script type="importmap">
+    {
+      "imports": {
+        "onnxruntime-common": "https://cdn.jsdelivr.net/npm/onnxruntime-common@1.18.0/dist/ort-common.mjs",
+        "kokoro-js": "./kokoro.js"
+      }
+    }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
     
     <script type="module">
-        // 최신 버전은 KokoroTTS라는 이름을 사용합니다.
-        import { KokoroTTS } from './kokoro.js';
+        import { KokoroTTS } from 'kokoro-js';
         window.KokoroTTS = KokoroTTS;
-        console.log("Local Library (v1.2.1) Loaded Successfully");
+        console.log("Local Engine Loaded with Import Map");
     </script>
 
     <style>
         :root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #3c4043; }
-        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); line-height: 1.6; }
         .container { max-width: 900px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
         #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 10px; border-radius: 8px; }
@@ -27,8 +35,10 @@
         button:disabled { background: #ccc; cursor: not-allowed; }
         #progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; display: none; }
         #progress-fill { width: 0%; height: 100%; background: #34a853; transition: width 0.3s ease; }
+        .word-list { display: grid; gap: 10px; }
         .word-card { background: var(--card); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 10px; }
         .word-text { font-size: 1.15rem; font-weight: 700; width: 220px; color: #1a73e8; }
+        .mean-text { font-size: 1.05rem; color: #5f6368; flex: 1; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
         .tts-icon { background: none; border: none; font-size: 1.3rem; cursor: pointer; }
     </style>
@@ -38,7 +48,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">로딩 대기 중...</div>
+        <div id="status-area">라이브러리 로딩 중...</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
@@ -84,7 +94,6 @@
         const pFill = document.getElementById('progress-fill');
         
         try {
-            // 라이브러리가 로딩될 때까지 대기
             let retry = 0;
             while (!window.KokoroTTS && retry < 10) {
                 await new Promise(r => setTimeout(r, 500));
@@ -97,11 +106,11 @@
             status.innerText = "로컬 모델(model.onnx) 로딩 및 해석 중...";
             pFill.style.width = "40%";
             
-            // 최신 버전의 초기화 방식
+            // 리포지토리에 올린 model.onnx 파일을 불러옵니다.
             tts = await window.KokoroTTS.from_pretrained('./model.onnx', { dtype: 'q8' });
 
             pFill.style.width = "100%";
-            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 준비 완료 (Local v1.2.1)</span>";
+            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 준비 완료 (Local Web Mode)</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
             console.error(e);
@@ -112,7 +121,7 @@
     
     window.onload = initTTS;
 
-    // --- 레벨 및 데이터 관리 (기존 로직 동일) ---
+    // --- 레벨 데이터 관리 (기존 유지) ---
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
@@ -163,16 +172,10 @@
     }
 
     async function playEnglish(text) {
-        if (!text) return;
+        if (!text || !tts) return;
         const cleanText = text.replace(/-/g, ',');
-        if (tts) {
-            const audio = await tts.generate(cleanText, { voice: 'af_bella' });
-            audio.play();
-        } else {
-            const utter = new SpeechSynthesisUtterance(cleanText);
-            utter.lang = 'en-US';
-            window.speechSynthesis.speak(utter);
-        }
+        const audio = await tts.generate(cleanText, { voice: 'af_bella' });
+        audio.play();
     }
 
     function playKorean(text) {
