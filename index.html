@@ -10,7 +10,7 @@
         :root { --p: #4A90E2; --s: #FFD93D; --bg: #F0F7FF; --c: #FFFFFF; --t: #2D3436; --err: #FF6B6B; --ok: #6BCB77; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 650px; text-align: center; } /* 격자 확장에 따른 컨테이너 확대 */
+        .container { width: 100%; max-width: 680px; text-align: center; }
         header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
         .logo-box { height: 45px; display: flex; align-items: center; }
         .logo-img { height: 100%; width: auto; object-fit: contain; }
@@ -38,7 +38,6 @@
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
         
-        /* 24x24 격자에 맞춘 셀 크기 조정 (모바일 가독성 고려) */
         .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #E1E8EE; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; width: max-content; }
         .cell { width: 24px; height: 24px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
@@ -201,9 +200,9 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [최종 최적화] 24x24 격자 및 장문 단어 수용 알고리즘
+    // [최종 로직] 24x24 격자 활용 및 가시성/연결성 균형 알고리즘
     function createCW() {
-        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 24; // 격자 크기 확장
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 24;
         const allW = cData.words.map(w => ({ 
             a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), 
             h: w.ko 
@@ -217,7 +216,7 @@
         
         ws.forEach((w, idx) => {
             let possibilities = [];
-            // 격자 크기 내 배치 가능 여부 확인
+            // 단어 길이 격자 초과 방지
             if(w.a.length > sz) w.a = w.a.substring(0, sz);
 
             for(let r=0; r<sz; r++) {
@@ -229,7 +228,15 @@
                                 let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
                                 if(grid[rr][cc]) {
                                     if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                    else over++;
+                                    else over += 10; // 교차점 점수 대폭 강화 (최우선순위)
+                                }
+                                // 가시성 확보: 주변 8칸에 다른 단어가 있으면 점수 차감 (단, 교차점은 제외)
+                                const neighbors = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+                                for(let [dr, dc] of neighbors) {
+                                    let nr = rr+dr, nc = cc+dc;
+                                    if(nr>=0 && nr<sz && nc>=0 && nc<sz && grid[nr][nc] && !grid[rr][cc]) {
+                                        over -= 1; // 단어들이 다닥다닥 붙는 현상 억제
+                                    }
                                 }
                             }
                             if(!fail) possibilities.push({ r, c, d, over });
@@ -239,7 +246,7 @@
             }
 
             if(possibilities.length > 0) {
-                // 교차점이 많은 곳 우선 정렬
+                // 점수 기반 정렬: 1순위 교차 연결성, 2순위 적절한 분산(가시성)
                 possibilities.sort((a,b) => b.over - a.over);
                 const best = possibilities[0];
                 for(let i=0; i<w.a.length; i++) {
@@ -254,6 +261,23 @@
                     grid[rr][cc] = { char: charToSet, n: (i===0 ? idx+1 : (existing ? existing.n : null)) };
                 }
                 placed.push({ ...best, ...w, num: idx+1 });
+            } else {
+                // 연결 가능한 곳이 전혀 없는 경우 격자의 빈 곳 중 안전한 곳에 강제 배치
+                let found = false;
+                for(let r=0; r<sz && !found; r+=2) { // 뭉침 방지를 위해 간격(step 2)을 두고 탐색
+                    for(let c=0; c<sz && !found; c+=2) {
+                        if(c+w.a.length <= sz) {
+                            let can = true;
+                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
+                            if(can) { 
+                                const b = { r, c, d: 'H' };
+                                for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null) };
+                                placed.push({ ...b, ...w, num: idx+1 });
+                                found = true;
+                            }
+                        }
+                    }
+                }
             }
         });
         
