@@ -6,7 +6,6 @@
     <title>CHESS VOCA Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <script type="module">
-        // Kokoro-JS를 확실한 경로에서 불러옵니다.
         import { KokoroWeb } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.0.0/dist/index.js';
         window.KokoroWeb = KokoroWeb;
     </script>
@@ -37,7 +36,7 @@
     <header>
         <h1>CHESS VOCA Master</h1>
         <div id="loading-area">
-            <span id="tts-status">영어 모델 로딩 중...</span>
+            <span id="tts-status">AI 음성 엔진 로딩 중...</span>
             <div id="status-dot"><div id="status-fill"></div></div>
         </div>
     </header>
@@ -76,7 +75,7 @@
     let kokoro = null;
     let words = [];
 
-    // 1. Kokoro 초기화 (확실한 여성 보이스 설정)
+    // 1. 영어 Kokoro 초기화 (클라이언트 자원 사용)
     async function initTTS() {
         try {
             document.getElementById('status-fill').style.width = "30%";
@@ -84,17 +83,16 @@
                 model: 'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/model.onnx' 
             });
             document.getElementById('status-fill').style.width = "100%";
-            document.getElementById('tts-status').innerText = "여성 음성 준비 완료 (af_bella)";
+            document.getElementById('tts-status').innerText = "영어 AI 음성 준비 완료 (af_bella)";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            document.getElementById('tts-status').innerText = "로딩 실패: 브라우저 TTS로 대체";
+            document.getElementById('tts-status').innerText = "로딩 실패: 시스템 음성으로 대체";
             document.getElementById('btn-study').disabled = false;
         }
     }
 
     window.onload = initTTS;
 
-    // 2. 레벨 규칙 (DSB 2는 4,5,6 / 13~22 등 반영)
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -152,12 +150,11 @@
         `).join('');
     }
 
-    // 3. 영어 재생 (Kokoro af_bella 고정)
+    // 3. 영어: Kokoro (클라이언트 기기 연산)
     async function playEnglish(text) {
         if (!text) return;
         const cleanText = text.replace(/-/g, ',');
         if (kokoro) {
-            // af_bella 보이스를 명시적으로 요청
             const audio = await kokoro.generate(cleanText, { voice: 'af_bella' });
             audio.play();
         } else {
@@ -167,26 +164,16 @@
         }
     }
 
-    // 4. 한국어 재생 (지정하신 Docker API 활용)
-    async function playKorean(text) {
-        const KOREAN_TTS_URL = "http://host.docker.internal:9880/v1"; 
-        try {
-            const res = await fetch(KOREAN_TTS_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    text: text,
-                    // 이전에 말씀하신 gpt vs 샘플링 보이스를 활용하도록 설정
-                    voice: "gpt_vs_sampling_voice" 
-                })
-            });
-            const blob = await res.blob();
-            new Audio(URL.createObjectURL(blob)).play();
-        } catch (e) {
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'ko-KR';
-            window.speechSynthesis.speak(utter);
-        }
+    // 4. 한국어: 기기 내장 음성 (클라이언트 기기 자원)
+    function playKorean(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        // 가장 자연스러운 음성을 찾기 위한 로직
+        const voices = window.speechSynthesis.getVoices();
+        const koVoice = voices.find(v => v.lang.includes('ko-KR')) || null;
+        if(koVoice) utter.voice = koVoice;
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
     }
 </script>
 </body>
