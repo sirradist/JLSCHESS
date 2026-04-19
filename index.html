@@ -1,39 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정상어학원 VOCA Master</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
+    <style>
+        :root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #3c4043; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
+        #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 10px; border-radius: 8px; }
+        .setup-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
+        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
+        button:disabled { background: #eee; cursor: not-allowed; }
+        .word-card { background: var(--card); padding: 18px; border-radius: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 12px; }
+        .word-text { font-size: 1.2rem; font-weight: 700; width: 220px; color: #1a73e8; }
+        .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
+        .tts-icon { background: none; border: none; font-size: 1.4rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>정상어학원 VOCA Master</h1>
+        <div id="status-area">시스템 초기화 중...</div>
+    </header>
+
+    <div class="setup-box">
+        <select id="level" onchange="window.updateUIByLevel()" disabled>
+            <option value="">레벨 선택</option>
+            <optgroup label="DS Level">
+                <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
+                <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
+                <option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option>
+            </optgroup>
+            <optgroup label="LS Level">
+                <option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option>
+                <option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option>
+                <option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option>
+                <option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option>
+            </optgroup>
+            <optgroup label="MS Level">
+                <option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option>
+                <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
+            </optgroup>
+        </select>
+        <select id="book" disabled></select>
+        <select id="lesson" disabled></select>
+        <button id="btn-study" onclick="window.fetchAndLoad()" disabled>학습 시작</button>
+    </div>
+    <div id="controls" style="display:none; justify-content:center; gap:25px; margin-bottom:20px;">
+        <label><input type="checkbox" id="chkEng" onchange="window.renderWords()"> 영어 가리기</label>
+        <label><input type="checkbox" id="chkKor" onchange="window.renderWords()"> 한글 가리기</label>
+    </div>
+    <div id="display-area"></div>
+</div>
+
 <script>
+    window.tts = null;
+
+    window.updateUIByLevel = function() {
+        const lv = document.getElementById('level').value;
+        if(!lv) return;
+        const config = {
+            DS: { books: [1,2,3], lessons: 10 },
+            LS: { books: [1,2,3], lessons: 10 },
+            MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
+        };
+        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
+        const c = config[type];
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : c.books;
+        document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
+        let lHtml = "";
+        if(lv.endsWith("2") && !lv.startsWith("MS")) {
+            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        } else {
+            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        }
+        document.getElementById('lesson').innerHTML = lHtml;
+    };
+
     window.initTTS = async function() {
         const status = document.getElementById('status-area');
         try {
-            status.innerText = "Bella 엔진 초기화 중 (추가 파일 없이 로드)...";
+            status.innerText = "Bella 음성 엔진을 준비하고 있습니다 (약 10초 소요)...";
             
-            // 1. 모델 파일을 가져옵니다.
+            // 1. 모델 데이터를 직접 가져옵니다.
             const response = await fetch('./model.onnx');
-            const modelData = await response.arrayBuffer();
+            const blob = await response.blob();
+            
+            // 2. 중요: 데이터를 가짜 URL로 변환하여 문자열 처리 에러를 우회합니다.
+            const modelUrl = URL.createObjectURL(blob);
 
-            // 2. 핵심: 외부 config.json을 찾지 않도록 설정을 직접 정의해서 주입합니다.
-            // 이 방식은 파일 누락 에러를 완벽하게 방어합니다.
-            window.tts = await window.KokoroTTS.from_pretrained(modelData, {
+            // 3. 엔진 로드 (config.json이 없어도 돌아가도록 수동 설정 주입)
+            window.tts = await window.KokoroTTS.from_pretrained(modelUrl, {
                 model_file_structure: 'flat',
-                // 라이브러리가 내부적으로 사용하는 설정값들을 직접 전달
-                config: {
-                    model_type: "kokoro",
-                    architectures: ["KokoroTTS"],
-                    vocab_size: 178,
-                    hidden_size: 256,
-                    num_hidden_layers: 8,
-                    num_attention_heads: 8,
-                    intermediate_size: 1024,
-                    num_voices: 11,
-                    sample_rate: 24000
-                },
                 dtype: 'q8'
             });
 
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
-            if(window.updateUIByLevel) window.updateUIByLevel();
         } catch (e) {
             console.error("초기화 실패:", e);
-            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
+            status.innerText = "⚠️ 시스템 기본 음성 모드 사용 중";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         }
     };
+
+    window.fetchAndLoad = async function() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const ls = document.getElementById('lesson').value;
+        try {
+            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            window.words = await res.json();
+            document.getElementById('controls').style.display = "flex";
+            window.renderWords();
+        } catch(e) { alert("데이터 로드 실패"); }
+    };
+
+    window.renderWords = function() {
+        const area = document.getElementById('display-area');
+        const hE = document.getElementById('chkEng').checked;
+        const hK = document.getElementById('chkKor').checked;
+        area.innerHTML = window.words.map((w) => `
+            <div class="word-card">
+                <button class="tts-icon" onclick="window.playEnglish('${w.en}')">🔈</button>
+                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
+                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
+                <button class="tts-icon" onclick="window.playKorean('${w.ko}')">🔊</button>
+            </div>
+        `).join('');
+    };
+
+    window.playEnglish = async function(text) {
+        if (!text) return;
+        const cleanText = text.replace(/-/g, ',');
+        if (window.tts && window.tts.generate) {
+            try {
+                const audio = await window.tts.generate(cleanText, { voice: 'af_bella' });
+                audio.play();
+            } catch (e) {
+                window.systemSpeak(cleanText);
+            }
+        } else {
+            window.systemSpeak(cleanText);
+        }
+    };
+
+    window.systemSpeak = function(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        window.speechSynthesis.speak(utter);
+    };
+
+    window.playKorean = function(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        window.speechSynthesis.speak(utter);
+    };
 </script>
+
+<script type="module">
+    import { KokoroTTS } from './kokoro.js';
+    window.KokoroTTS = KokoroTTS;
+    window.initTTS();
+</script>
+</body>
+</html>
