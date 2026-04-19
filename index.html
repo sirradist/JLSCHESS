@@ -16,7 +16,7 @@
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; outline: none; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
         .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
-        #book-image-container { display: none; margin-bottom: 15px; padding: 10px; background: #fff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #book-image-container { display: none; margin: 10px 0 15px; padding: 10px; background: #fff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         #book-cover { max-width: 120px; border-radius: 10px; border: 1px solid #eee; }
         .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .tab-btn { padding: 12px; border-radius: 12px; border: none; background: #BDC3C7; color: #fff; font-weight: 800; cursor: pointer; }
@@ -51,7 +51,7 @@
 <div class="container">
     <h1>🌟 CHESS VOCA Master</h1>
     <div class="setup-box">
-        <select id="level" onchange="updateUI()">
+        <select id="level" onchange="window.updateUI()">
             <option value="">레벨 선택</option>
             <optgroup label="DS">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
@@ -70,18 +70,22 @@
             </optgroup>
         </select>
         <div class="row">
-            <select id="book" onchange="updateBookImage()"></select>
+            <select id="book" onchange="window.updateBookImage()"></select>
             <select id="lesson"></select>
         </div>
-        <button class="btn-main" onclick="startStudy()">START!</button>
+        <button class="btn-main" onclick="window.startStudy()">START!</button>
     </div>
+
     <div id="book-image-container"><img id="book-cover" src="" alt="Book Cover"></div>
+
     <div class="tab-menu" id="main-tabs">
-        <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
-        <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
-        <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
+        <button id="tab-study" class="tab-btn active" onclick="window.switchTab('study')">Study</button>
+        <button id="tab-test" class="tab-btn" onclick="window.switchTab('test')">Test</button>
+        <button id="tab-puzzle" class="tab-btn" onclick="window.switchTab('puzzle')">Puzzle</button>
     </div>
+
     <div id="lesson-subtitle"></div>
+
     <div id="study-area">
         <div style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);">
             <label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label>
@@ -96,23 +100,22 @@
     <div id="puzzle-area">
         <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
         <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 (완료) ✔️</button>
-        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button>
+        <button class="btn-action" id="cw-check-btn" onclick="window.checkCW()">정답 확인 (완료) ✔️</button>
+        <button class="btn-action btn-next" id="cw-next-btn" onclick="window.nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button>
         <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
     </div>
 </div>
 
 <script>
+    // 1. 전역 설정 및 데이터 관리
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
 
-    // TTS 설정
+    // 2. TTS 설정 및 여성 음성 필터링
     const synth = window.speechSynthesis;
     let engVoice = null;
-
     function initVoices() {
         const voices = synth.getVoices();
-        // 미국식(en-US) 여성(Female) Google 보이스 타겟팅
         engVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google') && v.name.includes('Female')) || 
                    voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || 
                    voices.find(v => v.lang.startsWith('en-US')) ||
@@ -121,39 +124,33 @@
     if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
 
-    // 동사 과거형 낭독용 텍스트 변환 (하이픈을 쉼표로 바꿔 멈춤 유도)
     function getSpeakText(text) {
         if (!text) return "";
-        return text.replace(/\s*-\s*/g, ", ").trim();
+        return text.replace(/\s*-\s*/g, ", ").trim(); // plant - planted -> plant, planted (호흡 유도)
     }
 
     function speak(t) {
         synth.cancel();
         if (!engVoice) initVoices();
-        const utterance = new SpeechSynthesisUtterance(getSpeakText(t));
-        utterance.lang = 'en-US';
-        if (engVoice) utterance.voice = engVoice;
-        utterance.rate = 0.8;
-        utterance.pitch = 1.1; 
-        synth.speak(utterance);
+        const u = new SpeechSynthesisUtterance(getSpeakText(t));
+        u.lang = 'en-US';
+        if (engVoice) u.voice = engVoice;
+        u.rate = 0.8; u.pitch = 1.1; 
+        synth.speak(u);
     }
 
-    // UI 업데이트 함수 (전역으로 배치하여 선택창 연동 보장)
+    // 3. UI 로직 (window 객체에 직접 등록하여 HTML 연동 보장)
     window.updateUI = function() {
-        const v = document.getElementById('level').value; 
+        const v = document.getElementById('level').value;
         const bSel = document.getElementById('book');
         const lSel = document.getElementById('lesson');
-        if(!v) {
-            bSel.innerHTML = "";
-            lSel.innerHTML = "";
-            return;
-        }
+        if(!v) { bSel.innerHTML = ""; lSel.innerHTML = ""; return; }
         curLv = v;
         const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
         bSel.innerHTML = (is2?[4,5,6]:c.b).map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
         const ls = is2?Array.from({length:10},(_,i)=>i+13):(Array.isArray(c.l)?c.l:Array.from({length:10},(_,i)=>i+1));
         lSel.innerHTML = ls.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
-        updateBookImage();
+        window.updateBookImage();
     };
 
     window.updateBookImage = function() {
@@ -175,7 +172,7 @@
             const sub = document.getElementById('lesson-subtitle');
             if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else sub.style.display="none";
             document.getElementById('main-tabs').style.display = "grid"; 
-            curStage = 1; switchTab('study');
+            curStage = 1; window.switchTab('study');
         } catch(e) { alert("데이터 로드 실패"); }
     };
 
@@ -184,21 +181,16 @@
         document.getElementById('tab-'+t).classList.add('active');
         ['study-area','test-area','puzzle-area'].forEach(id => document.getElementById(id).style.display='none');
         document.getElementById(t+'-area').style.display='block';
-        if(t==='study') renderStudy(); 
-        if(t==='test') renderTest(); 
-        if(t==='puzzle') { curStage = 1; createCW(); }
+        if(t==='study') renderStudy(); if(t==='test') renderTest(); if(t==='puzzle') { curStage = 1; createCW(); }
     };
 
+    // 4. 학습 및 테스트 렌더링
     function renderStudy() {
         const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
         document.getElementById('study-list').innerHTML = cData.words.map(w => `
-            <div class="card">
-                <button class="tts-icon" onclick="speak('${w.en}')">🔊</button>
-                <div class="word-content">
-                    <div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
-                    <div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
-                </div>
-            </div>`).join('');
+            <div class="card"><button class="tts-icon" onclick="speak('${w.en}')">🔊</button>
+            <div class="word-content"><div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
+            <div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div></div></div>`).join('');
     }
 
     function renderTest() {
@@ -207,17 +199,15 @@
             const type = Math.random() > 0.5 ? "E2K" : "K2E";
             const q = type === "E2K" ? w.en : w.ko, ans = type === "E2K" ? w.ko : w.en;
             const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5);
-            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
+            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="window.checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
         }).join('');
     }
 
     window.checkAnswer = function(btn, choice, correct, english) {
-        if(choice === correct) {
-            btn.classList.add('ok');
-            speak(english); 
-        } else btn.classList.add('no');
+        if(choice === correct) { btn.classList.add('ok'); speak(english); } else btn.classList.add('no');
     };
 
+    // 5. 크로스워드 퍼즐 로직
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
@@ -273,9 +263,7 @@
 
     window.nextStage = function() { curStage = 2; createCW(); };
 
-    document.addEventListener('DOMContentLoaded', () => { 
-        initVoices();
-    });
+    document.addEventListener('DOMContentLoaded', initVoices);
 </script>
 </body>
 </html>
