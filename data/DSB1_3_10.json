@@ -1,0 +1,25 @@
+{
+  "subtitle": "What are you doing?",
+  "words": [
+    { "en": "run - ran", "ko": "달리다", "def": "" },
+    { "en": "street", "ko": "거리, 도로", "def": "" },
+    { "en": "bird", "ko": "새", "def": "" },
+    { "en": "sing - sang", "ko": "노래하다, 지저귀다", "def": "" },
+    { "en": "tweet", "ko": "짹짹 (새가 우는 소리)", "def": "" },
+    { "en": "pretty", "ko": "예쁜", "def": "" },
+    { "en": "kid", "ko": "아이", "def": "" },
+    { "en": "kitchen", "ko": "부역", "def": "" },
+    { "en": "munch - munched", "ko": "아삭아삭 먹다", "def": "" },
+    { "en": "little", "ko": "작은", "def": "" },
+    { "en": "visit - visited", "ko": "방문하다", "def": "" },
+    { "en": "upstairs", "ko": "위층에, 2층에", "def": "" },
+    { "en": "shout - shouted", "ko": "외치다, 소리치다", "def": "" },
+    { "en": "angry", "ko": "화난, 성난", "def": "" },
+    { "en": "chew - chewed", "ko": "씹다, 물어뜯다", "def": "" },
+    { "en": "video game", "ko": "비디오 게임", "def": "" },
+    { "en": "teeth", "ko": "치아, 이빨", "def": "" },
+    { "en": "itchy", "ko": "가려운", "def": "" },
+    { "en": "poor", "ko": "불쌍한, 가련한", "def": "" },
+    { "en": "play - played", "ko": "놀다, (게임을) 하다", "def": "" }
+  ]
+}

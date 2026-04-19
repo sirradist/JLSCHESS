@@ -1,0 +1,25 @@
+{
+  "subtitle": "Whose jacket is it?",
+  "words": [
+    { "en": "I - my - me - mine", "ko": "나 - 나의 - 나를 - 나의 것", "def": "" },
+    { "en": "you - your - you - yours", "ko": "너 - 너의 - 너를 - 너의 것", "def": "" },
+    { "en": "he - his - him - his", "ko": "그 - 그의 - 그를 - 그의 것", "def": "" },
+    { "en": "she - her - her - hers", "ko": "그녀 - 그녀의 - 그녀를 - 그녀의 것", "def": "" },
+    { "en": "we - our - us - ours", "ko": "우리 - 우리의 - 우리를 - 우리의 것", "def": "" },
+    { "en": "they - their - them - theirs", "ko": "그들 - 그들의 - 그들을 - 그들의 것", "def": "" },
+    { "en": "jacket", "ko": "재킷, 상의", "def": "" },
+    { "en": "purse", "ko": "지갑, 핸드백", "def": "" },
+    { "en": "belong to - belonged to", "ko": "~의 소유이다, ~에 속하다", "def": "" },
+    { "en": "find - found", "ko": "찾다, 발견하다", "def": "" },
+    { "en": "lose - lost", "ko": "잃어버리다", "def": "" },
+    { "en": "check - checked", "ko": "확인하다", "def": "" },
+    { "en": "pocket", "ko": "주머니", "def": "" },
+    { "en": "outside", "ko": "겉면, 바깥쪽", "def": "" },
+    { "en": "inside", "ko": "안쪽, 내부", "def": "" },
+    { "en": "initial", "ko": "이름의 첫 글자(이니셜)", "def": "" },
+    { "en": "write - wrote", "ko": "쓰다, 적다", "def": "" },
+    { "en": "everything", "ko": "모든 것", "def": "" },
+    { "en": "forget - forgot", "ko": "잊어버리다", "def": "" },
+    { "en": "name tag", "ko": "이름표", "def": "" }
+  ]
+}
