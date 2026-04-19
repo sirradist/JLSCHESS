@@ -9,9 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
     
     <script type="module">
-        import { KokoroWeb } from './kokoro.js';
-        window.KokoroWeb = KokoroWeb;
-        console.log("Kokoro 엔진 로드 성공");
+        import { KokoroTTS } from './kokoro.js';
+        window.KokoroTTS = KokoroTTS;
+        console.log("KokoroTTS 엔진이 성공적으로 등록되었습니다.");
     </script>
 
     <style>
@@ -35,7 +35,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">라이브러리 확인 중...</div>
+        <div id="status-area">로딩 대기 중...</div>
     </header>
 
     <div class="setup-box">
@@ -77,36 +77,36 @@
     async function initTTS() {
         const status = document.getElementById('status-area');
         try {
-            // 라이브러리가 로드될 때까지 대기
+            // 라이브러리 로드 대기
             let retry = 0;
-            while (!window.KokoroWeb && retry < 10) {
+            while (!window.KokoroTTS && retry < 10) {
                 await new Promise(r => setTimeout(r, 500));
                 retry++;
             }
 
-            if (!window.KokoroWeb) throw new Error("Library load failed");
+            if (!window.KokoroTTS) throw new Error("Library load failed");
 
-            status.innerText = "모델 파일(86MB) 로딩 중...";
+            status.innerText = "모델 파일(86MB) 읽는 중...";
             
-            // 모델을 바이너리로 직접 읽어 주입 (config.json 에러 방지)
+            // 모델을 바이너리로 직접 로드 (가장 안정적)
             const response = await fetch('./model.onnx');
             const modelData = await response.arrayBuffer();
 
-            // 업로드하신 kokoro.js 내의 클래스를 사용하여 초기화
-            tts = await window.KokoroWeb.new(modelData);
+            // Library Export Keys에서 확인된 'KokoroTTS' 클래스를 사용
+            tts = await window.KokoroTTS.from_pretrained(modelData, { dtype: 'q8' });
 
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
             console.error(e);
-            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
+            status.innerText = "⚠️ 시스템 음성 모드로 자동 전환됨";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // 레벨/데이터 관리 로직
+    // --- 나머지 데이터/레벨 로직 (기존 유지) ---
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
@@ -149,25 +149,4 @@
         area.innerHTML = words.map((w) => `
             <div class="word-card">
                 <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
-                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
-                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
-            </div>
-        `).join('');
-    }
-
-    async function playEnglish(text) {
-        if (!text || !tts) return;
-        const cleanText = text.replace(/-/g, ',');
-        const audio = await tts.generate(cleanText, { voice: 'af_bella' });
-        audio.play();
-    }
-
-    function playKorean(text) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        window.speechSynthesis.speak(utter);
-    }
-</script>
-</body>
-</html>
+                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList
