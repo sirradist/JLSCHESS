@@ -72,4 +72,124 @@
             </optgroup>
             <optgroup label="🌟 LS Level">
                 <option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option>
-                <option value="LS
+                <option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option>
+                <option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option>
+                <option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option>
+            </optgroup>
+            <optgroup label="🔥 MS Level">
+                <option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option>
+                <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
+            </optgroup>
+        </select>
+        <select id="book"><option value="">Book</option></select>
+        <select id="lesson"><option value="">Lesson</option></select>
+        <button id="btn-study" onclick="window.fetchAndLoad()">START!</button>
+    </div>
+
+    <div id="controls">
+        <label class="control-item"><input type="checkbox" id="chkEng" onchange="window.renderWords()"> English 👀</label>
+        <label class="control-item"><input type="checkbox" id="chkKor" onchange="window.renderWords()"> 한글 👀</label>
+    </div>
+
+    <div id="display-area"></div>
+</div>
+
+<script>
+    window.words = [];
+    const synth = window.speechSynthesis;
+    let engVoice = null;
+    let korVoice = null;
+
+    function initVoices() {
+        const voices = synth.getVoices();
+        engVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
+        korVoice = voices.find(v => v.name.includes('Google 한국어')) || voices.find(v => v.lang.startsWith('ko'));
+    }
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
+    initVoices();
+
+    window.speakSafe = function(text, langType) {
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.voice = langType === 'en' ? engVoice : korVoice;
+        utter.lang = langType === 'en' ? 'en-US' : 'ko-KR';
+        utter.rate = 0.9;
+        
+        let keepAlive = setInterval(() => {
+            if (!synth.speaking) clearInterval(keepAlive);
+            else synth.resume();
+        }, 3000);
+        synth.speak(utter);
+    };
+
+    // [중요] 레슨 선택이 안 되던 버그를 수정한 함수입니다.
+    window.updateUIByLevel = function() {
+        const lv = document.getElementById('level').value;
+        const bookSelect = document.getElementById('book');
+        const lessonSelect = document.getElementById('lesson');
+
+        if(!lv) {
+            bookSelect.innerHTML = '<option value="">Book</option>';
+            lessonSelect.innerHTML = '<option value="">Lesson</option>';
+            return;
+        }
+
+        const config = {
+            DS: { books: [1,2,3], lessons: 10 },
+            LS: { books: [1,2,3], lessons: 10 },
+            MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
+        };
+
+        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
+        const c = config[type];
+
+        // 북 목록 생성
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : c.books;
+        bookSelect.innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
+
+        // 레슨 목록 생성 (MS 레벨 규칙 및 Level 2 규칙 적용)
+        let lHtml = "";
+        if(lv.endsWith("2") && !lv.startsWith("MS")) {
+            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        } else if (Array.isArray(c.lessons)) {
+            lHtml = c.lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+        } else {
+            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        }
+        lessonSelect.innerHTML = lHtml;
+    };
+
+    window.fetchAndLoad = async function() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const ls = document.getElementById('lesson').value;
+        if(!lv || !bk || !ls) {
+            alert("레벨, 북, 레슨을 모두 선택해주세요!");
+            return;
+        }
+        try {
+            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            window.words = await res.json();
+            document.getElementById('controls').style.display = "flex";
+            window.renderWords();
+        } catch(e) { alert("파일을 찾을 수 없어요! (data/" + lv + "_" + bk + "_" + ls + ".json)"); }
+    };
+
+    window.renderWords = function() {
+        const area = document.getElementById('display-area');
+        const hE = document.getElementById('chkEng').checked;
+        const hK = document.getElementById('chkKor').checked;
+        area.innerHTML = window.words.map((w) => `
+            <div class="word-card">
+                <button class="tts-icon en-btn" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}', 'en')">🇺🇸</button>
+                <div class="word-content">
+                    <div class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
+                    <div class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
+                </div>
+                <button class="tts-icon ko-btn" onclick="window.speakSafe('${w.ko.replace(/'/g, "\\'")}', 'ko')">🇰🇷</button>
+            </div>
+        `).join('');
+    };
+</script>
+</body>
+</html>
