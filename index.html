@@ -14,43 +14,58 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Nanum Round', sans-serif; background-color: var(--bg);
-            margin: 0; padding: 10px; color: var(--text); line-height: 1.6;
+            margin: 0; padding: 15px; color: var(--text); line-height: 1.6;
         }
         .container { max-width: 500px; margin: 0 auto; }
-        header { text-align: center; padding: 20px 0; }
-        h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0; }
+        header { text-align: center; padding: 15px 0; }
+        h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -1px; }
+        
+        /* 설정 박스 디자인 대폭 수정 */
         .setup-box {
-            background: var(--card); padding: 15px; border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1); margin-bottom: 20px;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            background: var(--card); padding: 20px; border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(74, 144, 226, 0.15); margin-bottom: 25px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            border: 2px solid #fff;
         }
         select {
-            width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #E1E8EE;
-            background: #fff; font-size: 15px; font-family: inherit; color: var(--text); appearance: none;
+            width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE;
+            background: #fdfdfd; font-size: 16px; font-family: inherit; color: var(--text);
+            appearance: none; cursor: pointer;
         }
-        #level { grid-column: span 2; }
+        #level { grid-column: span 2; border-color: var(--primary); background: #f0f7ff; }
+        
         #btn-study {
             grid-column: span 2; background: var(--primary); color: white;
-            padding: 15px; border-radius: 15px; border: none; font-size: 1.1rem;
-            font-weight: 800; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 0 #357ABD;
+            padding: 16px; border-radius: 18px; border: none; font-size: 1.2rem;
+            font-weight: 800; cursor: pointer; margin-top: 8px;
+            box-shadow: 0 5px 0 #357ABD; transition: all 0.1s;
         }
         #btn-study:active { transform: translateY(3px); box-shadow: none; }
+
+        /* 학습 컨트롤러 */
         #controls {
-            display: none; justify-content: center; gap: 15px; margin-bottom: 15px;
-            padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 30px;
+            display: none; justify-content: center; gap: 20px; margin-bottom: 20px;
+            padding: 12px; background: rgba(255, 255, 255, 0.6); border-radius: 35px;
+            backdrop-filter: blur(5px);
         }
-        .control-item { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; font-weight: 700; color: var(--primary); }
+        .control-item { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; color: var(--primary); }
+
+        /* 단어 카드 디자인 보강 */
         .word-card {
-            background: var(--card); padding: 15px; border-radius: 18px; display: flex;
-            align-items: center; gap: 12px; margin-bottom: 12px; border: 2px solid #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: var(--card); padding: 18px; border-radius: 22px; display: flex;
+            align-items: center; gap: 15px; margin-bottom: 15px; border: 2px solid #fff;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.04); transition: transform 0.2s;
         }
-        .word-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .word-text { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
-        .mean-text { font-size: 1.05rem; font-weight: 700; color: #636e72; }
-        .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 8px; cursor: pointer; position: relative; }
-        .hidden::after { content: '?'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: 800; }
-        .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .word-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .word-text { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
+        .mean-text { font-size: 1.15rem; font-weight: 700; color: #636e72; }
+
+        /* 가리기 효과 전용 스타일 */
+        .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 10px; cursor: pointer; position: relative; min-height: 1.4em; }
+        .hidden::after { content: '👀 Click!'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; font-weight: 800; }
+
+        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #ddd; }
+        .tts-icon:active { transform: translateY(2px); box-shadow: none; }
         .en-btn { border: 2px solid #DFF9FB; }
         .ko-btn { border: 2px solid #FFF5D7; }
     </style>
@@ -59,12 +74,12 @@
 
 <div class="container">
     <header>
-        <h1>🎮 CHESS VOCA Master</h1>
+        <h1>🌟 CHESS VOCA Master 🌟</h1>
     </header>
 
     <div class="setup-box">
         <select id="level" onchange="window.updateUIByLevel()">
-            <option value="">레벨 선택 (Select Level)</option>
+            <option value="">레벨을 골라주세요!</option>
             <optgroup label="⭐ DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
                 <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
@@ -83,7 +98,7 @@
         </select>
         <select id="book"><option value="">Book</option></select>
         <select id="lesson"><option value="">Lesson</option></select>
-        <button id="btn-study" onclick="window.fetchAndLoad()">START!</button>
+        <button id="btn-study" onclick="window.fetchAndLoad()">학습 시작! START</button>
     </div>
 
     <div id="controls">
@@ -97,99 +112,10 @@
 <script>
     window.words = [];
     const synth = window.speechSynthesis;
-    let engVoice = null;
-    let korVoice = null;
+    let engVoice = null, korVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
         engVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
         korVoice = voices.find(v => v.name.includes('Google 한국어')) || voices.find(v => v.lang.startsWith('ko'));
     }
-    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
-    initVoices();
-
-    window.speakSafe = function(text, langType) {
-        synth.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = langType === 'en' ? engVoice : korVoice;
-        utter.lang = langType === 'en' ? 'en-US' : 'ko-KR';
-        utter.rate = 0.9;
-        
-        let keepAlive = setInterval(() => {
-            if (!synth.speaking) clearInterval(keepAlive);
-            else synth.resume();
-        }, 3000);
-        synth.speak(utter);
-    };
-
-    // [중요] 레슨 선택이 안 되던 버그를 수정한 함수입니다.
-    window.updateUIByLevel = function() {
-        const lv = document.getElementById('level').value;
-        const bookSelect = document.getElementById('book');
-        const lessonSelect = document.getElementById('lesson');
-
-        if(!lv) {
-            bookSelect.innerHTML = '<option value="">Book</option>';
-            lessonSelect.innerHTML = '<option value="">Lesson</option>';
-            return;
-        }
-
-        const config = {
-            DS: { books: [1,2,3], lessons: 10 },
-            LS: { books: [1,2,3], lessons: 10 },
-            MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
-        };
-
-        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
-        const c = config[type];
-
-        // 북 목록 생성
-        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : c.books;
-        bookSelect.innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
-
-        // 레슨 목록 생성 (MS 레벨 규칙 및 Level 2 규칙 적용)
-        let lHtml = "";
-        if(lv.endsWith("2") && !lv.startsWith("MS")) {
-            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
-        } else if (Array.isArray(c.lessons)) {
-            lHtml = c.lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
-        } else {
-            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
-        }
-        lessonSelect.innerHTML = lHtml;
-    };
-
-    window.fetchAndLoad = async function() {
-        const lv = document.getElementById('level').value;
-        const bk = document.getElementById('book').value;
-        const ls = document.getElementById('lesson').value;
-        if(!lv || !bk || !ls) {
-            alert("레벨, 북, 레슨을 모두 선택해주세요!");
-            return;
-        }
-        try {
-            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
-            window.words = await res.json();
-            document.getElementById('controls').style.display = "flex";
-            window.renderWords();
-        } catch(e) { alert("파일을 찾을 수 없어요! (data/" + lv + "_" + bk + "_" + ls + ".json)"); }
-    };
-
-    window.renderWords = function() {
-        const area = document.getElementById('display-area');
-        const hE = document.getElementById('chkEng').checked;
-        const hK = document.getElementById('chkKor').checked;
-        area.innerHTML = window.words.map((w) => `
-            <div class="word-card">
-                <button class="tts-icon en-btn" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}', 'en')">🇺🇸</button>
-                <div class="word-content">
-                    <div class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
-                    <div class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
-                </div>
-                <button class="tts-icon ko-btn" onclick="window.speakSafe('${w.ko.replace(/'/g, "\\'")}', 'ko')">🇰🇷</button>
-            </div>
-        `).join('');
-    };
-</script>
-</body>
-</html>
