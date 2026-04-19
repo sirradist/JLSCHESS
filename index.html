@@ -16,8 +16,9 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
     <script type="module">
-        import { KokoroTTS } from 'kokoro-js';
-        window.KokoroTTS = KokoroTTS;
+        import * as KokoroLib from 'kokoro-js';
+        window.KokoroLib = KokoroLib;
+        console.log("Library Export Keys:", Object.keys(KokoroLib));
     </script>
 
     <style>
@@ -42,8 +43,8 @@
 
 <div class="container">
     <header>
-        <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">라이브러리 로드 대기 중...</div>
+        <h1>정상어학원 CHESS VOCA Master</h1>
+        <div id="status-area">로딩 준비 중...</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
@@ -89,40 +90,43 @@
         const pFill = document.getElementById('progress-fill');
         
         try {
-            while (!window.KokoroTTS) {
+            while (!window.KokoroLib) {
                 await new Promise(r => setTimeout(r, 300));
             }
 
             pBar.style.display = "block";
-            status.innerText = "모델 데이터(86MB) 읽는 중... (약 10초 소요)";
-            pFill.style.width = "30%";
+            status.innerText = "모델 파일(86MB) 로딩 중...";
+            pFill.style.width = "40%";
             
-            // 1. 모델 파일을 직접 바이너리 데이터로 가져옵니다.
             const response = await fetch('./model.onnx');
-            if (!response.ok) throw new Error("모델 파일을 찾을 수 없습니다.");
             const modelData = await response.arrayBuffer();
             
-            pFill.style.width = "60%";
-            status.innerText = "AI 엔진에 데이터 주입 중...";
+            status.innerText = "음성 엔진 초기화 중...";
 
-            // 2. 경로가 아닌 데이터(buffer)를 직접 전달하여 config.json 찾기를 건너뜁니다.
-            tts = await window.KokoroTTS.new(modelData, {
-                dtype: 'q8'
-            });
+            // 핵심 수정: 라이브러리 내부에서 KokoroTTS 클래스나 생성자를 자동으로 찾습니다.
+            const lib = window.KokoroLib;
+            const TTSClass = lib.KokoroTTS || lib.default?.KokoroTTS || lib.default;
+
+            if (typeof TTSClass.new === 'function') {
+                tts = await TTSClass.new(modelData, { dtype: 'q8' });
+            } else {
+                // new 함수가 없다면 직접 클래스 생성 시도
+                tts = await new TTSClass(modelData, { dtype: 'q8' });
+            }
 
             pFill.style.width = "100%";
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            console.error(e);
-            status.innerText = "⚠️ 시스템 음성 모드로 자동 전환됨";
+            console.error("최종 초기화 에러:", e);
+            status.innerText = "⚠️ 시스템 음성 모드로 전환됨";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // --- 나머지 로직 (기존 유지) ---
+    // --- 레벨 및 데이터 로직 (기존 유지) ---
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
