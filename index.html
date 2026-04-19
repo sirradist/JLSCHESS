@@ -2,116 +2,274 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JLS CHESS VOCA Master</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #3c4043; }
-        body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
-        #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 15px; border-radius: 8px; }
-        .setup-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
-        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
-        .word-card { background: var(--card); padding: 18px; border-radius: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .word-text { font-size: 1.2rem; font-weight: 700; width: 220px; color: #1a73e8; }
-        .mean-text { font-size: 1.1rem; color: #5f6368; flex: 1; }
-        .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
-        .tts-icon { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 5px; }
+        :root {
+            --primary: #4A90E2;
+            --secondary: #FFD93D;
+            --accent: #FF6B6B;
+            --success: #6BCB77;
+            --bg: #F0F7FF;
+            --card: #FFFFFF;
+            --text: #2D3436;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nanum Round', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 10px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+            text-shadow: 1px 1px 0 #fff;
+        }
+
+        #status-area {
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #74b9ff;
+            font-weight: 700;
+        }
+
+        /* 설정 박스 (모바일 최적화) */
+        .setup-box {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #E1E8EE;
+            background: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text);
+            appearance: none;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        #level { grid-column: span 2; }
+
+        #btn-study {
+            grid-column: span 2;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-top: 5px;
+            box-shadow: 0 4px 0 #357ABD;
+        }
+
+        #btn-study:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* 컨트롤 영역 */
+        #controls {
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* 단어 카드 (모바일 최적화) */
+        .word-card {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .word-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .word-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .mean-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #636e72;
+        }
+
+        /* 가리기 효과 */
+        .hidden {
+            background-color: var(--secondary) !important;
+            color: transparent !important;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .hidden::after {
+            content: '?';
+            color: #fff;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 800;
+        }
+
+        /* 버튼 최적화 */
+        .tts-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #F8F9FA;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tts-icon:active {
+            background: #E1E8EE;
+        }
+
+        .en-btn { border: 2px solid #DFF9FB; }
+        .ko-btn { border: 2px solid #FFF5D7; }
+
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">음성 엔진 준비 완료 (안정화 모드)</div>
+        <h1>🎮 CHESS VOCA Master</h1>
+        <div id="status-area">Ready to Study! ✨</div>
     </header>
 
     <div class="setup-box">
         <select id="level" onchange="window.updateUIByLevel()">
-            <option value="">레벨 선택</option>
-            <optgroup label="DS Level">
+            <option value="">Choose Level (레벨 선택)</option>
+            <optgroup label="⭐ DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
                 <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
                 <option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option>
             </optgroup>
-            <optgroup label="LS Level">
+            <optgroup label="🌟 LS Level">
                 <option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option>
                 <option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option>
                 <option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option>
                 <option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option>
             </optgroup>
-            <optgroup label="MS Level">
+            <optgroup label="🔥 MS Level">
                 <option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option>
                 <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
             </optgroup>
         </select>
         <select id="book"></select>
         <select id="lesson"></select>
-        <button id="btn-study" onclick="window.fetchAndLoad()">학습 시작</button>
+        <button id="btn-study" onclick="window.fetchAndLoad()">START (시작!)</button>
     </div>
-    <div id="controls" style="display:none; justify-content:center; gap:25px; margin-bottom:20px;">
-        <label><input type="checkbox" id="chkEng" onchange="window.renderWords()"> 영어 가리기</label>
-        <label><input type="checkbox" id="chkKor" onchange="window.renderWords()"> 한글 가리기</label>
+
+    <div id="controls">
+        <label class="control-item"><input type="checkbox" id="chkEng" onchange="window.renderWords()"> English 👀</label>
+        <label class="control-item"><input type="checkbox" id="chkKor" onchange="window.renderWords()"> 한글 👀</label>
     </div>
+
     <div id="display-area"></div>
 </div>
 
 <script>
     window.words = [];
     const synth = window.speechSynthesis;
-
-    // --- [안정화 1] 목소리 강제 고정 ---
     let engVoice = null;
     let korVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
-        // 크롬/안드로이드에서 가장 안정적인 Google 보이스를 우선 선택
-        engVoice = voices.find(v => v.name.includes('Google US English')) || 
-                   voices.find(v => v.lang.startsWith('en-US')) || 
-                   voices.find(v => v.lang.startsWith('en'));
-        
-        korVoice = voices.find(v => v.name.includes('Google 한국어')) || 
-                   voices.find(v => v.lang.startsWith('ko-KR')) || 
-                   voices.find(v => v.lang.startsWith('ko'));
+        engVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
+        korVoice = voices.find(v => v.name.includes('Google 한국어')) || voices.find(v => v.lang.startsWith('ko'));
     }
-
-    // 보이스 로딩 대기
-    if (synth.onvoiceschanged !== undefined) {
-        synth.onvoiceschanged = initVoices;
-    }
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
 
-    // --- [안정화 2] 끊김 방지 재생 로직 ---
     window.speakSafe = function(text, langType) {
-        // 기존 재생 중인 음성 즉시 중단
         synth.cancel();
-
         const utter = new SpeechSynthesisUtterance(text);
         utter.voice = langType === 'en' ? engVoice : korVoice;
         utter.lang = langType === 'en' ? 'en-US' : 'ko-KR';
-        
-        // 속도를 살짝 늦춰서(0.9) 기기 부하를 줄이고 명확도를 높임
         utter.rate = 0.9;
-        utter.pitch = 1;
-
-        // [중요] 특정 기기에서 소리가 중간에 죽는 버그 방지
+        
         let keepAlive = setInterval(() => {
-            if (!synth.speaking) {
-                clearInterval(keepAlive);
-            } else {
-                synth.resume(); // 브라우저에게 "아직 읽는 중이니 멈추지 마"라고 계속 신호 보냄
-            }
+            if (!synth.speaking) clearInterval(keepAlive);
+            else synth.resume();
         }, 3000);
-
         synth.speak(utter);
     };
 
-    // --- UI 로직 ---
     window.updateUIByLevel = function() {
         const lv = document.getElementById('level').value;
         if(!lv) return;
@@ -143,7 +301,8 @@
             window.words = await res.json();
             document.getElementById('controls').style.display = "flex";
             window.renderWords();
-        } catch(e) { alert("데이터 로드 실패"); }
+            window.scrollTo({ top: document.getElementById('controls').offsetTop - 20, behavior: 'smooth' });
+        } catch(e) { alert("Data not found! 파일을 확인해주세요."); }
     };
 
     window.renderWords = function() {
@@ -152,5 +311,15 @@
         const hK = document.getElementById('chkKor').checked;
         area.innerHTML = window.words.map((w) => `
             <div class="word-card">
-                <button class="tts-icon" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}', 'en')">🔈</button>
-                <span
+                <button class="tts-icon en-btn" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}', 'en')">🇺🇸</button>
+                <div class="word-content">
+                    <div class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
+                    <div class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
+                </div>
+                <button class="tts-icon ko-btn" onclick="window.speakSafe('${w.ko.replace(/'/g, "\\'")}', 'ko')">🇰🇷</button>
+            </div>
+        `).join('');
+    };
+</script>
+</body>
+</html>
