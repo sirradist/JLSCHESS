@@ -12,13 +12,12 @@
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
         
-        /* 헤더 및 로고 스타일 최적화 */
         header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
         .logo-box { height: 45px; display: flex; align-items: center; }
         .logo-img { height: 100%; width: auto; object-fit: contain; }
-        h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+        h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; }
         
-        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74,144,226,0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; outline: none; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
         .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
@@ -31,17 +30,20 @@
         .tab-btn.active { background: var(--p); }
         #lesson-subtitle { margin: 0 0 15px; font-size: 1.1rem; font-weight: 800; color: #576574; display: none; background: #fff; padding: 12px; border-radius: 15px; border: 2px dashed var(--p); }
         #study-area, #test-area, #puzzle-area { display: none; padding-bottom: 30px; }
+        
         .card { background: var(--c); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); text-align: left; }
         .word-text { font-size: 1.25rem; font-weight: 800; color: var(--p); }
         .mean-text { font-size: 1.05rem; font-weight: 700; color: #636e72; }
         .hidden { background: var(--s) !important; color: transparent !important; border-radius: 8px; cursor: pointer; position: relative; min-height: 1.2em; }
         .hidden::after { content: '?'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: 800; }
         .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #DFF9FB; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; }
+        
         .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
         .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; }
         .q-opt { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #E1E8EE; background: #fff; font-weight: 700; text-align: left; margin-bottom: 8px; }
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
+        
         .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; }
         .cell { width: 28px; height: 28px; background: #fff; position: relative; display: flex; align-items: center; justify-content: center; }
@@ -49,6 +51,7 @@
         .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; }
         .cell.ok { background: #e8f5e9; }
         .cell-num { position: absolute; top: 0px; left: 1px; font-size: 0.45rem; color: #999; font-weight: 700; }
+        
         .h-box { text-align: left; background: #fff; padding: 15px; border-radius: 20px; }
         .h-item { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; color: #555; }
         .btn-action { background: var(--s); color: var(--t); padding: 14px; border-radius: 15px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #D4B531; }
@@ -65,7 +68,7 @@
     </header>
 
     <div class="setup-box">
-        <select id="level" onchange="window.updateUI()">
+        <select id="level" onchange="updateUI()">
             <option value="">레벨 선택</option>
             <optgroup label="DS">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
@@ -84,18 +87,18 @@
             </optgroup>
         </select>
         <div class="row">
-            <select id="book" onchange="window.updateBookImage()"></select>
+            <select id="book" onchange="updateBookImage()"></select>
             <select id="lesson"></select>
         </div>
-        <button class="btn-main" onclick="window.startStudy()">START!</button>
+        <button class="btn-main" onclick="startStudy()">START!</button>
     </div>
 
     <div id="book-image-container"><img id="book-cover" src="" alt="Book Cover"></div>
 
     <div class="tab-menu" id="main-tabs">
-        <button id="tab-study" class="tab-btn active" onclick="window.switchTab('study')">Study</button>
-        <button id="tab-test" class="tab-btn" onclick="window.switchTab('test')">Test</button>
-        <button id="tab-puzzle" class="tab-btn" onclick="window.switchTab('puzzle')">Puzzle</button>
+        <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
+        <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
+        <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
     </div>
 
     <div id="lesson-subtitle"></div>
@@ -107,79 +110,10 @@
         </div>
         <div id="study-list"></div>
     </div>
+    
     <div id="test-area">
         <button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button>
         <div id="test-list"></div>
     </div>
-    <div id="puzzle-area">
-        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
-        <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-action" id="cw-check-btn" onclick="window.checkCW()">정답 확인 (완료) ✔️</button>
-        <button class="btn-action btn-next" id="cw-next-btn" onclick="window.nextStage()" style="display:none;">다음 스테이지 (나머지 단어) ➡️</button>
-        <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
-    </div>
-</div>
 
-<script>
-    const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
-    let cData = { words: [] }, curLv = "", curStage = 1;
-
-    const synth = window.speechSynthesis;
-    let engVoice = null;
-    function initVoices() {
-        const voices = synth.getVoices();
-        engVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google') && v.name.includes('Female')) || 
-                   voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || 
-                   voices.find(v => v.lang.startsWith('en-US')) ||
-                   voices.find(v => v.lang.startsWith('en'));
-    }
-    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
-    initVoices();
-
-    function getSpeakText(text) {
-        if (!text) return "";
-        return text.replace(/\s*-\s*/g, ", ").trim();
-    }
-
-    function speak(t) {
-        synth.cancel();
-        if (!engVoice) initVoices();
-        const u = new SpeechSynthesisUtterance(getSpeakText(t));
-        u.lang = 'en-US';
-        if (engVoice) u.voice = engVoice;
-        u.rate = 0.8; u.pitch = 1.1; 
-        synth.speak(u);
-    }
-
-    window.updateUI = function() {
-        const v = document.getElementById('level').value;
-        const bSel = document.getElementById('book');
-        const lSel = document.getElementById('lesson');
-        if(!v) { bSel.innerHTML = ""; lSel.innerHTML = ""; return; }
-        curLv = v;
-        const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
-        bSel.innerHTML = (is2?[4,5,6]:c.b).map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
-        const ls = is2?Array.from({length:10},(_,i)=>i+13):(Array.isArray(c.l)?c.l:Array.from({length:10},(_,i)=>i+1));
-        lSel.innerHTML = ls.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
-        window.updateBookImage();
-    };
-
-    window.updateBookImage = function() {
-        const lv = document.getElementById('level').value, bk = document.getElementById('book').value;
-        const container = document.getElementById('book-image-container'), img = document.getElementById('book-cover');
-        if (lv && bk) {
-            img.src = `data/${lv}_${bk}.jpg`;
-            img.onload = () => container.style.display = 'block';
-            img.onerror = () => container.style.display = 'none';
-        } else container.style.display = 'none';
-    };
-
-    window.startStudy = async function() {
-        const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
-        if(!v||!b||!l) return alert("선택 필수!");
-        try {
-            const res = await fetch(`data/${v}_${b}_${l}.json`);
-            const d = await res.json(); cData = d.words ? d : { words: d };
-            const sub = document.getElementById('lesson-subtitle');
-            if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else sub.style.display="none";
-            document.getElementById('main-tabs').style.display = "grid";
+    <div id
