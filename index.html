@@ -10,7 +10,7 @@
         :root { --p: #4A90E2; --s: #FFD93D; --bg: #F0F7FF; --c: #FFFFFF; --t: #2D3436; --err: #FF6B6B; --ok: #6BCB77; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 600px; text-align: center; }
+        .container { width: 100%; max-width: 650px; text-align: center; }
         header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
         .logo-box { height: 45px; display: flex; align-items: center; }
         .logo-img { height: 100%; width: auto; object-fit: contain; }
@@ -36,15 +36,17 @@
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
         
+        /* [배경색 수정] 입력 칸이 없는 곳을 확실하게 어둡게 처리 */
         .cw-wrap { overflow-x: auto; background: #fff; padding: 10px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #E1E8EE; -webkit-overflow-scrolling: touch; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; width: max-content; }
-        .cell { width: 32px; height: 32px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
-        .cell.active { background: #fff; }
-        .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
+        .cell { width: 30px; height: 30px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .cell.empty { background: #34495e !important; } /* 단어 없는 칸은 무조건 이 색상 */
+        .cell.active { background: #fff !important; }
+        .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
         .cell input:focus { background: #fff9db; }
         .cell.ok { background: #e8f5e9 !important; }
         .cell.no { background: #ffebee !important; }
-        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.55rem; color: #999; font-weight: 700; pointer-events: none; z-index: 5; }
+        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.5rem; color: #999; font-weight: 700; pointer-events: none; z-index: 5; }
         
         .h-box { text-align: left; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
         .h-item { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; color: #555; }
@@ -200,28 +202,25 @@
 
     let lastDir = 'H'; 
 
-    // [최종 교정] 겹치기 실패 시 독립 배치 강제 수행 로직
     function createCW() {
-        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 20; 
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
         const half = Math.ceil(allW.length / 2);
-        
         let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
         const originalOrder = [...ws];
-        ws.sort((a, b) => b.a.length - a.a.length);
-        
+
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
 
         let grid, placed;
-        for(let attempt=0; attempt<100; attempt++) {
+        // 최대 시도 횟수를 줄이고 로직의 확실성을 높임
+        for(let attempt=0; attempt<20; attempt++) {
             grid = Array(sz).fill().map(() => Array(sz).fill(null));
             placed = [];
-            let successAll = true;
+            let tempWs = [...ws].sort(() => Math.random() - 0.5);
 
-            for(let w of ws) {
+            for(let w of tempWs) {
                 let possibilities = [];
-                // 1단계: 기존 단어들과 교차 가능한 지점 탐색
                 for(let r=0; r<sz; r++) {
                     for(let c=0; c<sz; c++) {
                         for(let d of ['H', 'V']) {
@@ -245,7 +244,7 @@
                     possibilities.sort((a,b) => b.over - a.over);
                     best = possibilities[0];
                 } else {
-                    // 2단계: 교차 실패 시, 완전히 빈 영역에 독립적으로 강제 배치 (1칸 단위 전수조사)
+                    // [배치 보장] 교차점 없으면 무조건 빈 곳 강제 배치
                     let found = false;
                     for(let r=0; r<sz && !found; r++) {
                         for(let c=0; c<sz && !found; c++) {
@@ -277,19 +276,18 @@
                         grid[rr][cc] = { char: charToSet, n: (i===0 ? originalIndex+1 : (existing ? existing.n : null)), d: existing ? existing.d + best.d : best.d };
                     }
                     placed.push({ ...best, ...w, num: originalIndex+1 });
-                } else {
-                    successAll = false; break;
                 }
             }
-            if(successAll) break;
+            if(placed.length === ws.length) break; 
         }
         
-        let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 32px);">`;
+        let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 30px);">`;
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
                     h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
                 } else {
+                    // [배경색 수정] 확실하게 empty 클래스 부여
                     h += `<div class="cell empty"></div>`;
                 }
             }
