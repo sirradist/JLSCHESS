@@ -114,4 +114,66 @@
 
     // --- 나머지 데이터 로딩 로직 (기존 유지) ---
     const CONFIG = {
-        DS: { books
+        DS: { books: [1,2,3], lessons: 10 },
+        LS: { books: [1,2,3], lessons: 10 },
+        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
+    };
+
+    function updateUIByLevel() {
+        const lv = document.getElementById('level').value;
+        if(!lv) return;
+        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
+        const config = CONFIG[type];
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : config.books;
+        document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
+        let lHtml = "";
+        if(lv.endsWith("2") && !lv.startsWith("MS")) {
+            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        } else {
+            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        }
+        document.getElementById('lesson').innerHTML = lHtml;
+    }
+
+    async function fetchAndLoad() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const ls = document.getElementById('lesson').value;
+        try {
+            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            words = await res.json();
+            document.getElementById('controls').style.display = "flex";
+            renderWords();
+        } catch(e) { alert("데이터 로드 실패"); }
+    }
+
+    function renderWords() {
+        const area = document.getElementById('display-area');
+        const hE = document.getElementById('chkEng').checked;
+        const hK = document.getElementById('chkKor').checked;
+
+        area.innerHTML = words.map((w) => `
+            <div class="word-card">
+                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
+                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
+                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
+                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
+            </div>
+        `).join('');
+    }
+
+    async function playEnglish(text) {
+        if (!text || !tts) return;
+        const cleanText = text.replace(/-/g, ',');
+        const audio = await tts.generate(cleanText, { voice: 'af_bella' });
+        audio.play();
+    }
+
+    function playKorean(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        window.speechSynthesis.speak(utter);
+    }
+</script>
+</body>
+</html>
