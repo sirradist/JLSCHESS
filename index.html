@@ -197,23 +197,28 @@
 
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 20; 
-        const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
+        const allW = cData.words.map((w, i) => ({ 
+            a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), 
+            h: w.ko,
+            id: i + 1 // 힌트 번호 고정
+        }));
         const half = Math.ceil(allW.length / 2);
         let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
-        const originalOrder = [...ws];
 
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
 
         let grid, placed;
-        for(let attempt=0; attempt<50; attempt++) {
+        for(let attempt=0; attempt<100; attempt++) {
             grid = Array(sz).fill().map(() => Array(sz).fill(null));
             placed = [];
-            // 매 시도마다 긴 단어 우선 배치로 기초 틀 잡기
-            let tempWs = [...ws].sort((a,b) => b.a.length - a.a.length);
+            
+            // [중요] 단어를 섞되, 힌트의 '번호'와 '방향'을 유지하며 배치 시도
+            let tempWs = [...ws].sort(() => Math.random() - 0.5);
 
             for(let w of tempWs) {
                 let possibilities = [];
+                // 1. 교차점 탐색
                 for(let r=0; r<sz; r++) {
                     for(let c=0; c<sz; c++) {
                         for(let d of ['H', 'V']) {
@@ -237,6 +242,7 @@
                     possibilities.sort((a,b) => b.over - a.over);
                     best = possibilities[0];
                 } else {
+                    // 2. 강제 배치 (빈자리)
                     let found = false;
                     for(let r=0; r<sz && !found; r++) {
                         for(let c=0; c<sz && !found; c++) {
@@ -255,7 +261,6 @@
                 }
 
                 if(best) {
-                    const originalIndex = originalOrder.indexOf(w);
                     for(let i=0; i<w.a.length; i++) {
                         let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
                         let existing = grid[rr][cc];
@@ -265,9 +270,10 @@
                             if(!chars.includes(charToSet)) chars.push(charToSet);
                             charToSet = chars.join(',');
                         }
-                        // [수정] 번호 정보를 객체로 관리하여 가로/세로 번호를 중첩 가능하게 함
+                        
+                        // [핵심] 가로/세로 번호를 객체로 관리
                         let numObj = existing ? {...existing.nums} : {};
-                        if(i===0) numObj[best.d] = originalIndex + 1;
+                        if(i===0) numObj[best.d] = w.id;
 
                         grid[rr][cc] = { 
                             char: charToSet, 
@@ -275,7 +281,7 @@
                             d: existing ? existing.d + best.d : best.d 
                         };
                     }
-                    placed.push({ ...best, ...w, num: originalIndex+1 });
+                    placed.push({ ...best, ...w });
                 }
             }
             if(placed.length === ws.length) break; 
@@ -285,22 +291,22 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    // [수정] 해당 칸에 존재하는 모든 번호를 가로/세로 구분 없이 표시
-                    let numLabel = "";
-                    if(grid[r][c].nums) {
-                        let ns = Object.values(grid[r][c].nums);
-                        if(ns.length > 0) numLabel = Math.min(...ns); // 중첩 시 낮은 번호 우선 표시
-                    }
-                    h += `<div class="cell active">${numLabel?`<span class="cell-num">${numLabel}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
+                    // 번호 표시 (가로/세로 둘 다 있으면 가로 번호 우선 혹은 낮은 번호)
+                    let ns = Object.values(grid[r][c].nums);
+                    let label = ns.length > 0 ? Math.min(...ns) : "";
+                    h += `<div class="cell active">${label?`<span class="cell-num">${label}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
                 }
             }
         }
         box.innerHTML = h + `</div>`;
-        hBox.innerHTML = originalOrder.map((w,i) => {
-            const p = placed.find(pl => pl.num === i+1);
-            return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d.includes('H')?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
+        
+        // [수정] 힌트 목록에 배치된 '실제 방향'을 표시하여 학습자와의 괴리 해결
+        hBox.innerHTML = ws.map(w => {
+            const p = placed.find(pl => pl.id === w.id);
+            const dirText = p ? (p.d === 'H' ? '가로' : '세로') : '미배치';
+            return `<div class="h-item">${w.id}. ${w.h} (${dirText}, ${w.a.length}자)</div>`;
         }).join('');
     }
 
