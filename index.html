@@ -12,7 +12,7 @@
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
         h1 { font-size: 1.5rem; color: var(--p); margin: 15px 0; font-weight: 800; }
-        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74,144,226,0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
         .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
@@ -73,19 +73,22 @@
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
 
-    // [중요] Google EN 보이스 고정 로직
+    // [음성 엔진 재검증 섹션]
     const synth = window.speechSynthesis;
     let engVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
-        // Google US English 선호, 없으면 일반 en-US 찾기
-        engVoice = voices.find(v => v.name.includes('Google US English')) || 
-                   voices.find(v => v.lang === 'en-US') || 
-                   voices.find(v => v.lang.startsWith('en'));
+        // [여성 음성 고정 로직]
+        // 1순위: Google 보이스 중 'Female' 이름 포함
+        // 2순위: 'Google US English' (기본 여성인 경우가 많음)
+        // 3순위: 그 외 en-US 여성 음성
+        engVoice = voices.find(v => v.name.includes('Google') && v.name.includes('Female')) || 
+                   voices.find(v => v.name.includes('Google US English')) || 
+                   voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) ||
+                   voices.find(v => v.lang === 'en-US');
     }
 
-    // 브라우저마다 voice 리스트 로드 타이밍이 다르므로 대응
     if (synth.onvoiceschanged !== undefined) {
         synth.onvoiceschanged = initVoices;
     }
@@ -143,11 +146,9 @@
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
         const half = Math.ceil(allW.length / 2);
         const ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
-        
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (단어 ${ws.length}개)`;
         document.getElementById('cw-next-btn').style.display = 'none';
         document.getElementById('cw-check-btn').style.display = 'block';
-
         let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
         ws.forEach(w => {
             let best = null;
@@ -173,7 +174,6 @@
             }
             placed.push({ ...best, ...w });
         });
-
         let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 28px);">`;
         for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
             if(grid[r][c]) h += `<div class="cell" id="c-${r}-${c}">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}"></div>`;
@@ -192,22 +192,19 @@
         });
         if(allOk) {
             alert(curStage === 1 ? "STAGE 1 성공! 다음 단어들로 넘어갑니다." : "전부 맞혔어요! 참 잘했어요!");
-            if(curStage === 1) {
-                document.getElementById('cw-check-btn').style.display = 'none';
-                document.getElementById('cw-next-btn').style.display = 'block';
-            }
+            if(curStage === 1) { document.getElementById('cw-check-btn').style.display = 'none'; document.getElementById('cw-next-btn').style.display = 'block'; }
         } else alert("틀린 칸이 있어요. 다시 확인해보세요!");
     }
 
     function nextStage() { curStage = 2; createCW(); }
 
-    // [수정] 고정된 Google EN 보이스로 말하기
     function speak(t) {
         synth.cancel();
         const u = new SpeechSynthesisUtterance(t);
-        if (engVoice) u.voice = engVoice; //
+        if (engVoice) u.voice = engVoice;
         u.lang = 'en-US';
         u.rate = 0.9;
+        u.pitch = 1.1; // 여성 음성의 톤을 더 살리기 위해 살짝 높임
         synth.speak(u);
     }
 
