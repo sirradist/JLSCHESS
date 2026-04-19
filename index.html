@@ -201,7 +201,6 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [스마트 입력 로직] 방향 인식을 위한 전역 변수
     let lastDir = 'H'; 
 
     function createCW() {
@@ -215,7 +214,7 @@
         let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
         
         ws.forEach((w, idx) => {
-            let possibilities = [];
+            let best = null;
             if(w.a.length > sz) w.a = w.a.substring(0, sz);
 
             for(let r=0; r<sz; r++) {
@@ -238,7 +237,27 @@
 
             if(possibilities.length > 0) {
                 possibilities.sort((a,b) => b.over - a.over);
-                const best = possibilities[0];
+                best = possibilities[0];
+            } else {
+                // 배치 실패 시 1칸 단위로 전수 조사 (SNOWMAN 누락 방지)
+                let found = false;
+                for(let r=0; r<sz && !found; r++) { 
+                    for(let c=0; c<sz && !found; c++) {
+                        if(c+w.a.length <= sz) {
+                            let can = true;
+                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
+                            if(can) { best = { r, c, d: 'H' }; found = true; }
+                        }
+                        if(!found && r+w.a.length <= sz) {
+                            let can = true;
+                            for(let i=0; i<w.a.length; i++) if(grid[r+i][c]) { can = false; break; }
+                            if(can) { best = { r, c, d: 'V' }; found = true; }
+                        }
+                    }
+                }
+            }
+
+            if(best) {
                 for(let i=0; i<w.a.length; i++) {
                     let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
                     let existing = grid[rr][cc];
@@ -248,29 +267,13 @@
                         if(!chars.includes(charToSet)) chars.push(charToSet);
                         charToSet = chars.join(',');
                     }
-                    // 방향 정보(d)를 데이터 속성에 저장
                     grid[rr][cc] = { 
                         char: charToSet, 
                         n: (i===0 ? idx+1 : (existing ? existing.n : null)),
-                        d: existing ? existing.d + best.d : best.d // 교차점인 경우 방향 모두 저장
+                        d: existing ? existing.d + best.d : best.d 
                     };
                 }
                 placed.push({ ...best, ...w, num: idx+1 });
-            } else {
-                let found = false;
-                for(let r=1; r<sz && !found; r+=3) { 
-                    for(let c=1; c<sz && !found; c+=3) {
-                        if(c+w.a.length <= sz) {
-                            let can = true;
-                            for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
-                            if(can) { 
-                                for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null), d: 'H' };
-                                placed.push({ r, c, d: 'H', ...w, num: idx+1 });
-                                found = true;
-                            }
-                        }
-                    }
-                }
             }
         });
         
@@ -278,7 +281,6 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    // input 태그에 좌표(r, c)와 방향(d) 정보를 data 속성으로 심어줌
                     h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" oninput="smartMove(this); this.value = this.value.toUpperCase()"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
@@ -288,28 +290,20 @@
         box.innerHTML = h + `</div>`;
         hBox.innerHTML = ws.map((w,i) => {
             const p = placed.find(pl => pl.num === i+1);
-            return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d==='H'?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
+            return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d.includes('H')?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
         }).join('');
     }
 
-    // 포커스 시 해당 칸의 주요 방향으로 lastDir 설정
     function setDir(el) {
         const d = el.dataset.dir;
-        if(d.length === 1) lastDir = d; // 한 방향뿐인 칸은 그 방향 고정
+        if(d.length === 1) lastDir = d; 
     }
 
-    // [핵심] 지능형 다음 칸 이동 로직
     function smartMove(el) {
         if (el.value.length < 1) return;
-        
-        const r = parseInt(el.dataset.r);
-        const c = parseInt(el.dataset.c);
+        const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
         let nextR = r, nextC = c;
-
-        // 현재 단어 방향에 따라 다음 좌표 계산
-        if (lastDir === 'H') nextC++;
-        else nextR++;
-
+        if (lastDir === 'H') nextC++; else nextR++;
         const nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
         if (nextInput) nextInput.focus();
     }
