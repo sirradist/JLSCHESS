@@ -200,21 +200,20 @@
 
     let lastDir = 'H'; 
 
+    // [최종 교정] 겹치기 실패 시 독립 배치 강제 수행 로직
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
         const half = Math.ceil(allW.length / 2);
         
-        // [수정] 긴 단어가 자리를 먼저 선점하도록 글자 수 기준 내림차순 정렬
         let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
-        const originalOrder = [...ws]; // 힌트 번호 유지를 위한 원본 순서 저장
+        const originalOrder = [...ws];
         ws.sort((a, b) => b.a.length - a.a.length);
         
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
 
         let grid, placed;
-        // [핵심] 모든 단어가 배치될 때까지 무한 루프 (최대 100회)
         for(let attempt=0; attempt<100; attempt++) {
             grid = Array(sz).fill().map(() => Array(sz).fill(null));
             placed = [];
@@ -222,6 +221,7 @@
 
             for(let w of ws) {
                 let possibilities = [];
+                // 1단계: 기존 단어들과 교차 가능한 지점 탐색
                 for(let r=0; r<sz; r++) {
                     for(let c=0; c<sz; c++) {
                         for(let d of ['H', 'V']) {
@@ -234,7 +234,7 @@
                                         else over += 100; 
                                     }
                                 }
-                                if(!fail) possibilities.push({ r, c, d, over });
+                                if(!fail && over > 0) possibilities.push({ r, c, d, over });
                             }
                         }
                     }
@@ -245,7 +245,7 @@
                     possibilities.sort((a,b) => b.over - a.over);
                     best = possibilities[0];
                 } else {
-                    // 강제 배치 로직 (순차 전수조사)
+                    // 2단계: 교차 실패 시, 완전히 빈 영역에 독립적으로 강제 배치 (1칸 단위 전수조사)
                     let found = false;
                     for(let r=0; r<sz && !found; r++) {
                         for(let c=0; c<sz && !found; c++) {
