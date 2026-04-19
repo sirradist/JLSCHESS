@@ -10,8 +10,8 @@
     
     <script type="module">
         import { KokoroTTS } from './kokoro.js';
-        window.KokoroTTS = KokoroTTS; // 전역 객체에 등록
-        console.log("KokoroTTS 클래스가 성공적으로 등록되었습니다.");
+        window.KokoroTTS = KokoroTTS; // 전역 객체에 클래스 등록
+        console.log("KokoroTTS 클래스 등록 완료");
     </script>
 
     <style>
@@ -77,25 +77,25 @@
     async function initTTS() {
         const status = document.getElementById('status-area');
         try {
-            // 라이브러리 로드 대기
+            // 클래스 로드 대기
             let retry = 0;
             while (!window.KokoroTTS && retry < 10) {
                 await new Promise(r => setTimeout(r, 500));
                 retry++;
             }
 
-            if (!window.KokoroTTS) throw new Error("Library load failed");
+            if (!window.KokoroTTS) throw new Error("클래스 로드 실패");
 
-            status.innerText = "모델 데이터(86MB) 읽는 중... (약 10초 소요)";
+            status.innerText = "모델 파일(86MB) 데이터 읽는 중...";
             
-            // 1. 모델 파일을 직접 바이너리 데이터로 가져옵니다.
+            // 1. 모델 파일을 직접 바이너리로 읽어옵니다.
             const response = await fetch('./model.onnx');
             const modelData = await response.arrayBuffer();
             
             status.innerText = "Bella 음성 엔진 초기화 중...";
 
             // 2. 클래스 생성자를 직접 호출 (new KokoroTTS)
-            // config.json을 찾지 않도록 model_file_structure 옵션 사용
+            // config.json을 찾지 않도록 주입 방식으로 로드
             tts = await new window.KokoroTTS(modelData, {
                 model_file_structure: 'flat',
                 dtype: 'q8'
@@ -112,7 +112,7 @@
     
     window.onload = initTTS;
 
-    // --- 나머지 데이터 로딩 로직 (기존 유지) ---
+    // --- 나머지 데이터 로직 (기존 동일) ---
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
@@ -149,31 +149,4 @@
 
     function renderWords() {
         const area = document.getElementById('display-area');
-        const hE = document.getElementById('chkEng').checked;
-        const hK = document.getElementById('chkKor').checked;
-
-        area.innerHTML = words.map((w) => `
-            <div class="word-card">
-                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
-                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
-                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
-            </div>
-        `).join('');
-    }
-
-    async function playEnglish(text) {
-        if (!text || !tts) return;
-        const cleanText = text.replace(/-/g, ',');
-        const audio = await tts.generate(cleanText, { voice: 'af_bella' });
-        audio.play();
-    }
-
-    function playKorean(text) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        window.speechSynthesis.speak(utter);
-    }
-</script>
-</body>
-</html>
+        const hE =
