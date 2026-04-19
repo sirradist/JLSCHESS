@@ -1,0 +1,25 @@
+{
+  "subtitle": "Can you play the piano?",
+  "words": [
+    { "en": "flute", "ko": "플루트", "def": "" },
+    { "en": "musical instrument", "ko": "악기", "def": "" },
+    { "en": "baseball", "ko": "야구", "def": "" },
+    { "en": "basketball", "ko": "농구", "def": "" },
+    { "en": "dribble - dribbled", "ko": "드리블 하다", "def": "" },
+    { "en": "shoot - shot", "ko": "(골을 향해) 던지다, 슛하다", "def": "" },
+    { "en": "violin", "ko": "바이올린", "def": "" },
+    { "en": "tennis", "ko": "테니스", "def": "" },
+    { "en": "pass - passed", "ko": "건네다, 패스하다", "def": "" },
+    { "en": "kick - kicked", "ko": "(발로) 차다", "def": "" },
+    { "en": "tomorrow", "ko": "내일", "def": "" },
+    { "en": "piano", "ko": "피아노", "def": "" },
+    { "en": "lesson", "ko": "수업", "def": "" },
+    { "en": "drum", "ko": "북, 드럼", "def": "" },
+    { "en": "many", "ko": "많은, 여러 개의", "def": "" },
+    { "en": "soccer", "ko": "축구", "def": "" },
+    { "en": "badminton", "ko": "배드민턴", "def": "" },
+    { "en": "amazing", "ko": "놀라운", "def": "" },
+    { "en": "practice - practiced", "ko": "연습하다", "def": "" },
+    { "en": "teach - taught", "ko": "가르치다", "def": "" }
+  ]
+}

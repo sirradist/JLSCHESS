@@ -1,0 +1,25 @@
+{
+  "subtitle": "The Fox and the Crow",
+  "words": [
+    { "en": "forest", "ko": "숲", "def": "" },
+    { "en": "cheese", "ko": "치즈", "def": "" },
+    { "en": "beak", "ko": "새의 부리", "def": "" },
+    { "en": "climb - climbed", "ko": "오르다, 올라가다", "def": "" },
+    { "en": "bottom", "ko": "맨 아래 부분", "def": "" },
+    { "en": "feather", "ko": "새의 깃털", "def": "" },
+    { "en": "shiny", "ko": "반짝거리는", "def": "" },
+    { "en": "bright", "ko": "빛나는", "def": "" },
+    { "en": "voice", "ko": "목소리", "def": "" },
+    { "en": "sing - sang", "ko": "노래 부르다", "def": "" },
+    { "en": "special", "ko": "특별한", "def": "" },
+    { "en": "lift - lifted", "ko": "들어올리다", "def": "" },
+    { "en": "fall - fell", "ko": "떨어지다", "def": "" },
+    { "en": "bite", "ko": "한 입", "def": "" },
+    { "en": "noise", "ko": "시끄러운 소리", "def": "" },
+    { "en": "mind - minded", "ko": "언짢아하다", "def": "" },
+    { "en": "belly", "ko": "배", "def": "" },
+    { "en": "remember - remembered", "ko": "기억하다", "def": "" },
+    { "en": "trick - tricked", "ko": "속임수를 쓰다", "def": "" },
+    { "en": "steal - stole", "ko": "훔치다", "def": "" }
+  ]
+}
