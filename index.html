@@ -11,13 +11,20 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
-        h1 { font-size: 1.5rem; color: var(--p); margin: 15px 0; font-weight: 800; }
+        
+        /* [수정] 헤더 및 로고 스타일 */
+        header { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0; }
+        .logo { height: 40px; width: auto; object-fit: contain; }
+        h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; }
+        
         .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74,144,226,0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; outline: none; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
         .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
+        
         #book-image-container { display: none; margin: 10px 0 15px; padding: 10px; background: #fff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         #book-cover { max-width: 120px; border-radius: 10px; border: 1px solid #eee; }
+        
         .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .tab-btn { padding: 12px; border-radius: 12px; border: none; background: #BDC3C7; color: #fff; font-weight: 800; cursor: pointer; }
         .tab-btn.active { background: var(--p); }
@@ -49,7 +56,11 @@
 </head>
 <body>
 <div class="container">
-    <h1>🌟 CHESS VOCA Master</h1>
+    <header>
+        <img src="data/JLS Logo.png" alt="JLS Logo" class="logo">
+        <h1>CHESS VOCA Master</h1>
+    </header>
+
     <div class="setup-box">
         <select id="level" onchange="window.updateUI()">
             <option value="">레벨 선택</option>
@@ -107,11 +118,9 @@
 </div>
 
 <script>
-    // 1. 전역 설정 및 데이터 관리
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
 
-    // 2. TTS 설정 및 여성 음성 필터링
     const synth = window.speechSynthesis;
     let engVoice = null;
     function initVoices() {
@@ -126,7 +135,7 @@
 
     function getSpeakText(text) {
         if (!text) return "";
-        return text.replace(/\s*-\s*/g, ", ").trim(); // plant - planted -> plant, planted (호흡 유도)
+        return text.replace(/\s*-\s*/g, ", ").trim();
     }
 
     function speak(t) {
@@ -139,7 +148,6 @@
         synth.speak(u);
     }
 
-    // 3. UI 로직 (window 객체에 직접 등록하여 HTML 연동 보장)
     window.updateUI = function() {
         const v = document.getElementById('level').value;
         const bSel = document.getElementById('book');
@@ -184,7 +192,6 @@
         if(t==='study') renderStudy(); if(t==='test') renderTest(); if(t==='puzzle') { curStage = 1; createCW(); }
     };
 
-    // 4. 학습 및 테스트 렌더링
     function renderStudy() {
         const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
         document.getElementById('study-list').innerHTML = cData.words.map(w => `
@@ -207,7 +214,6 @@
         if(choice === correct) { btn.classList.add('ok'); speak(english); } else btn.classList.add('no');
     };
 
-    // 5. 크로스워드 퍼즐 로직
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
