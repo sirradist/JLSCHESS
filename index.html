@@ -6,19 +6,12 @@
     <title>CHESS VOCA Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     
-    <script type="importmap">
-    {
-      "imports": {
-        "onnxruntime-common": "https://cdn.jsdelivr.net/npm/onnxruntime-common@1.18.0/dist/ort-common.mjs",
-        "kokoro-js": "./kokoro.js"
-      }
-    }
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
+    
     <script type="module">
-        import * as KokoroLib from 'kokoro-js';
-        window.KokoroLib = KokoroLib;
-        console.log("Library Export Keys:", Object.keys(KokoroLib));
+        import { KokoroWeb } from './kokoro.js';
+        window.KokoroWeb = KokoroWeb;
+        console.log("Kokoro 엔진 로드 성공");
     </script>
 
     <style>
@@ -31,8 +24,6 @@
         select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        #progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; display: none; }
-        #progress-fill { width: 0%; height: 100%; background: #34a853; transition: width 0.3s ease; }
         .word-card { background: var(--card); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 10px; }
         .word-text { font-size: 1.15rem; font-weight: 700; width: 220px; color: #1a73e8; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
@@ -43,9 +34,8 @@
 
 <div class="container">
     <header>
-        <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">로딩 준비 중...</div>
-        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <h1>정상어학원 VOCA Master</h1>
+        <div id="status-area">라이브러리 확인 중...</div>
     </header>
 
     <div class="setup-box">
@@ -86,47 +76,37 @@
 
     async function initTTS() {
         const status = document.getElementById('status-area');
-        const pBar = document.getElementById('progress-bar');
-        const pFill = document.getElementById('progress-fill');
-        
         try {
-            while (!window.KokoroLib) {
-                await new Promise(r => setTimeout(r, 300));
+            // 라이브러리가 로드될 때까지 대기
+            let retry = 0;
+            while (!window.KokoroWeb && retry < 10) {
+                await new Promise(r => setTimeout(r, 500));
+                retry++;
             }
 
-            pBar.style.display = "block";
+            if (!window.KokoroWeb) throw new Error("Library load failed");
+
             status.innerText = "모델 파일(86MB) 로딩 중...";
-            pFill.style.width = "40%";
             
+            // 모델을 바이너리로 직접 읽어 주입 (config.json 에러 방지)
             const response = await fetch('./model.onnx');
             const modelData = await response.arrayBuffer();
-            
-            status.innerText = "음성 엔진 초기화 중...";
 
-            // 핵심 수정: 라이브러리 내부에서 KokoroTTS 클래스나 생성자를 자동으로 찾습니다.
-            const lib = window.KokoroLib;
-            const TTSClass = lib.KokoroTTS || lib.default?.KokoroTTS || lib.default;
+            // 업로드하신 kokoro.js 내의 클래스를 사용하여 초기화
+            tts = await window.KokoroWeb.new(modelData);
 
-            if (typeof TTSClass.new === 'function') {
-                tts = await TTSClass.new(modelData, { dtype: 'q8' });
-            } else {
-                // new 함수가 없다면 직접 클래스 생성 시도
-                tts = await new TTSClass(modelData, { dtype: 'q8' });
-            }
-
-            pFill.style.width = "100%";
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            console.error("최종 초기화 에러:", e);
-            status.innerText = "⚠️ 시스템 음성 모드로 전환됨";
+            console.error(e);
+            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // --- 레벨 및 데이터 로직 (기존 유지) ---
+    // 레벨/데이터 관리 로직
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
