@@ -12,10 +12,11 @@
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
         
-        /* [수정] 헤더 및 로고 스타일 */
-        header { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0; }
-        .logo { height: 40px; width: auto; object-fit: contain; }
-        h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; }
+        /* 헤더 및 로고 스타일 최적화 */
+        header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
+        .logo-box { height: 45px; display: flex; align-items: center; }
+        .logo-img { height: 100%; width: auto; object-fit: contain; }
+        h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; letter-spacing: -0.5px; }
         
         .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74,144,226,0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; font-size: 16px; font-family: inherit; outline: none; }
@@ -57,7 +58,9 @@
 <body>
 <div class="container">
     <header>
-        <img src="data/JLS Logo.png" alt="JLS Logo" class="logo">
+        <div class="logo-box">
+            <img id="main-logo" src="data/JLS%20Logo.png" alt="JLS Logo" class="logo-img" onerror="this.style.display='none'">
+        </div>
         <h1>CHESS VOCA Master</h1>
     </header>
 
@@ -179,97 +182,4 @@
             const d = await res.json(); cData = d.words ? d : { words: d };
             const sub = document.getElementById('lesson-subtitle');
             if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else sub.style.display="none";
-            document.getElementById('main-tabs').style.display = "grid"; 
-            curStage = 1; window.switchTab('study');
-        } catch(e) { alert("데이터 로드 실패"); }
-    };
-
-    window.switchTab = function(t) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.add('active');
-        ['study-area','test-area','puzzle-area'].forEach(id => document.getElementById(id).style.display='none');
-        document.getElementById(t+'-area').style.display='block';
-        if(t==='study') renderStudy(); if(t==='test') renderTest(); if(t==='puzzle') { curStage = 1; createCW(); }
-    };
-
-    function renderStudy() {
-        const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
-        document.getElementById('study-list').innerHTML = cData.words.map(w => `
-            <div class="card"><button class="tts-icon" onclick="speak('${w.en}')">🔊</button>
-            <div class="word-content"><div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
-            <div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div></div></div>`).join('');
-    }
-
-    function renderTest() {
-        const list = [...cData.words].sort(() => Math.random() - 0.5).slice(0, 10);
-        document.getElementById('test-list').innerHTML = list.map((w, i) => {
-            const type = Math.random() > 0.5 ? "E2K" : "K2E";
-            const q = type === "E2K" ? w.en : w.ko, ans = type === "E2K" ? w.ko : w.en;
-            const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5);
-            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="window.checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
-        }).join('');
-    }
-
-    window.checkAnswer = function(btn, choice, correct, english) {
-        if(choice === correct) { btn.classList.add('ok'); speak(english); } else btn.classList.add('no');
-    };
-
-    function createCW() {
-        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
-        const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
-        const half = Math.ceil(allW.length / 2), ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
-        document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (단어 ${ws.length}개)`;
-        document.getElementById('cw-next-btn').style.display = 'none'; document.getElementById('cw-check-btn').style.display = 'block';
-        let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
-        ws.forEach(w => {
-            let best = null;
-            if(placed.length === 0) best = { r: 7, c: 4, d: 'H' };
-            else {
-                for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
-                    ['H','V'].forEach(d => {
-                        if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
-                            let over = 0, fail = false;
-                            for(let i=0; i<w.a.length; i++) {
-                                let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                if(grid[rr][cc]) { if(grid[rr][cc].char===w.a[i]) over++; else fail=true; }
-                            }
-                            if(!fail && over>0) best = { r, c, d };
-                        }
-                    }); if(best) break;
-                }
-            }
-            if(!best) best = { r: (placed.length*2)%sz, c: 1, d: 'H' };
-            for(let i=0; i<w.a.length; i++) {
-                let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
-                grid[rr][cc] = { char: w.a[i], n: (i===0?placed.length+1:(grid[rr][cc]?grid[rr][cc].n:null)) };
-            }
-            placed.push({ ...best, ...w });
-        });
-        let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 28px);">`;
-        for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
-            if(grid[r][c]) h += `<div class="cell" id="c-${r}-${c}">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}"></div>`;
-            else h += `<div class="cell empty"></div>`;
-        }
-        box.innerHTML = h + `</div>`;
-        hBox.innerHTML = placed.map((p,i) => `<div class="h-item">${i+1}. ${p.h} (${p.d==='H'?'가로':'세로'}, ${p.a.length}자)</div>`).join('');
-    }
-
-    window.checkCW = function() {
-        const inputs = document.querySelectorAll('.cell input');
-        let allOk = true;
-        inputs.forEach(i => {
-            if(i.value.toUpperCase() === i.dataset.ans) i.parentElement.classList.add('ok');
-            else { i.parentElement.classList.remove('ok'); allOk = false; }
-        });
-        if(allOk) {
-            alert(curStage === 1 ? "STAGE 1 성공! 다음 단어들로 넘어갑니다." : "전부 맞혔어요! 참 잘했어요!");
-            if(curStage === 1) { document.getElementById('cw-check-btn').style.display = 'none'; document.getElementById('cw-next-btn').style.display = 'block'; }
-        } else alert("틀린 칸이 있어요. 다시 확인해보세요!");
-    };
-
-    window.nextStage = function() { curStage = 2; createCW(); };
-
-    document.addEventListener('DOMContentLoaded', initVoices);
-</script>
-</body>
-</html>
+            document.getElementById('main-tabs').style.display = "grid";
