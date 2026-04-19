@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHESS VOCA Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script type="module">
+        import { KokoroWeb } from 'https://cdn.jsdelivr.net/npm/kokoro-js@latest/dist/index.js';
+        window.KokoroWeb = KokoroWeb;
+    </script>
     <style>
         :root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #3c4043; }
         body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); line-height: 1.6; }
@@ -16,29 +20,15 @@
         .setup-box { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 15px; outline: none; transition: 0.2s; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #1557b0; transform: translateY(-1px); }
-        button.secondary { background: #e8f0fe; color: var(--primary); }
-
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
         .controls { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; justify-content: center; gap: 20px; flex-wrap: wrap; border: 1px solid #eee; }
-        .controls label { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
-
         .word-list { display: grid; gap: 12px; }
         .word-card { background: var(--card); padding: 20px; border-radius: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; }
-        .word-main { display: flex; align-items: center; gap: 20px; flex: 2; }
         .word-text { font-size: 1.25rem; font-weight: 700; width: 220px; color: #1a73e8; cursor: pointer; }
         .mean-text { font-size: 1.1rem; color: #5f6368; flex: 1; cursor: pointer; }
-        .def-text { font-size: 0.95rem; color: #1557b0; font-style: italic; flex: 2; border-left: 2px solid #e8f0fe; padding-left: 15px; cursor: pointer; }
-
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; }
         .tts-icon { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .tts-icon:hover { background: #f1f3f4; }
-        .info-msg { text-align: center; padding: 50px; color: #9aa0a6; }
-
-        @media (max-width: 600px) {
-            .word-card { flex-direction: column; align-items: flex-start; }
-            .word-main { width: 100%; }
-            .def-text { border-left: none; border-top: 1px solid #eee; padding-left: 0; padding-top: 10px; width: 100%; }
-        }
     </style>
 </head>
 <body>
@@ -46,7 +36,7 @@
 <div class="container">
     <header>
         <h1>CHESS VOCA Master</h1>
-        <p>정상어학원 단어 연습 시스템</p>
+        <p id="tts-status">TTS 엔진 로딩 중...</p>
     </header>
 
     <div class="setup-box">
@@ -58,20 +48,16 @@
                 <option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option>
             </optgroup>
             <optgroup label="LS Level">
-                <option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option>
-                <option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option>
-                <option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option>
-                <option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option>
+                <option value="LSA1">LSA 1</option><option value="LSB1">LSB 1</option>
+                <option value="LSC1">LSC 1</option><option value="LSD1">LSD 1</option>
             </optgroup>
             <optgroup label="MS Level">
-                <option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option>
-                <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
+                <option value="MSA1">MSA 1</option><option value="MSB1">MSB 1</option>
             </optgroup>
         </select>
         <select id="book"></select>
         <select id="lesson"></select>
-        <button onclick="fetchAndLoad('study')">학습 시작</button>
-        <button onclick="fetchAndLoad('test')" class="secondary">테스트 시작</button>
+        <button id="btn-study" onclick="fetchAndLoad('study')" disabled>학습 시작</button>
     </div>
 
     <div id="controls" class="controls">
@@ -80,12 +66,29 @@
         <label id="lblDef" style="display:none;"><input type="checkbox" id="chkDef" onchange="renderWords()"> 영영풀이 가리기</label>
     </div>
 
-    <div id="display-area">
-        <div class="info-msg">레벨과 레슨을 선택한 후 [학습 시작] 버튼을 눌러주세요.</div>
-    </div>
+    <div id="display-area"></div>
 </div>
 
 <script>
+    let kokoro = null;
+    let words = [];
+
+    // 1. 페이지 로드 시 Kokoro 모델 초기화 (Repository의 파일을 브라우저로 가져옴)
+    async function initTTS() {
+        try {
+            // 브라우저에서 실행되는 Kokoro 모델 인스턴스 생성
+            kokoro = await window.KokoroWeb.new({ model: 'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/model.onnx' });
+            document.getElementById('tts-status').innerText = "TTS 준비 완료 ✨";
+            document.getElementById('btn-study').disabled = false;
+        } catch (e) {
+            document.getElementById('tts-status').innerText = "TTS 로딩 실패 (브라우저 호환성 확인 필요)";
+            console.error(e);
+        }
+    }
+
+    window.onload = initTTS;
+
+    // 2. 레벨/교재/레슨 로직 (기존 유지)
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -93,32 +96,14 @@
         MS: { books: [1,2], lessons: [1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17], hasDef: true }
     };
 
-    let words = []; 
-
     function updateUIByLevel() {
         const lv = document.getElementById('level').value;
         if(!lv) return;
-        
-        // 레벨 분류 로직 수정
-        let type = "DS";
-        if(lv.startsWith("MS")) type = "MS";
-        else if(lv.startsWith("LS")) type = "LS";
-        else if(lv.startsWith("DSD")) type = "DSD";
-        
+        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : (lv.startsWith("DSD") ? "DSD" : "DS"));
         const config = CONFIG[type];
-        
-        // 교재 번호 업데이트
-        const bookCount = (lv === "DSB2" || lv === "DSC2" || lv === "DSD2") ? [4,5,6] : config.books;
-        // 위 예시처럼 레벨별 교재 번호가 다를 경우를 위해 유연하게 대처 가능
-        // 사용자가 적어준 예시(DSB 2는 4,5,6)를 반영하려면 아래처럼 수정:
-        let currentBooks = config.books;
-        if(lv.endsWith("2") && !lv.startsWith("MS")) {
-            currentBooks = [4,5,6];
-        }
-
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : config.books;
         document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
         
-        // 레슨 번호 업데이트 (DSB 2는 13~22 반영)
         let lessonHtml = "";
         if(lv.endsWith("2") && !lv.startsWith("MS")) {
             for(let i=13; i<=22; i++) lessonHtml += `<option value="${i}">Lesson ${i}</option>`;
@@ -128,7 +113,6 @@
             for(let i=1; i<=10; i++) lessonHtml += `<option value="${i}">Lesson ${i}</option>`;
         }
         document.getElementById('lesson').innerHTML = lessonHtml;
-        
         document.getElementById('lblDef').style.display = config.hasDef ? "flex" : "none";
     }
 
@@ -136,20 +120,14 @@
         const lv = document.getElementById('level').value;
         const bk = document.getElementById('book').value;
         const ls = document.getElementById('lesson').value;
-        if(!lv) { alert("레벨을 선택해 주세요."); return; }
         const path = `data/${lv}_${bk}_${ls}.json`;
         try {
             const res = await fetch(path);
-            if(!res.ok) throw new Error();
             words = await res.json();
-            if(mode === 'study') {
-                document.getElementById('controls').style.display = "flex";
-                renderWords();
-            } else {
-                document.getElementById('display-area').innerHTML = "<div class='info-msg'>테스트 기능 준비 중</div>";
-            }
+            document.getElementById('controls').style.display = "flex";
+            renderWords();
         } catch(e) {
-            document.getElementById('display-area').innerHTML = `<div class='info-msg' style='color:red;'>데이터 로드 실패: ${path}<br>로컬에서 테스트 중이라면 Live Server를 이용하세요.</div>`;
+            alert("파일을 불러오지 못했습니다: " + path);
         }
     }
 
@@ -165,24 +143,42 @@
             words.map((w, idx) => `
                 <div class="word-card">
                     <div class="word-main">
-                        <button class="tts-icon" onclick="playTTS('${w.en}', 'en')">🔈</button>
+                        <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
                         <span class="word-text ${hEng ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
                         <span class="mean-text ${hKor ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                        <button class="tts-icon" onclick="playTTS('${w.ko}', 'ko')">🔊</button>
+                        <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
                     </div>
-                    ${showDef ? `<div class="def-text ${hDef ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.def || ''}</div>` : ''}
+                    ${showDef ? `<div class="def-text ${hDef ? 'hidden' : ''}" onclick="playEnglish('${w.def}'); this.classList.toggle('hidden');">${w.def || ''}</div>` : ''}
                 </div>
             `).join('') + `</div>`;
     }
 
-    async function playTTS(text, lang) {
-        let cleanText = text.replace(/-/g, ',');
-        const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = lang === 'en' ? 'en-US' : 'ko-KR';
-        if(lang === 'en') utter.rate = 0.8; 
-        window.speechSynthesis.speak(utter);
+    // 3. 영어 전용 (Kokoro-JS: 별도 서버 없이 실행)
+    async function playEnglish(text) {
+        if (!kokoro) return;
+        const cleanText = text.replace(/-/g, ',');
+        const audio = await kokoro.generate(cleanText, { voice: 'af_bella' }); // 고정된 여성 목소리
+        audio.play();
+    }
+
+    // 4. 한국어 전용 (지정하신 로컬 서버 호출)
+    async function playKorean(text) {
+        const KOREAN_TTS_URL = "http://host.docker.internal:9880/v1"; 
+        try {
+            const res = await fetch(KOREAN_TTS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const blob = await res.blob();
+            new Audio(URL.createObjectURL(blob)).play();
+        } catch (e) {
+            // 한국어 서버 미구동 시 백업용 브라우저 TTS
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'ko-KR';
+            window.speechSynthesis.speak(utter);
+        }
     }
 </script>
-
 </body>
 </html>
