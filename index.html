@@ -10,7 +10,7 @@
         :root { --p: #4A90E2; --s: #FFD93D; --bg: #F0F7FF; --c: #FFFFFF; --t: #2D3436; --err: #FF6B6B; --ok: #6BCB77; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 680px; text-align: center; }
+        .container { width: 100%; max-width: 600px; text-align: center; }
         header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
         .logo-box { height: 45px; display: flex; align-items: center; }
         .logo-img { height: 100%; width: auto; object-fit: contain; }
@@ -38,17 +38,19 @@
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
         
-        .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #E1E8EE; }
+        /* 모바일 가시성 극대화: 셀 크기 32px로 확대 및 격자 18x18로 조정 */
+        .cw-wrap { overflow-x: auto; background: #fff; padding: 10px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #E1E8EE; -webkit-overflow-scrolling: touch; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; width: max-content; }
-        .cell { width: 24px; height: 24px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
+        .cell { width: 32px; height: 32px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
         .cell.active { background: #fff; }
-        .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
+        .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
+        .cell input:focus { background: #fff9db; } /* 입력 중인 칸 강조 */
         .cell.ok { background: #e8f5e9 !important; }
         .cell.no { background: #ffebee !important; }
-        .cell-num { position: absolute; top: 0px; left: 1px; font-size: 0.4rem; color: #999; font-weight: 700; pointer-events: none; z-index: 10; }
+        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.55rem; color: #999; font-weight: 700; pointer-events: none; z-index: 5; }
         
         .h-box { text-align: left; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid #eee; }
-        .h-item { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; color: #555; }
+        .h-item { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; color: #555; }
         .btn-action { background: var(--s); color: var(--t); padding: 14px; border-radius: 15px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #D4B531; }
         .btn-next { background: var(--ok); color: #fff; box-shadow: 0 4px 0 #529E5A; }
     </style>
@@ -200,13 +202,10 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [최종 로직] 24x24 격자 활용 및 가시성/연결성 균형 알고리즘
+    // [최적화] 모바일 가시성 확보를 위한 18x18 격자 및 입력 편의 로직
     function createCW() {
-        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 24;
-        const allW = cData.words.map(w => ({ 
-            a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), 
-            h: w.ko 
-        }));
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
+        const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
         const half = Math.ceil(allW.length / 2), ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
         
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
@@ -216,7 +215,6 @@
         
         ws.forEach((w, idx) => {
             let possibilities = [];
-            // 단어 길이 격자 초과 방지
             if(w.a.length > sz) w.a = w.a.substring(0, sz);
 
             for(let r=0; r<sz; r++) {
@@ -228,15 +226,12 @@
                                 let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
                                 if(grid[rr][cc]) {
                                     if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                    else over += 10; // 교차점 점수 대폭 강화 (최우선순위)
+                                    else over += 15; // 연결성 강조
                                 }
-                                // 가시성 확보: 주변 8칸에 다른 단어가 있으면 점수 차감 (단, 교차점은 제외)
                                 const neighbors = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
                                 for(let [dr, dc] of neighbors) {
                                     let nr = rr+dr, nc = cc+dc;
-                                    if(nr>=0 && nr<sz && nc>=0 && nc<sz && grid[nr][nc] && !grid[rr][cc]) {
-                                        over -= 1; // 단어들이 다닥다닥 붙는 현상 억제
-                                    }
+                                    if(nr>=0 && nr<sz && nc>=0 && nc<sz && grid[nr][nc] && !grid[rr][cc]) over -= 2;
                                 }
                             }
                             if(!fail) possibilities.push({ r, c, d, over });
@@ -246,7 +241,6 @@
             }
 
             if(possibilities.length > 0) {
-                // 점수 기반 정렬: 1순위 교차 연결성, 2순위 적절한 분산(가시성)
                 possibilities.sort((a,b) => b.over - a.over);
                 const best = possibilities[0];
                 for(let i=0; i<w.a.length; i++) {
@@ -262,17 +256,15 @@
                 }
                 placed.push({ ...best, ...w, num: idx+1 });
             } else {
-                // 연결 가능한 곳이 전혀 없는 경우 격자의 빈 곳 중 안전한 곳에 강제 배치
                 let found = false;
-                for(let r=0; r<sz && !found; r+=2) { // 뭉침 방지를 위해 간격(step 2)을 두고 탐색
-                    for(let c=0; c<sz && !found; c+=2) {
+                for(let r=1; r<sz && !found; r+=3) { 
+                    for(let c=1; c<sz && !found; c+=3) {
                         if(c+w.a.length <= sz) {
                             let can = true;
                             for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
                             if(can) { 
-                                const b = { r, c, d: 'H' };
                                 for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null) };
-                                placed.push({ ...b, ...w, num: idx+1 });
+                                placed.push({ r, c, d: 'H', ...w, num: idx+1 });
                                 found = true;
                             }
                         }
@@ -281,11 +273,11 @@
             }
         });
         
-        let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 24px);">`;
+        let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 32px);">`;
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" oninput="this.value = this.value.toUpperCase()"></div>`;
+                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" oninput="moveNext(this); this.value = this.value.toUpperCase()"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
                 }
@@ -296,6 +288,15 @@
             const p = placed.find(pl => pl.num === i+1);
             return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d==='H'?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
         }).join('');
+    }
+
+    // [추가] 모바일 입력 편의를 위한 자동 커서 이동 함수
+    function moveNext(el) {
+        if (el.value.length >= 1) {
+            const inputs = Array.from(document.querySelectorAll('.cell.active input'));
+            const idx = inputs.indexOf(el);
+            if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        }
     }
 
     function checkCW() {
