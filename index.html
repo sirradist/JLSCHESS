@@ -6,9 +6,7 @@
     <title>CHESS VOCA Master</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
-    
     <style>
         :root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #3c4043; }
         body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
@@ -30,11 +28,11 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">라이브러리 준비 중...</div>
+        <div id="status-area">엔진 및 라이브러리 확인 중...</div>
     </header>
 
     <div class="setup-box">
-        <select id="level" disabled>
+        <select id="level" onchange="updateUIByLevel()" disabled>
             <option value="">레벨 선택</option>
             <optgroup label="DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
@@ -66,77 +64,22 @@
 </div>
 
 <script>
-    let tts = null;
-    let words = [];
+    // 전역 변수 설정
+    window.tts = null;
+    window.words = [];
 
-    // --- 엔진 초기화 함수 ---
-    async function initTTS() {
-        const status = document.getElementById('status-area');
-        try {
-            // KokoroTTS가 로드될 때까지 최대 5초간 대기
-            let retry = 0;
-            while (!window.KokoroTTS && retry < 10) {
-                await new Promise(r => setTimeout(r, 500));
-                retry++;
-            }
-            if (!window.KokoroTTS) throw new Error("Library load timeout");
-
-            status.innerText = "음성 모델(86MB) 로딩 중입니다...";
-            const response = await fetch('./model.onnx');
-            const modelData = await response.arrayBuffer();
-
-            // ⚠️ tokenizer 에러 방지를 위해 from_pretrained를 사용
-            tts = await window.KokoroTTS.from_pretrained(modelData, {
-                model_file_structure: 'flat'
-            });
-
-            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
-            document.querySelectorAll('select, button').forEach(el => el.disabled = false);
-        } catch (e) {
-            console.error("초기화 실패:", e);
-            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
-            document.querySelectorAll('select, button').forEach(el => el.disabled = false);
-        }
-    }
-
-    // --- 음성 재생 함수 ---
-    async function playEnglish(text) {
-        if (!text) return;
-        const cleanText = text.replace(/-/g, ',');
-        
-        // tts가 있고, 토크나이저가 정상적으로 포함되어 있는지 체크
-        if (tts && tts.tokenizer) {
-            try {
-                const audio = await tts.generate(cleanText, { voice: 'af_bella' });
-                audio.play();
-            } catch (e) {
-                console.error("AI 생성 실패:", e);
-                systemSpeak(cleanText);
-            }
-        } else {
-            systemSpeak(cleanText);
-        }
-    }
-
-    function systemSpeak(text) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'en-US';
-        window.speechSynthesis.speak(utter);
-    }
-
-    // --- 데이터 관리 로직 ---
-    const CONFIG = {
-        DS: { books: [1,2,3], lessons: 10 },
-        LS: { books: [1,2,3], lessons: 10 },
-        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
-    };
-
-    function updateUIByLevel() {
+    // 1. 모든 함수를 전역(window)에 정의하여 'not defined' 에러를 방지합니다.
+    window.updateUIByLevel = function() {
         const lv = document.getElementById('level').value;
         if(!lv) return;
+        const config = {
+            DS: { books: [1,2,3], lessons: 10 },
+            LS: { books: [1,2,3], lessons: 10 },
+            MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
+        };
         let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
-        const config = CONFIG[type];
-        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : config.books;
+        const c = config[type];
+        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : c.books;
         document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
         let lHtml = "";
         if(lv.endsWith("2") && !lv.startsWith("MS")) {
@@ -147,24 +90,45 @@
         document.getElementById('lesson').innerHTML = lHtml;
     }
 
-    async function fetchAndLoad() {
+    window.initTTS = async function() {
+        const status = document.getElementById('status-area');
+        try {
+            status.innerText = "음성 엔진 데이터(86MB) 로딩 중...";
+            const response = await fetch('./model.onnx');
+            const modelData = await response.arrayBuffer();
+
+            // 업로드한 kokoro.js의 KokoroTTS 클래스를 사용하여 초기화
+            // tokenizer 에러 방지를 위해 from_pretrained 호출
+            window.tts = await window.KokoroTTS.from_pretrained(modelData, {
+                model_file_structure: 'flat'
+            });
+
+            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
+            document.querySelectorAll('select, button').forEach(el => el.disabled = false);
+        } catch (e) {
+            console.error(e);
+            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
+            document.querySelectorAll('select, button').forEach(el => el.disabled = false);
+        }
+    };
+
+    window.fetchAndLoad = async function() {
         const lv = document.getElementById('level').value;
         const bk = document.getElementById('book').value;
         const ls = document.getElementById('lesson').value;
         try {
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
-            words = await res.json();
+            window.words = await res.json();
             document.getElementById('controls').style.display = "flex";
             renderWords();
         } catch(e) { alert("데이터 로드 실패"); }
-    }
+    };
 
-    function renderWords() {
+    window.renderWords = function() {
         const area = document.getElementById('display-area');
         const hE = document.getElementById('chkEng').checked;
         const hK = document.getElementById('chkKor').checked;
-
-        area.innerHTML = words.map((w) => `
+        area.innerHTML = window.words.map((w) => `
             <div class="word-card">
                 <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
                 <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
@@ -172,25 +136,41 @@
                 <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
             </div>
         `).join('');
-    }
+    };
 
-    function playKorean(text) {
+    window.playEnglish = async function(text) {
+        if (!text) return;
+        const cleanText = text.replace(/-/g, ',');
+        if (window.tts && window.tts.generate) {
+            try {
+                const audio = await window.tts.generate(cleanText, { voice: 'af_bella' });
+                audio.play();
+            } catch (e) {
+                console.error("AI 생성 실패:", e);
+                const utter = new SpeechSynthesisUtterance(cleanText);
+                utter.lang = 'en-US';
+                window.speechSynthesis.speak(utter);
+            }
+        } else {
+            const utter = new SpeechSynthesisUtterance(cleanText);
+            utter.lang = 'en-US';
+            window.speechSynthesis.speak(utter);
+        }
+    };
+
+    window.playKorean = function(text) {
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = 'ko-KR';
         window.speechSynthesis.speak(utter);
-    }
+    };
 </script>
 
 <script type="module">
     import { KokoroTTS } from './kokoro.js';
     window.KokoroTTS = KokoroTTS;
-    // 모든 준비가 끝났으니 초기화 시작
+    // 전역에 함수들이 모두 정의된 후 initTTS 호출
     initTTS();
 </script>
 
-<script>
-    // 이벤트 리스너 연결
-    document.getElementById('level').addEventListener('change', updateUIByLevel);
-</script>
 </body>
 </html>
