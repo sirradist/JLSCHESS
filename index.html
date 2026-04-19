@@ -38,13 +38,12 @@
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
         
-        /* 모바일 가시성 극대화: 셀 크기 32px로 확대 및 격자 18x18로 조정 */
         .cw-wrap { overflow-x: auto; background: #fff; padding: 10px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #E1E8EE; -webkit-overflow-scrolling: touch; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; width: max-content; }
         .cell { width: 32px; height: 32px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
         .cell.active { background: #fff; }
         .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
-        .cell input:focus { background: #fff9db; } /* 입력 중인 칸 강조 */
+        .cell input:focus { background: #fff9db; }
         .cell.ok { background: #e8f5e9 !important; }
         .cell.no { background: #ffebee !important; }
         .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.55rem; color: #999; font-weight: 700; pointer-events: none; z-index: 5; }
@@ -202,7 +201,9 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // [최적화] 모바일 가시성 확보를 위한 18x18 격자 및 입력 편의 로직
+    // [스마트 입력 로직] 방향 인식을 위한 전역 변수
+    let lastDir = 'H'; 
+
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 18; 
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
@@ -226,12 +227,7 @@
                                 let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
                                 if(grid[rr][cc]) {
                                     if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                    else over += 15; // 연결성 강조
-                                }
-                                const neighbors = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-                                for(let [dr, dc] of neighbors) {
-                                    let nr = rr+dr, nc = cc+dc;
-                                    if(nr>=0 && nr<sz && nc>=0 && nc<sz && grid[nr][nc] && !grid[rr][cc]) over -= 2;
+                                    else over += 15;
                                 }
                             }
                             if(!fail) possibilities.push({ r, c, d, over });
@@ -252,7 +248,12 @@
                         if(!chars.includes(charToSet)) chars.push(charToSet);
                         charToSet = chars.join(',');
                     }
-                    grid[rr][cc] = { char: charToSet, n: (i===0 ? idx+1 : (existing ? existing.n : null)) };
+                    // 방향 정보(d)를 데이터 속성에 저장
+                    grid[rr][cc] = { 
+                        char: charToSet, 
+                        n: (i===0 ? idx+1 : (existing ? existing.n : null)),
+                        d: existing ? existing.d + best.d : best.d // 교차점인 경우 방향 모두 저장
+                    };
                 }
                 placed.push({ ...best, ...w, num: idx+1 });
             } else {
@@ -263,7 +264,7 @@
                             let can = true;
                             for(let i=0; i<w.a.length; i++) if(grid[r][c+i]) { can = false; break; }
                             if(can) { 
-                                for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null) };
+                                for(let i=0; i<w.a.length; i++) grid[r][c+i] = { char: w.a[i], n: (i===0?idx+1:null), d: 'H' };
                                 placed.push({ r, c, d: 'H', ...w, num: idx+1 });
                                 found = true;
                             }
@@ -277,7 +278,8 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" oninput="moveNext(this); this.value = this.value.toUpperCase()"></div>`;
+                    // input 태그에 좌표(r, c)와 방향(d) 정보를 data 속성으로 심어줌
+                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" oninput="smartMove(this); this.value = this.value.toUpperCase()"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
                 }
@@ -290,13 +292,26 @@
         }).join('');
     }
 
-    // [추가] 모바일 입력 편의를 위한 자동 커서 이동 함수
-    function moveNext(el) {
-        if (el.value.length >= 1) {
-            const inputs = Array.from(document.querySelectorAll('.cell.active input'));
-            const idx = inputs.indexOf(el);
-            if (idx < inputs.length - 1) inputs[idx + 1].focus();
-        }
+    // 포커스 시 해당 칸의 주요 방향으로 lastDir 설정
+    function setDir(el) {
+        const d = el.dataset.dir;
+        if(d.length === 1) lastDir = d; // 한 방향뿐인 칸은 그 방향 고정
+    }
+
+    // [핵심] 지능형 다음 칸 이동 로직
+    function smartMove(el) {
+        if (el.value.length < 1) return;
+        
+        const r = parseInt(el.dataset.r);
+        const c = parseInt(el.dataset.c);
+        let nextR = r, nextC = c;
+
+        // 현재 단어 방향에 따라 다음 좌표 계산
+        if (lastDir === 'H') nextC++;
+        else nextR++;
+
+        const nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
+        if (nextInput) nextInput.focus();
     }
 
     function checkCW() {
