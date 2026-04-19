@@ -7,8 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    
     <script type="module">
-        import { KokoroWeb } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.1.0/dist/index.js';
+        import { KokoroWeb } from 'https://esm.sh/kokoro-js@1.1.0';
         window.KokoroWeb = KokoroWeb;
     </script>
 
@@ -37,7 +38,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">로딩을 준비하고 있습니다...</div>
+        <div id="status-area">라이브러리 로딩 중...</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
@@ -78,43 +79,44 @@
     let kokoro = null;
     let words = [];
 
-    // 모델 로딩 최적화 로직
+    // 모델 로딩 로직 보완
     async function initTTS() {
         const status = document.getElementById('status-area');
         const pBar = document.getElementById('progress-bar');
         const pFill = document.getElementById('progress-fill');
         
         try {
-            // 라이브러리 로딩 확인을 위해 0.5초 대기
-            if (!window.KokoroWeb) {
-                setTimeout(initTTS, 500);
-                return;
+            // 라이브러리가 로드될 때까지 최대 2초 대기
+            let retry = 0;
+            while (!window.KokoroWeb && retry < 4) {
+                await new Promise(r => setTimeout(r, 500));
+                retry++;
             }
 
+            if (!window.KokoroWeb) throw new Error("Library Load Failed");
+
             pBar.style.display = "block";
-            status.innerText = "Repository 내부 모델 파일(86MB) 로딩 중...";
+            status.innerText = "Repository 내부 모델(model.onnx) 로딩 중...";
             pFill.style.width = "40%";
             
-            // GitHub Pages 환경에서 절대 경로를 명확히 지정합니다.
-            const modelPath = window.location.pathname.includes('JLSCHESS') ? '/JLSCHESS/model.onnx' : './model.onnx';
-
+            // 본인 리포지토리의 model.onnx 파일 호출
             kokoro = await window.KokoroWeb.new({ 
-                model: modelPath 
+                model: './model.onnx' 
             });
 
             pFill.style.width = "100%";
-            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료 (Bella Voice)</span>";
+            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            console.error("TTS Init Error:", e);
-            status.innerText = "⚠️ 시스템 음성 모드 (내부 모델을 로드할 수 없습니다)";
+            console.error(e);
+            status.innerText = "⚠️ 시스템 음성 모드 (내부 모델을 찾을 수 없습니다)";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // 레벨/데이터 관리 로직
+    // 레벨/데이터 관리 로직 (기존 동일)
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -148,49 +150,4 @@
         try {
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
             if(!res.ok) throw new Error();
-            words = await res.json();
-            document.getElementById('controls').style.display = "flex";
-            renderWords();
-        } catch(e) { alert("데이터 파일을 불러올 수 없습니다. 경로를 확인해주세요."); }
-    }
-
-    function renderWords() {
-        const area = document.getElementById('display-area');
-        const hE = document.getElementById('chkEng').checked;
-        const hK = document.getElementById('chkKor').checked;
-        const hD = document.getElementById('chkDef').checked;
-        const lv = document.getElementById('level').value;
-        const showDef = lv.startsWith("DSD") || lv.startsWith("LS") || lv.startsWith("MS");
-
-        area.innerHTML = words.map((w, idx) => `
-            <div class="word-card">
-                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
-                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
-                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
-                ${showDef ? `<div class="def-text ${hD ? 'hidden' : ''}" onclick="playEnglish('${w.def}'); this.classList.toggle('hidden');">${w.def || ''}</div>` : ''}
-            </div>
-        `).join('');
-    }
-
-    async function playEnglish(text) {
-        if (!text) return;
-        const cleanText = text.replace(/-/g, ',');
-        if (kokoro) {
-            const audio = await kokoro.generate(cleanText, { voice: 'af_bella' });
-            audio.play();
-        } else {
-            const utter = new SpeechSynthesisUtterance(cleanText);
-            utter.lang = 'en-US';
-            window.speechSynthesis.speak(utter);
-        }
-    }
-
-    function playKorean(text) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        window.speechSynthesis.speak(utter);
-    }
-</script>
-</body>
-</html>
+            words = await res.json
