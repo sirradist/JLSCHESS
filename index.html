@@ -42,8 +42,8 @@
 
 <div class="container">
     <header>
-        <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">엔진 로딩 대기 중...</div>
+        <h1>정상어학원 VOCA Master</h1>
+        <div id="status-area">라이브러리 로드 대기 중...</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
@@ -94,13 +94,19 @@
             }
 
             pBar.style.display = "block";
-            status.innerText = "단일 모델 파일(model.onnx)에서 직접 로드 중...";
-            pFill.style.width = "40%";
+            status.innerText = "모델 데이터(86MB) 읽는 중... (약 10초 소요)";
+            pFill.style.width = "30%";
             
-            // 핵심: 폴더 로딩 방식 대신, ONNX 모델 파일을 직접 주입합니다.
-            // config.json이 없어도 작동하도록 기본 설정을 강제로 부여합니다.
-            tts = await window.KokoroTTS.new('./model.onnx', {
-                model_file_structure: 'flat', // 단일 파일 구조임을 명시
+            // 1. 모델 파일을 직접 바이너리 데이터로 가져옵니다.
+            const response = await fetch('./model.onnx');
+            if (!response.ok) throw new Error("모델 파일을 찾을 수 없습니다.");
+            const modelData = await response.arrayBuffer();
+            
+            pFill.style.width = "60%";
+            status.innerText = "AI 엔진에 데이터 주입 중...";
+
+            // 2. 경로가 아닌 데이터(buffer)를 직접 전달하여 config.json 찾기를 건너뜁니다.
+            tts = await window.KokoroTTS.new(modelData, {
                 dtype: 'q8'
             });
 
@@ -109,22 +115,14 @@
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
             console.error(e);
-            // 만약 flat 옵션이 안 듣는 라이브러리 버전일 경우를 대비한 2차 시도
-            try {
-                status.innerText = "2차 시도 중 (구버전 방식)...";
-                tts = await window.KokoroTTS.from_pretrained('./model.onnx');
-                status.innerText = "✅ 준비 완료 (Legacy)";
-                document.getElementById('btn-study').disabled = false;
-            } catch (e2) {
-                status.innerText = "⚠️ 시스템 음성 모드로 작동";
-                document.getElementById('btn-study').disabled = false;
-            }
+            status.innerText = "⚠️ 시스템 음성 모드로 자동 전환됨";
+            document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // 레벨/데이터 로직 (기존 유지)
+    // --- 나머지 로직 (기존 유지) ---
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10 },
         LS: { books: [1,2,3], lessons: 10 },
