@@ -73,6 +73,24 @@
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
 
+    // [중요] Google EN 보이스 고정 로직
+    const synth = window.speechSynthesis;
+    let engVoice = null;
+
+    function initVoices() {
+        const voices = synth.getVoices();
+        // Google US English 선호, 없으면 일반 en-US 찾기
+        engVoice = voices.find(v => v.name.includes('Google US English')) || 
+                   voices.find(v => v.lang === 'en-US') || 
+                   voices.find(v => v.lang.startsWith('en'));
+    }
+
+    // 브라우저마다 voice 리스트 로드 타이밍이 다르므로 대응
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = initVoices;
+    }
+    initVoices();
+
     function updateUI() {
         const v = document.getElementById('level').value; if(!v) return; curLv = v;
         const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
@@ -182,8 +200,20 @@
     }
 
     function nextStage() { curStage = 2; createCW(); }
-    function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='en-US'; window.speechSynthesis.speak(u); }
-    document.addEventListener('DOMContentLoaded', () => { document.getElementById('level').addEventListener('change', updateUI); });
+
+    // [수정] 고정된 Google EN 보이스로 말하기
+    function speak(t) {
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(t);
+        if (engVoice) u.voice = engVoice; //
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        synth.speak(u);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { 
+        document.getElementById('level').addEventListener('change', updateUI); 
+    });
 </script>
 </body>
 </html>
