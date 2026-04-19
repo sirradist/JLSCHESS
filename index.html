@@ -7,49 +7,48 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #4A90E2; --secondary: #FFD93D; --bg: #F0F7FF; --card: #FFFFFF; --text: #2D3436; --accent: #FF6B6B; }
+        :root { --primary: #4A90E2; --secondary: #FFD93D; --bg: #F0F7FF; --card: #FFFFFF; --text: #2D3436; --accent: #FF6B6B; --success: #6BCB77; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; color: var(--text); display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 100%; max-width: 500px; text-align: center; }
         h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
         
-        /* 설정 및 탭 스타일 */
+        /* 설정 및 탭 */
         .setup-box { background: var(--card); padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(74, 144, 226, 0.15); margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
         select { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; background: #fff; font-size: 16px; font-family: inherit; }
         .row { display: flex; gap: 10px; } .row select { flex: 1; }
-        .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 15px; }
-        .tab-btn { padding: 10px; border-radius: 15px; border: none; background: #d1d8e0; font-weight: 800; font-size: 0.9rem; cursor: pointer; color: #fff; }
+        #btn-study { background: var(--primary); color: white; padding: 16px; border-radius: 18px; border: none; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #357ABD; margin-top: 5px; }
+        #btn-study:active { transform: translateY(3px); box-shadow: none; }
+
+        /* 학습 모드 탭 (DSB/DSC에서도 보여야 함) */
+        .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .tab-btn { padding: 12px; border-radius: 15px; border: none; background: #BDC3C7; font-weight: 800; font-size: 1rem; cursor: pointer; color: #fff; }
         .tab-btn.active { background: var(--primary); }
 
-        #btn-study { background: var(--primary); color: white; padding: 16px; border-radius: 18px; border: none; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #357ABD; }
-        
-        /* 컨텐츠 영역 */
-        #lesson-subtitle { margin: 10px 0; font-size: 1.1rem; font-weight: 800; color: #576574; display: none; background: #fff; padding: 10px; border-radius: 15px; border: 2px dashed var(--primary); }
+        #lesson-subtitle { margin: 10px 0 20px; font-size: 1.1rem; font-weight: 800; color: #576574; display: none; background: #fff; padding: 10px; border-radius: 15px; border: 2px dashed var(--primary); }
         #study-area, #test-area, #puzzle-area { display: none; }
         
-        /* 단어 카드 및 테스트 폼 */
-        .word-card { background: var(--card); padding: 18px; border-radius: 22px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.04); text-align: left; }
-        .word-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .word-text { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
-        .mean-text, .def-text { font-size: 1rem; font-weight: 700; color: #636e72; }
-        .def-text { color: #eb4d4b; font-size: 0.9rem; font-style: italic; }
+        /* 카드 및 퀴즈 스타일 */
+        .word-card { background: var(--card); padding: 18px; border-radius: 22px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border: 2px solid #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.04); text-align: left; }
+        .word-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .word-text { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
+        .mean-text { font-size: 1.15rem; font-weight: 700; color: #636e72; }
+        .def-text { color: #eb4d4b; font-size: 0.9rem; font-style: italic; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
         
-        .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 10px; cursor: pointer; position: relative; min-height: 1.2em; }
-        .hidden::after { content: '👀'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; }
-        .tts-icon { width: 45px; height: 45px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 0 #ddd; border: 2px solid #DFF9FB; }
+        .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 10px; cursor: pointer; position: relative; min-height: 1.4em; }
+        .hidden::after { content: '👀 Click!'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; font-weight: 800; }
+        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; box-shadow: 0 3px 0 #ddd; border: 2px solid #DFF9FB; }
         
-        /* 퀴즈 스타일 */
-        .quiz-container { background: #fff; padding: 20px; border-radius: 25px; margin-bottom: 15px; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .quiz-question { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; color: var(--text); }
-        .quiz-options { display: grid; gap: 10px; }
-        .opt-btn { padding: 12px; border-radius: 12px; border: 2px solid #E1E8EE; background: #fff; font-weight: 700; text-align: left; cursor: pointer; }
-        .opt-btn.correct { background: var(--success) !important; color: white; border-color: var(--success); }
-        .opt-btn.wrong { background: var(--accent) !important; color: white; border-color: var(--accent); }
+        .quiz-box { background: #fff; padding: 20px; border-radius: 25px; margin-bottom: 15px; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .quiz-q { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; color: var(--text); }
+        .quiz-opts { display: grid; gap: 10px; }
+        .quiz-opt { padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE; background: #fff; font-weight: 700; text-align: left; cursor: pointer; font-size: 1rem; }
+        .quiz-opt.correct { background: var(--success) !important; color: white; border-color: var(--success); }
+        .quiz-opt.wrong { background: var(--accent) !important; color: white; border-color: var(--accent); }
 
-        /* 퍼즐/크로스워드 간이 스타일 */
-        .puzzle-item { display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 10px; }
-        .puzzle-hint { font-weight: 800; color: #576574; font-size: 0.95rem; }
-        .puzzle-input { padding: 12px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1.1rem; text-align: center; font-weight: 800; }
+        .puzzle-box { background: #fff; padding: 20px; border-radius: 25px; margin-bottom: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .puz-hint { font-weight: 800; color: #576574; font-size: 1rem; margin-bottom: 12px; }
+        .puz-input { width: 100%; padding: 14px; border-radius: 15px; border: 3px solid var(--primary); font-size: 1.2rem; text-align: center; font-weight: 800; background: #F0F7FF; }
     </style>
 </head>
 <body>
@@ -59,7 +58,7 @@
 
     <div class="setup-box">
         <select id="level" onchange="updateUI()">
-            <option value="">레벨 선택 (Level)</option>
+            <option value="">레벨 선택 (Select Level)</option>
             <optgroup label="⭐ DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
                 <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
@@ -77,161 +76,16 @@
             </optgroup>
         </select>
         <div class="row"><select id="book"><option value="">교재</option></select><select id="lesson"><option value="">레슨</option></select></div>
-        <button id="btn-study" onclick="startStudy()">START 학습 시작</button>
+        <button id="btn-study" onclick="startStudy()">학습 시작! START</button>
     </div>
 
     <div class="tab-menu" id="main-tabs">
-        <button class="tab-btn active" onclick="switchTab('study')">Study</button>
-        <button class="tab-btn" onclick="switchTab('test')">Test</button>
-        <button class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
+        <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
+        <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
+        <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
     </div>
 
     <div id="lesson-subtitle"></div>
 
     <div id="study-area">
-        <div id="study-controls" style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; font-size: 0.8rem; font-weight: 800;">
-            <label><input type="checkbox" id="chkEng" onchange="renderStudy()"> 영단어 가리기</label>
-            <label><input type="checkbox" id="chkKor" onchange="renderStudy()"> 뜻 가리기</label>
-            <label id="lblDef" style="display:none;"><input type="checkbox" id="chkDef" onchange="renderStudy()"> 영영가리기</label>
-        </div>
-        <div id="study-list"></div>
-    </div>
-
-    <div id="test-area">
-        <div id="test-content"></div>
-    </div>
-
-    <div id="puzzle-area">
-        <div id="puzzle-content"></div>
-    </div>
-</div>
-
-<script>
-    var CONFIG = {
-        DS: { books: [1,2,3], lessons: 10 },
-        LS: { books: [1,2,3], lessons: 10 },
-        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
-    };
-    var currentData = { subtitle: "", words: [] };
-    var synth = window.speechSynthesis;
-    var currentLevel = "";
-
-    function updateUI() {
-        var lv = document.getElementById('level').value;
-        var bSel = document.getElementById('book');
-        var lSel = document.getElementById('lesson');
-        if (!lv) return;
-        currentLevel = lv;
-        var type = lv.indexOf("MS") === 0 ? "MS" : (lv.indexOf("LS") === 0 ? "LS" : "DS");
-        var c = CONFIG[type];
-        var isLevel2 = lv.indexOf("2", lv.length - 1) !== -1 && type !== "MS";
-        bSel.innerHTML = (isLevel2 ? [4,5,6] : c.books).map(function(b){ return '<option value="'+b+'">Chess Book '+b+'</option>'; }).join('');
-        var lNum = isLevel2 ? 13 : 1;
-        var lList = isLevel2 ? Array.from({length:10}, (_,i)=>i+13) : (Array.isArray(c.lessons) ? c.lessons : Array.from({length:10}, (_,i)=>i+1));
-        lSel.innerHTML = lList.map(function(l){ return '<option value="'+l+'">Lesson '+l+'</option>'; }).join('');
-    }
-
-    function startStudy() {
-        var lv = document.getElementById('level').value;
-        var bk = document.getElementById('book').value;
-        var ls = document.getElementById('lesson').value;
-        if (!lv || !bk || !ls) return alert("레벨을 선택하세요!");
-        
-        fetch('data/'+lv+'_'+bk+'_'+ls+'.json').then(res=>res.json()).then(data=>{
-            currentData = data.words ? data : { subtitle: "", words: data };
-            document.getElementById('lesson-subtitle').innerText = "📖 " + (currentData.subtitle || "Vocabulary List");
-            document.getElementById('lesson-subtitle').style.display = "block";
-            document.getElementById('main-tabs').style.display = "grid";
-            
-            // DSD 이상 레벨 체크 (영영 정의 기능 활성화)
-            var isAdvanced = (lv.startsWith("DSD") || lv.startsWith("LS") || lv.startsWith("MS"));
-            document.getElementById('lblDef').style.display = isAdvanced ? "inline" : "none";
-            
-            switchTab('study');
-        }).catch(()=>alert("파일을 찾을 수 없습니다."));
-    }
-
-    function switchTab(type) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event && event.target.classList && event.target.classList.add('active');
-        
-        document.getElementById('study-area').style.display = type === 'study' ? 'block' : 'none';
-        document.getElementById('test-area').style.display = type === 'test' ? 'block' : 'none';
-        document.getElementById('puzzle-area').style.display = type === 'puzzle' ? 'block' : 'none';
-        
-        if(type === 'study') renderStudy();
-        if(type === 'test') renderTest();
-        if(type === 'puzzle') renderPuzzle();
-    }
-
-    function renderStudy() {
-        var hE = document.getElementById('chkEng').checked;
-        var hK = document.getElementById('chkKor').checked;
-        var hD = document.getElementById('chkDef').checked;
-        var isAdvanced = (currentLevel.startsWith("DSD") || currentLevel.startsWith("LS") || currentLevel.startsWith("MS"));
-
-        document.getElementById('study-list').innerHTML = currentData.words.map(w => `
-            <div class="word-card">
-                <button class="tts-icon" onclick="speak('${w.en.split('-')[0].trim()}')">🔊</button>
-                <div class="word-content">
-                    <div class="word-text ${hE?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
-                    <div class="mean-text ${hK?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
-                    ${isAdvanced && w.def ? `<div class="def-text ${hD?'hidden':''}" onclick="this.classList.toggle('hidden')">Def: ${w.def}</div>` : ''}
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function renderTest() {
-        var isAdvanced = (currentLevel.startsWith("DSD") || currentLevel.startsWith("LS") || currentLevel.startsWith("MS"));
-        var testList = [...currentData.words].sort(() => Math.random() - 0.5).slice(0, 5);
-        
-        document.getElementById('test-content').innerHTML = testList.map((w, idx) => {
-            // DSD 이상이면 50% 확률로 영영 정의 퀴즈 생성
-            var isDefQuiz = isAdvanced && w.def && Math.random() > 0.5;
-            var question = isDefQuiz ? w.def : w.ko;
-            var options = [w.en, ...currentData.words.filter(x=>x.en!==w.en).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.en)].sort(()=>Math.random()-0.5);
-            
-            return `
-                <div class="quiz-container">
-                    <div class="quiz-question">Q${idx+1}. ${isDefQuiz?'[ENG Def] ':''}${question}</div>
-                    <div class="quiz-options">
-                        ${options.map(opt => `<button class="opt-btn" onclick="checkQuiz(this, '${opt}', '${w.en}')">${opt}</button>`).join('')}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function checkQuiz(btn, choice, answer) {
-        if(choice === answer) btn.classList.add('correct');
-        else btn.classList.add('wrong');
-    }
-
-    function renderPuzzle() {
-        var isAdvanced = (currentLevel.startsWith("DSD") || currentLevel.startsWith("LS") || currentLevel.startsWith("MS"));
-        var pList = [...currentData.words].sort(() => Math.random() - 0.5).slice(0, 5);
-
-        document.getElementById('puzzle-content').innerHTML = pList.map((w, idx) => {
-            var isDefHint = isAdvanced && w.def && Math.random() > 0.5;
-            var hint = isDefHint ? w.def : w.ko;
-            var answer = w.en.split('-')[0].trim().toLowerCase();
-            
-            return `
-                <div class="puzzle-item">
-                    <div class="puzzle-hint">${idx+1}. ${isDefHint?'[Definition] ':''}${hint}</div>
-                    <input type="text" class="puzzle-input" placeholder="Type here..." oninput="checkPuzzle(this, '${answer}')">
-                </div>
-            `;
-        }).join('');
-    }
-
-    function checkPuzzle(input, answer) {
-        if(input.value.toLowerCase().trim() === answer) input.style.borderColor = "#6BCB77";
-        else input.style.borderColor = "#FF6B6B";
-    }
-
-    function speak(t) { synth.cancel(); var u = new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=0.8; synth.speak(u); }
-</script>
-</body>
-</html>
+        <div id="study-options" style="display:flex; justify-content:center; gap:10px; margin-bottom
