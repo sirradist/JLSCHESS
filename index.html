@@ -208,90 +208,74 @@
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
         document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
 
-        // [배치 보장 전략] 전체 성공할 때까지 최대 10번 재시도
-        let finalGrid, finalPlaced;
-        for(let attempt=0; attempt<10; attempt++) {
-            let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
-            let allPlaced = true;
+        let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
 
-            ws.forEach((w, idx) => {
-                let possibilities = [];
-                if(w.a.length > sz) w.a = w.a.substring(0, sz);
+        ws.forEach((w, idx) => {
+            let possibilities = [];
+            // 1. 교차점 탐색 로직 (기존 연결성 유지)
+            for(let r=0; r<sz; r++) {
+                for(let c=0; c<sz; c++) {
+                    for(let d of ['H', 'V']) {
+                        if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
+                            let over = 0, fail = false;
+                            for(let i=0; i<w.a.length; i++) {
+                                let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
+                                if(grid[rr][cc]) {
+                                    if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
+                                    else over += 100; // 교차 시 점수 대폭 부여
+                                }
+                            }
+                            if(!fail) possibilities.push({ r, c, d, over });
+                        }
+                    }
+                }
+            }
 
-                for(let r=0; r<sz; r++) {
-                    for(let c=0; c<sz; c++) {
+            let best = null;
+            if(possibilities.length > 0) {
+                possibilities.sort((a,b) => b.over - a.over);
+                best = possibilities[0];
+            } else {
+                // 2. [핵심] 교차점이 없을 경우 무조건 빈자리 탐색 (1칸 단위 정밀 조사)
+                let found = false;
+                for(let r=0; r<sz && !found; r++) {
+                    for(let c=0; c<sz && !found; c++) {
                         for(let d of ['H', 'V']) {
-                            if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) {
-                                let over = 0, fail = false;
+                            if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) {
+                                let can = true;
                                 for(let i=0; i<w.a.length; i++) {
                                     let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                    if(grid[rr][cc]) {
-                                        if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true;
-                                        else over += 20;
-                                    }
+                                    if(grid[rr][cc]) { can = false; break; }
                                 }
-                                if(!fail) possibilities.push({ r, c, d, over });
+                                if(can) { best = { r, c, d, over: 0 }; found = true; }
                             }
                         }
                     }
                 }
-
-                let best = null;
-                if(possibilities.length > 0) {
-                    possibilities.sort((a,b) => b.over - a.over);
-                    best = possibilities[0];
-                } else {
-                    let found = false;
-                    for(let r=0; r<sz && !found; r++) { 
-                        for(let c=0; c<sz && !found; c++) {
-                            for(let d of ['H', 'V']) {
-                                if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) {
-                                    let can = true;
-                                    for(let i=0; i<w.a.length; i++) {
-                                        let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                        if(grid[rr][cc]) { can = false; break; }
-                                    }
-                                    if(can) { best = { r, c, d, over: 0 }; found = true; }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if(best) {
-                    for(let i=0; i<w.a.length; i++) {
-                        let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
-                        let existing = grid[rr][cc];
-                        let charToSet = w.a[i];
-                        if(existing) {
-                            let chars = existing.char.split(',');
-                            if(!chars.includes(charToSet)) chars.push(charToSet);
-                            charToSet = chars.join(',');
-                        }
-                        grid[rr][cc] = { char: charToSet, n: (i===0 ? idx+1 : (existing ? existing.n : null)), d: existing ? existing.d + best.d : best.d };
-                    }
-                    placed.push({ ...best, ...w, num: idx+1 });
-                } else {
-                    allPlaced = false;
-                }
-            });
-
-            if(allPlaced) {
-                finalGrid = grid; finalPlaced = placed;
-                break;
             }
-        }
 
-        if(!finalGrid) { // 만약 10번 다 실패하면 (이론적으로 거의 불가능) 마지막 상태라도 출력
-            finalGrid = Array(sz).fill().map(() => Array(sz).fill(null)); 
-            finalPlaced = [];
-        }
-        
+            if(best) {
+                for(let i=0; i<w.a.length; i++) {
+                    let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
+                    let existing = grid[rr][cc];
+                    let charToSet = w.a[i];
+                    if(existing) {
+                        let chars = existing.char.split(',');
+                        if(!chars.includes(charToSet)) chars.push(charToSet);
+                        charToSet = chars.join(',');
+                    }
+                    grid[rr][cc] = { char: charToSet, n: (i===0 ? idx+1 : (existing ? existing.n : null)), d: existing ? existing.d + best.d : best.d };
+                }
+                placed.push({ ...best, ...w, num: idx+1 });
+            }
+        });
+
+        // 렌더링 로직
         let h = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 32px);">`;
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
-                if(finalGrid[r][c]) {
-                    h += `<div class="cell active">${finalGrid[r][c].n?`<span class="cell-num">${finalGrid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${finalGrid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${finalGrid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
+                if(grid[r][c]) {
+                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
                 }
@@ -299,7 +283,7 @@
         }
         box.innerHTML = h + `</div>`;
         hBox.innerHTML = ws.map((w,i) => {
-            const p = finalPlaced.find(pl => pl.num === i+1);
+            const p = placed.find(pl => pl.num === i+1);
             return `<div class="h-item">${i+1}. ${w.h} (${p?(p.d.includes('H')?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
         }).join('');
     }
