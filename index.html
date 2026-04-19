@@ -10,8 +10,8 @@
     
     <script type="module">
         import { KokoroTTS } from './kokoro.js';
-        window.KokoroTTS = KokoroTTS;
-        console.log("KokoroTTS 엔진이 성공적으로 등록되었습니다.");
+        window.KokoroTTS = KokoroTTS; // 전역 객체에 등록
+        console.log("KokoroTTS 클래스가 성공적으로 등록되었습니다.");
     </script>
 
     <style>
@@ -35,7 +35,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">로딩 대기 중...</div>
+        <div id="status-area">엔진 로드 대기 중...</div>
     </header>
 
     <div class="setup-box">
@@ -86,14 +86,20 @@
 
             if (!window.KokoroTTS) throw new Error("Library load failed");
 
-            status.innerText = "모델 파일(86MB) 읽는 중...";
+            status.innerText = "모델 데이터(86MB) 읽는 중... (약 10초 소요)";
             
-            // 모델을 바이너리로 직접 로드 (가장 안정적)
+            // 1. 모델 파일을 직접 바이너리 데이터로 가져옵니다.
             const response = await fetch('./model.onnx');
             const modelData = await response.arrayBuffer();
+            
+            status.innerText = "Bella 음성 엔진 초기화 중...";
 
-            // Library Export Keys에서 확인된 'KokoroTTS' 클래스를 사용
-            tts = await window.KokoroTTS.from_pretrained(modelData, { dtype: 'q8' });
+            // 2. 클래스 생성자를 직접 호출 (new KokoroTTS)
+            // config.json을 찾지 않도록 model_file_structure 옵션 사용
+            tts = await new window.KokoroTTS(modelData, {
+                model_file_structure: 'flat',
+                dtype: 'q8'
+            });
 
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
@@ -106,68 +112,6 @@
     
     window.onload = initTTS;
 
-    // --- 나머지 데이터/레벨 로직 (기존 유지) ---
+    // --- 나머지 데이터 로딩 로직 (기존 유지) ---
     const CONFIG = {
-        DS: { books: [1,2,3], lessons: 10 },
-        LS: { books: [1,2,3], lessons: 10 },
-        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
-    };
-
-    function updateUIByLevel() {
-        const lv = document.getElementById('level').value;
-        if(!lv) return;
-        let type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
-        const config = CONFIG[type];
-        let currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : config.books;
-        document.getElementById('book').innerHTML = currentBooks.map(b => `<option value="${b}">Book ${b}</option>`).join('');
-        let lHtml = "";
-        if(lv.endsWith("2") && !lv.startsWith("MS")) {
-            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
-        } else {
-            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
-        }
-        document.getElementById('lesson').innerHTML = lHtml;
-    }
-
-    async function fetchAndLoad() {
-        const lv = document.getElementById('level').value;
-        const bk = document.getElementById('book').value;
-        const ls = document.getElementById('lesson').value;
-        try {
-            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
-            words = await res.json();
-            document.getElementById('controls').style.display = "flex";
-            renderWords();
-        } catch(e) { alert("데이터 로드 실패"); }
-    }
-
-    function renderWords() {
-        const area = document.getElementById('display-area');
-        const hE = document.getElementById('chkEng').checked;
-        const hK = document.getElementById('chkKor').checked;
-
-        area.innerHTML = words.map((w) => `
-            <div class="word-card">
-                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
-                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
-                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
-            </div>
-        `).join('');
-    }
-
-    async function playEnglish(text) {
-        if (!text || !tts) return;
-        const cleanText = text.replace(/-/g, ',');
-        const audio = await tts.generate(cleanText, { voice: 'af_bella' });
-        audio.play();
-    }
-
-    function playKorean(text) {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        window.speechSynthesis.speak(utter);
-    }
-</script>
-</body>
-</html>
+        DS: { books
