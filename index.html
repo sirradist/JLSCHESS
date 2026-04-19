@@ -29,8 +29,6 @@
         .card { background: var(--c); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); text-align: left; }
         .word-text { font-size: 1.25rem; font-weight: 800; color: var(--p); }
         .mean-text { font-size: 1.05rem; font-weight: 700; color: #636e72; }
-        .hidden { background: var(--s) !important; color: transparent !important; border-radius: 8px; cursor: pointer; position: relative; min-height: 1.2em; }
-        .hidden::after { content: '?'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: 800; }
         .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #DFF9FB; background: #F8F9FA; font-size: 1.2rem; cursor: pointer; }
         .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); }
         .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; }
@@ -94,7 +92,7 @@
         <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
     </div>
     <div id="lesson-subtitle"></div>
-    <div id="study-area"><div id="study-options" style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
+    <div id="study-area"><div id="study-list"></div></div>
     <div id="test-area"><button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
     <div id="puzzle-area">
         <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
@@ -185,8 +183,7 @@
     }
 
     function renderStudy() {
-        const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
-        document.getElementById('study-list').innerHTML = cData.words.map(w => `<div class="card"><button class="tts-icon" onclick="speak('${w.en}')">🔊</button><div class="word-content"><div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div><div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div></div></div>`).join('');
+        document.getElementById('study-list').innerHTML = cData.words.map(w => `<div class="card"><button class="tts-icon" onclick="speak('${w.en}')">🔊</button><div class="word-content"><div class="word-text">${w.en}</div><div class="mean-text">${w.ko}</div></div></div>`).join('');
     }
 
     function renderTest() {
@@ -240,7 +237,7 @@
                 possibilities.sort((a,b) => b.over - a.over);
                 best = possibilities[0];
             } else {
-                // [수정] 배치 실패 시 SNOWMAN 등 누락 방지를 위한 전수 조사 로직 강화
+                // [누락 방지] 1칸 단위 전수조사 강화 (감점 로직 제거)
                 let found = false;
                 for(let r=0; r<sz && !found; r++) { 
                     for(let c=0; c<sz && !found; c++) {
