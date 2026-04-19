@@ -17,28 +17,27 @@
         body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
         .container { max-width: 900px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
+        #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 10px; border-radius: 8px; }
         .setup-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
         button:disabled { background: #ccc; cursor: not-allowed; }
+        #progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; display: none; }
+        #progress-fill { width: 0%; height: 100%; background: #34a853; transition: width 0.3s ease; }
         .controls { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; justify-content: center; gap: 20px; border: 1px solid #eee; }
-        .word-list { display: grid; gap: 10px; }
-        .word-card { background: var(--card); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; }
-        .word-text { font-size: 1.1rem; font-weight: 700; width: 220px; color: #1a73e8; }
-        .mean-text { font-size: 1rem; color: #5f6368; flex: 1; }
+        .word-card { background: var(--card); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 10px; }
+        .word-text { font-size: 1.15rem; font-weight: 700; width: 220px; color: #1a73e8; }
+        .mean-text { font-size: 1.05rem; color: #5f6368; flex: 1; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
-        .tts-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-        #status-area { font-size: 0.9rem; margin-bottom: 10px; color: #666; font-weight: bold; }
-        #progress-bar { width: 100%; height: 5px; background: #eee; border-radius: 5px; margin-top: 5px; display: none; }
-        #progress-fill { width: 0%; height: 100%; background: #34a853; border-radius: 5px; transition: width 0.3s; }
+        .tts-icon { background: none; border: none; font-size: 1.3rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">내부 모델 로딩 대기 중...</div>
+        <h1>정상어학원 CHESS VOCA Master</h1>
+        <div id="status-area">로딩을 준비하고 있습니다...</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </header>
 
@@ -79,37 +78,43 @@
     let kokoro = null;
     let words = [];
 
-    // --- 수정한 로컬 로딩 로직 ---
+    // 모델 로딩 최적화 로직
     async function initTTS() {
         const status = document.getElementById('status-area');
         const pBar = document.getElementById('progress-bar');
         const pFill = document.getElementById('progress-fill');
         
         try {
-            if (window.KokoroWeb) {
-                pBar.style.display = "block";
-                status.innerText = "Repository 내부 모델 파일 로딩 중...";
-                
-                // 본인 리포지토리에 저장된 model.onnx를 직접 호출
-                kokoro = await window.KokoroWeb.new({ 
-                    model: './model.onnx' 
-                });
-
-                pFill.style.width = "100%";
-                status.innerHTML = "<span style='color:#34a853'>✅ 내부 음성 엔진 준비 완료</span>";
-                document.getElementById('btn-study').disabled = false;
+            // 라이브러리 로딩 확인을 위해 0.5초 대기
+            if (!window.KokoroWeb) {
+                setTimeout(initTTS, 500);
+                return;
             }
+
+            pBar.style.display = "block";
+            status.innerText = "Repository 내부 모델 파일(86MB) 로딩 중...";
+            pFill.style.width = "40%";
+            
+            // GitHub Pages 환경에서 절대 경로를 명확히 지정합니다.
+            const modelPath = window.location.pathname.includes('JLSCHESS') ? '/JLSCHESS/model.onnx' : './model.onnx';
+
+            kokoro = await window.KokoroWeb.new({ 
+                model: modelPath 
+            });
+
+            pFill.style.width = "100%";
+            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료 (Bella Voice)</span>";
+            document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            console.error(e);
-            status.innerText = "⚠️ 내부 모델 로딩 실패 (시스템 음성 모드)";
+            console.error("TTS Init Error:", e);
+            status.innerText = "⚠️ 시스템 음성 모드 (내부 모델을 로드할 수 없습니다)";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
-    // 페이지 로드 후 엔진 초기화 시작
     window.onload = initTTS;
 
-    // 레벨 데이터 및 나머지 기능 (기존 유지)
+    // 레벨/데이터 관리 로직
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -142,10 +147,11 @@
         const ls = document.getElementById('lesson').value;
         try {
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            if(!res.ok) throw new Error();
             words = await res.json();
             document.getElementById('controls').style.display = "flex";
             renderWords();
-        } catch(e) { alert("JSON 파일 로드 실패"); }
+        } catch(e) { alert("데이터 파일을 불러올 수 없습니다. 경로를 확인해주세요."); }
     }
 
     function renderWords() {
