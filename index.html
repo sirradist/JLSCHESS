@@ -9,10 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
     
     <script type="module">
-        // esm.sh는 라이브러리를 하나의 파일로 합쳐서 제공하므로 404 에러가 나지 않습니다.
-        import { KokoroWeb } from 'https://esm.sh/kokoro-js@1.1.2';
-        window.KokoroWeb = KokoroWeb;
-        console.log("Kokoro Library Loaded Successfully");
+        import { Kokoro } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.1.2/dist/index.js';
+        window.Kokoro = Kokoro;
+        console.log("Kokoro Library Loaded");
     </script>
 
     <style>
@@ -81,45 +80,40 @@
     let kokoro = null;
     let words = [];
 
-    // 모델 초기화 로직
     async function initTTS() {
         const status = document.getElementById('status-area');
         const pBar = document.getElementById('progress-bar');
         const pFill = document.getElementById('progress-fill');
         
         try {
-            // 라이브러리 로딩 확인을 위한 재시도 루프
+            // 라이브러리 로딩 확인
             let attempts = 0;
-            while (!window.KokoroWeb && attempts < 10) {
-                status.innerText = `엔진 준비 중... (${attempts + 1}/10)`;
+            while (!window.Kokoro && attempts < 10) {
                 await new Promise(r => setTimeout(r, 500));
                 attempts++;
             }
 
-            if (!window.KokoroWeb) throw new Error("Library not loaded");
+            if (!window.Kokoro) throw new Error("Library load error");
 
             pBar.style.display = "block";
-            status.innerText = "내 저장소에서 모델(86MB)을 읽어오는 중...";
+            status.innerText = "Repository 내부 모델(model.onnx) 로딩 중...";
             pFill.style.width = "40%";
             
             // 본인 Repository의 model.onnx 파일을 호출
-            kokoro = await window.KokoroWeb.new({ 
-                model: './model.onnx' 
-            });
+            kokoro = await window.Kokoro.new('./model.onnx');
 
             pFill.style.width = "100%";
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
             console.error(e);
-            status.innerText = "⚠️ 시스템 음성 모드 (내부 모델을 찾을 수 없습니다)";
+            status.innerText = "⚠️ 시스템 음성 모드 (내부 모델 로드 불가)";
             document.getElementById('btn-study').disabled = false;
         }
     }
     
     window.onload = initTTS;
 
-    // 레벨/데이터 규칙 (기존 유지)
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -156,7 +150,7 @@
             words = await res.json();
             document.getElementById('controls').style.display = "flex";
             renderWords();
-        } catch(e) { alert("데이터 파일을 불러올 수 없습니다. data 폴더 내 JSON 파일을 확인하세요."); }
+        } catch(e) { alert("JSON 데이터를 불러올 수 없습니다. 경로를 확인하세요."); }
     }
 
     function renderWords() {
