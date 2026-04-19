@@ -278,7 +278,7 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" oninput="smartMove(this)"></div>`;
+                    h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" data-r="${r}" data-c="${c}" data-dir="${grid[r][c].d}" onfocus="setDir(this)" onkeydown="handleKey(event, this)" oninput="smartMove(this)"></div>`;
                 } else {
                     h += `<div class="cell empty"></div>`;
                 }
@@ -293,18 +293,40 @@
 
     function setDir(el) {
         const d = el.dataset.dir;
-        // 교차점이면 현재 흐름(lastDir)을 유지하고, 아니면 단어의 유일한 방향으로 설정
         if(d.length === 1) lastDir = d; 
+        // 포커스 시 글자가 이미 있다면 덮어쓰기 편하도록 선택 (단, 모바일 키보드 유지를 위해 짧은 지연시간 부여)
+        setTimeout(() => { if(el === document.activeElement) el.select(); }, 50);
     }
 
+    function handleKey(e, el) {
+        if (e.key === 'Backspace' && el.value === '') {
+            const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
+            let prevR = r, prevC = c;
+            if (lastDir === 'H') prevC--; else prevR--;
+            const prevInput = document.querySelector(`input[data-r="${prevR}"][data-c="${prevC}"]`);
+            if (prevInput) prevInput.focus();
+        }
+    }
+
+    // [최적화 완료] 개선된 smartMove 함수 적용
     function smartMove(el) {
-        el.value = el.value.toUpperCase();
-        if (el.value.length < 1) return;
-        const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
-        let nextR = r, nextC = c;
-        if (lastDir === 'H') nextC++; else nextR++;
-        const nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
-        if (nextInput) nextInput.focus();
+        const val = el.value.toUpperCase();
+        if (val.length >= 1) {
+            // 한 글자만 남기기 (덮어쓰기 보장)
+            el.value = val.charAt(val.length - 1);
+            
+            const r = parseInt(el.dataset.r);
+            const c = parseInt(el.dataset.c);
+            let nextR = r, nextC = c;
+            
+            if (lastDir === 'H') nextC++; else nextR++;
+            
+            const nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
+            if (nextInput) {
+                // setTimeout을 사용하여 입력 완료 후 안전하게 포커스 이동
+                setTimeout(() => nextInput.focus(), 10);
+            }
+        }
     }
 
     function checkCW() {
