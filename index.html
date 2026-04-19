@@ -28,11 +28,11 @@
 <div class="container">
     <header>
         <h1>정상어학원 VOCA Master</h1>
-        <div id="status-area">엔진 및 라이브러리 확인 중...</div>
+        <div id="status-area">시스템 초기화 중...</div>
     </header>
 
     <div class="setup-box">
-        <select id="level" onchange="updateUIByLevel()" disabled>
+        <select id="level" onchange="window.updateUIByLevel()" disabled>
             <option value="">레벨 선택</option>
             <optgroup label="DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
@@ -52,23 +52,17 @@
         </select>
         <select id="book" disabled></select>
         <select id="lesson" disabled></select>
-        <button id="btn-study" onclick="fetchAndLoad()" disabled>학습 시작</button>
+        <button id="btn-study" onclick="window.fetchAndLoad()" disabled>학습 시작</button>
     </div>
-
     <div id="controls" style="display:none; justify-content:center; gap:25px; margin-bottom:20px;">
-        <label><input type="checkbox" id="chkEng" onchange="renderWords()"> 영어 가리기</label>
-        <label><input type="checkbox" id="chkKor" onchange="renderWords()"> 한글 가리기</label>
+        <label><input type="checkbox" id="chkEng" onchange="window.renderWords()"> 영어 가리기</label>
+        <label><input type="checkbox" id="chkKor" onchange="window.renderWords()"> 한글 가리기</label>
     </div>
-
     <div id="display-area"></div>
 </div>
 
 <script>
-    // 전역 변수 설정
-    window.tts = null;
-    window.words = [];
-
-    // 1. 모든 함수를 전역(window)에 정의하여 'not defined' 에러를 방지합니다.
+    // 전역 스코프 함수 정의
     window.updateUIByLevel = function() {
         const lv = document.getElementById('level').value;
         if(!lv) return;
@@ -88,25 +82,26 @@
             for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
         }
         document.getElementById('lesson').innerHTML = lHtml;
-    }
+    };
 
     window.initTTS = async function() {
         const status = document.getElementById('status-area');
         try {
-            status.innerText = "음성 엔진 데이터(86MB) 로딩 중...";
+            status.innerText = "Bella 음성 엔진을 불러오는 중입니다 (약 10초 소요)...";
             const response = await fetch('./model.onnx');
-            const modelData = await response.arrayBuffer();
+            const blob = await response.blob();
+            
+            // 핵심: 바이너리 데이터를 가짜 URL로 변환하여 라이브러리에 전달
+            const modelUrl = URL.createObjectURL(blob);
 
-            // 업로드한 kokoro.js의 KokoroTTS 클래스를 사용하여 초기화
-            // tokenizer 에러 방지를 위해 from_pretrained 호출
-            window.tts = await window.KokoroTTS.from_pretrained(modelData, {
+            window.tts = await window.KokoroTTS.from_pretrained(modelUrl, {
                 model_file_structure: 'flat'
             });
 
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         } catch (e) {
-            console.error(e);
+            console.error("초기화 실패:", e);
             status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         }
@@ -120,7 +115,7 @@
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
             window.words = await res.json();
             document.getElementById('controls').style.display = "flex";
-            renderWords();
+            window.renderWords();
         } catch(e) { alert("데이터 로드 실패"); }
     };
 
@@ -130,10 +125,10 @@
         const hK = document.getElementById('chkKor').checked;
         area.innerHTML = window.words.map((w) => `
             <div class="word-card">
-                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
+                <button class="tts-icon" onclick="window.playEnglish('${w.en}')">🔈</button>
                 <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
                 <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
+                <button class="tts-icon" onclick="window.playKorean('${w.ko}')">🔊</button>
             </div>
         `).join('');
     };
@@ -147,15 +142,17 @@
                 audio.play();
             } catch (e) {
                 console.error("AI 생성 실패:", e);
-                const utter = new SpeechSynthesisUtterance(cleanText);
-                utter.lang = 'en-US';
-                window.speechSynthesis.speak(utter);
+                window.systemSpeak(cleanText);
             }
         } else {
-            const utter = new SpeechSynthesisUtterance(cleanText);
-            utter.lang = 'en-US';
-            window.speechSynthesis.speak(utter);
+            window.systemSpeak(cleanText);
         }
+    };
+
+    window.systemSpeak = function(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        window.speechSynthesis.speak(utter);
     };
 
     window.playKorean = function(text) {
@@ -168,9 +165,7 @@
 <script type="module">
     import { KokoroTTS } from './kokoro.js';
     window.KokoroTTS = KokoroTTS;
-    // 전역에 함수들이 모두 정의된 후 initTTS 호출
-    initTTS();
+    window.initTTS();
 </script>
-
 </body>
 </html>
