@@ -8,36 +8,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4A90E2; --secondary: #FFD93D; --accent: #FF6B6B;
-            --success: #6BCB77; --bg: #F0F7FF; --card: #FFFFFF; --text: #2D3436;
+            --primary: #4A90E2; --secondary: #FFD93D; --bg: #F0F7FF; --card: #FFFFFF; --text: #2D3436;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Nanum Round', sans-serif; background-color: var(--bg);
-            margin: 0; padding: 15px; color: var(--text); line-height: 1.6;
+            margin: 0; padding: 15px; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh;
         }
-        .container { max-width: 500px; margin: 0 auto; }
-        header { text-align: center; padding: 15px 0; }
-        h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -1px; }
+        .container { width: 100%; max-width: 450px; text-align: center; }
+        h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
         
         .setup-box {
-            background: var(--card); padding: 20px; border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(74, 144, 226, 0.15); margin-bottom: 25px;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-            border: 2px solid #fff;
+            background: var(--card); padding: 25px; border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.15); margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 12px;
         }
         select {
             width: 100%; padding: 14px; border-radius: 15px; border: 2px solid #E1E8EE;
-            background: #fdfdfd; font-size: 16px; font-family: inherit; color: var(--text);
-            appearance: none; cursor: pointer;
+            background: #fff; font-size: 16px; font-family: inherit; color: var(--text); cursor: pointer;
         }
-        #level { grid-column: span 2; border-color: var(--primary); background: #f0f7ff; }
-        
+        .row { display: flex; gap: 10px; }
+        .row select { flex: 1; }
+
         #btn-study {
-            grid-column: span 2; background: var(--primary); color: white;
-            padding: 16px; border-radius: 18px; border: none; font-size: 1.2rem;
-            font-weight: 800; cursor: pointer; margin-top: 8px;
-            box-shadow: 0 5px 0 #357ABD; transition: all 0.1s;
+            background: var(--primary); color: white; padding: 16px; border-radius: 18px;
+            border: none; font-size: 1.2rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 5px 0 #357ABD; transition: all 0.1s; margin-top: 10px;
         }
         #btn-study:active { transform: translateY(3px); box-shadow: none; }
 
@@ -50,7 +46,7 @@
         .word-card {
             background: var(--card); padding: 18px; border-radius: 22px; display: flex;
             align-items: center; gap: 15px; margin-bottom: 15px; border: 2px solid #fff;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.04);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.04); text-align: left;
         }
         .word-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
         .word-text { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
@@ -59,20 +55,17 @@
         .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 10px; cursor: pointer; position: relative; min-height: 1.4em; }
         .hidden::after { content: '👀 Click!'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; font-weight: 800; }
 
-        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #ddd; border: 2px solid #DFF9FB; }
-        .tts-icon:active { transform: translateY(2px); box-shadow: none; }
+        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; box-shadow: 0 3px 0 #ddd; border: 2px solid #DFF9FB; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>🌟 CHESS VOCA Master 🌟</h1>
-    </header>
+    <h1>🌟 CHESS VOCA Master 🌟</h1>
 
     <div class="setup-box">
         <select id="level">
-            <option value="">레벨 선택 (Select Level)</option>
+            <option value="">레벨 선택 (Level)</option>
             <optgroup label="⭐ DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
                 <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
@@ -89,8 +82,12 @@
                 <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
             </optgroup>
         </select>
-        <select id="book"><option value="">교재 선택</option></select>
-        <select id="lesson"><option value="">Lesson</option></select>
+        
+        <div class="row">
+            <select id="book"><option value="">교재</option></select>
+            <select id="lesson"><option value="">레슨</option></select>
+        </div>
+        
         <button id="btn-study">학습 시작! START</button>
     </div>
 
@@ -103,100 +100,72 @@
 </div>
 
 <script>
-    // 전역 상태 관리
-    window.words = [];
+    const CONFIG = {
+        DS: { books: [1,2,3], lessons: 10 },
+        LS: { books: [1,2,3], lessons: 10 },
+        MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
+    };
+
+    let words = [];
     const synth = window.speechSynthesis;
     let engVoice = null;
 
-    // 음성 초기화
     function initVoices() {
         const voices = synth.getVoices();
-        engVoice = voices.find(v => v.name.includes('Google US English')) || 
-                   voices.find(v => v.lang.startsWith('en-US')) ||
-                   voices.find(v => v.lang.startsWith('en'));
+        engVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
     }
     if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
 
-    // 발음 함수
-    window.speakSafe = function(text) {
-        synth.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = engVoice;
-        utter.lang = 'en-US';
-        utter.rate = 0.9;
-        let keepAlive = setInterval(() => {
-            if (!synth.speaking) clearInterval(keepAlive);
-            else synth.resume();
-        }, 3000);
-        synth.speak(utter);
-    };
-
-    // [핵심] 레벨 변경 시 호출될 로직
-    function updateUIByLevel() {
+    function updateUI() {
         const lv = document.getElementById('level').value;
-        const bookSelect = document.getElementById('book');
-        const lessonSelect = document.getElementById('lesson');
+        const bookSel = document.getElementById('book');
+        const lessonSel = document.getElementById('lesson');
 
-        if(!lv) {
-            bookSelect.innerHTML = '<option value="">교재 선택</option>';
-            lessonSelect.innerHTML = '<option value="">Lesson</option>';
-            return;
-        }
-
-        const config = {
-            DS: { books: [1,2,3], lessons: 10 },
-            LS: { books: [1,2,3], lessons: 10 },
-            MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
-        };
+        if (!lv) return;
 
         const type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
-        const c = config[type];
+        const c = CONFIG[type];
 
-        // Chess Book 목록 생성
-        const currentBooks = (lv.endsWith("2") && !lv.startsWith("MS")) ? [4,5,6] : c.books;
-        bookSelect.innerHTML = currentBooks.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
+        // Chess Book 업데이트
+        const isLevel2 = lv.endsWith("2") && type !== "MS";
+        const books = isLevel2 ? [4,5,6] : c.books;
+        bookSel.innerHTML = books.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
 
-        // Lesson 목록 생성
-        let lHtml = "";
-        if(lv.endsWith("2") && !lv.startsWith("MS")) {
-            for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        // Lesson 업데이트
+        let lessons = [];
+        if (isLevel2) {
+            for(let i=13; i<=22; i++) lessons.push(i);
         } else if (Array.isArray(c.lessons)) {
-            lHtml = c.lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+            lessons = c.lessons;
         } else {
-            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+            for(let i=1; i<=10; i++) lessons.push(i);
         }
-        lessonSelect.innerHTML = lHtml;
+        lessonSel.innerHTML = lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
     }
 
-    // 단어 로드 및 렌더링
-    async function fetchAndLoad() {
+    async function startStudy() {
         const lv = document.getElementById('level').value;
         const bk = document.getElementById('book').value;
         const ls = document.getElementById('lesson').value;
-        if(!lv || !bk || !ls) {
-            alert("레벨, 교재, 레슨을 모두 선택해 주세요! ✨");
-            return;
-        }
+        if (!lv || !bk || !ls) return alert("레벨, 교재, 레슨을 골라주세요!");
+
         try {
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
-            if(!res.ok) throw new Error();
-            window.words = await res.json();
+            words = await res.json();
             document.getElementById('controls').style.display = "flex";
-            renderWords();
-        } catch(e) { 
-            alert("파일을 찾을 수 없어요! data 폴더에 파일이 있는지 확인해 주세요."); 
-        }
+            render();
+        } catch(e) { alert("파일을 찾을 수 없습니다."); }
     }
 
-    function renderWords() {
+    function render() {
         const area = document.getElementById('display-area');
         const hE = document.getElementById('chkEng').checked;
         const hK = document.getElementById('chkKor').checked;
         
-        area.innerHTML = window.words.map((w) => `
+        area.innerHTML = words.map(w => `
             <div class="word-card">
-                <button class="tts-icon" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}')">🔊</button>
+                <button class="tts-icon" onclick="speak('${w.en.replace(/'/g, "\\'")}')">🔊</button>
                 <div class="word-content">
                     <div class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
                     <div class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
@@ -205,13 +174,20 @@
         `).join('');
     }
 
-    // [안전장치] 페이지 로드 완료 후 이벤트 리스너들을 수동으로 연결합니다.
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('level').addEventListener('change', updateUIByLevel);
-        document.getElementById('btn-study').addEventListener('click', fetchAndLoad);
-        document.getElementById('chkEng').addEventListener('change', renderWords);
-        document.getElementById('chkKor').addEventListener('change', renderWords);
-    });
+    function speak(text) {
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.voice = engVoice;
+        utter.lang = 'en-US';
+        utter.rate = 0.9;
+        synth.speak(utter);
+    }
+
+    // 이벤트 바인딩
+    document.getElementById('level').addEventListener('change', updateUI);
+    document.getElementById('btn-study').addEventListener('click', startStudy);
+    document.getElementById('chkEng').addEventListener('change', render);
+    document.getElementById('chkKor').addEventListener('change', render);
 </script>
 </body>
 </html>
