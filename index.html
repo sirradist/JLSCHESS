@@ -6,6 +6,7 @@
     <title>CHESS VOCA Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <script type="module">
+        // 로딩 속도를 위해 v1.0.0 버전을 명시적으로 호출
         import { KokoroWeb } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.0.0/dist/index.js';
         window.KokoroWeb = KokoroWeb;
     </script>
@@ -15,10 +16,18 @@
         .container { max-width: 900px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 30px; }
         header h1 { color: var(--primary); margin-bottom: 5px; }
+        
+        /* 로딩 바 디자인 개선 */
+        #loading-area { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        #status-dot { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        #status-fill { width: 0%; height: 100%; background: #34a853; transition: width 0.5s ease; }
+        .ready { color: #34a853; font-weight: bold; }
+
         .setup-box { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 15px; outline: none; transition: 0.2s; }
+        select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 15px; outline: none; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
         button:disabled { background: #ccc; cursor: not-allowed; }
+        
         .controls { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: none; justify-content: center; gap: 20px; border: 1px solid #eee; }
         .word-list { display: grid; gap: 12px; }
         .word-card { background: var(--card); padding: 20px; border-radius: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; }
@@ -26,8 +35,6 @@
         .mean-text { font-size: 1.1rem; color: #5f6368; flex: 1; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
         .tts-icon { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 5px; border-radius: 50%; }
-        #status-dot { display: inline-block; width: 100px; height: 10px; background: #ddd; border-radius: 5px; overflow: hidden; }
-        #status-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -36,7 +43,7 @@
     <header>
         <h1>CHESS VOCA Master</h1>
         <div id="loading-area">
-            <span id="tts-status">AI 음성 엔진 로딩 중...</span>
+            <span id="tts-status">Bella 음성 모델 로딩 중 (약 80MB)...</span>
             <div id="status-dot"><div id="status-fill"></div></div>
         </div>
     </header>
@@ -75,24 +82,28 @@
     let kokoro = null;
     let words = [];
 
-    // 1. 영어 Kokoro 초기화 (클라이언트 자원 사용)
+    // Bella 음성 로딩 최적화
     async function initTTS() {
+        const fill = document.getElementById('status-fill');
+        const status = document.getElementById('tts-status');
+        
         try {
-            document.getElementById('status-fill').style.width = "30%";
+            fill.style.width = "40%"; // 로딩 시작 표시
             kokoro = await window.KokoroWeb.new({ 
                 model: 'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/model.onnx' 
             });
-            document.getElementById('status-fill').style.width = "100%";
-            document.getElementById('tts-status').innerText = "영어 AI 음성 준비 완료 (af_bella)";
+            fill.style.width = "100%";
+            status.innerHTML = "<span class='ready'>Bella 여성 음성 준비 완료 ✨</span>";
             document.getElementById('btn-study').disabled = false;
         } catch (e) {
-            document.getElementById('tts-status').innerText = "로딩 실패: 시스템 음성으로 대체";
-            document.getElementById('btn-study').disabled = false;
+            status.innerText = "로딩 실패: 새로고침 후 다시 시도해 주세요.";
+            console.error(e);
         }
     }
 
     window.onload = initTTS;
 
+    // 레벨/데이터 로직 (기존 유지)
     const CONFIG = {
         DS: { books: [1,2,3], lessons: 10, hasDef: false },
         DSD: { books: [1,2,3], lessons: 10, hasDef: true },
@@ -128,7 +139,7 @@
             words = await res.json();
             document.getElementById('controls').style.display = "flex";
             renderWords();
-        } catch(e) { alert("파일 로드 실패"); }
+        } catch(e) { alert("파일 로드 실패: " + `data/${lv}_${bk}_${ls}.json`); }
     }
 
     function renderWords() {
@@ -150,11 +161,11 @@
         `).join('');
     }
 
-    // 3. 영어: Kokoro (클라이언트 기기 연산)
     async function playEnglish(text) {
         if (!text) return;
         const cleanText = text.replace(/-/g, ',');
         if (kokoro) {
+            // af_bella 음성을 명시적으로 사용하여 재생
             const audio = await kokoro.generate(cleanText, { voice: 'af_bella' });
             audio.play();
         } else {
@@ -164,15 +175,9 @@
         }
     }
 
-    // 4. 한국어: 기기 내장 음성 (클라이언트 기기 자원)
     function playKorean(text) {
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = 'ko-KR';
-        // 가장 자연스러운 음성을 찾기 위한 로직
-        const voices = window.speechSynthesis.getVoices();
-        const koVoice = voices.find(v => v.lang.includes('ko-KR')) || null;
-        if(koVoice) utter.voice = koVoice;
-        utter.rate = 1.0;
         window.speechSynthesis.speak(utter);
     }
 </script>
