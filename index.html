@@ -65,59 +65,52 @@
     <div id="display-area"></div>
 </div>
 
-<script type="module">
-    import { KokoroTTS } from './kokoro.js';
-    window.KokoroTTS = KokoroTTS;
-    initTTS();
-</script>
-
 <script>
     let tts = null;
     let words = [];
 
+    // --- 엔진 초기화 함수 ---
     async function initTTS() {
         const status = document.getElementById('status-area');
         try {
-            status.innerText = "Bella 음성 엔진 데이터를 로드하고 있습니다...";
-            
+            // KokoroTTS가 로드될 때까지 최대 5초간 대기
+            let retry = 0;
+            while (!window.KokoroTTS && retry < 10) {
+                await new Promise(r => setTimeout(r, 500));
+                retry++;
+            }
+            if (!window.KokoroTTS) throw new Error("Library load timeout");
+
+            status.innerText = "음성 모델(86MB) 로딩 중입니다...";
             const response = await fetch('./model.onnx');
             const modelData = await response.arrayBuffer();
 
-            // 핵심: 토크나이저 에러를 방지하기 위해 from_pretrained 형식을 사용하되 
-            // 단일 모델 데이터를 명시적으로 주입합니다.
+            // ⚠️ tokenizer 에러 방지를 위해 from_pretrained를 사용
             tts = await window.KokoroTTS.from_pretrained(modelData, {
-                model_file_structure: 'flat',
-                // 라이브러리가 외부에서 토크나이저를 찾지 못하면 
-                // 기본 웹 토크나이저를 사용하도록 유도합니다.
+                model_file_structure: 'flat'
             });
 
             status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
-            document.getElementById('level').disabled = false;
-            document.getElementById('book').disabled = false;
-            document.getElementById('lesson').disabled = false;
-            document.getElementById('btn-study').disabled = false;
+            document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         } catch (e) {
-            console.error("엔진 초기화 실패:", e);
-            status.innerText = "⚠️ AI 음성 엔진 로드 실패 (시스템 음성 모드)";
-            // 실패하더라도 학습은 가능하게 활성화
+            console.error("초기화 실패:", e);
+            status.innerText = "⚠️ 시스템 음성 모드로 작동 중";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         }
     }
 
+    // --- 음성 재생 함수 ---
     async function playEnglish(text) {
         if (!text) return;
         const cleanText = text.replace(/-/g, ',');
         
-        // tts 객체와 tokenizer 함수가 모두 존재하는지 확인
-        if (tts && typeof tts.generate === 'function') {
+        // tts가 있고, 토크나이저가 정상적으로 포함되어 있는지 체크
+        if (tts && tts.tokenizer) {
             try {
-                // 토크나이저가 없는 경우를 대비한 2차 안전장치
-                const audio = await tts.generate(cleanText, { 
-                    voice: 'af_heart' // 기본 보이스 이름으로 시도
-                });
+                const audio = await tts.generate(cleanText, { voice: 'af_bella' });
                 audio.play();
             } catch (e) {
-                console.error("AI 생성 에러:", e.message);
+                console.error("AI 생성 실패:", e);
                 systemSpeak(cleanText);
             }
         } else {
@@ -154,8 +147,6 @@
         document.getElementById('lesson').innerHTML = lHtml;
     }
 
-    document.getElementById('level').addEventListener('change', updateUIByLevel);
-
     async function fetchAndLoad() {
         const lv = document.getElementById('level').value;
         const bk = document.getElementById('book').value;
@@ -188,6 +179,18 @@
         utter.lang = 'ko-KR';
         window.speechSynthesis.speak(utter);
     }
+</script>
+
+<script type="module">
+    import { KokoroTTS } from './kokoro.js';
+    window.KokoroTTS = KokoroTTS;
+    // 모든 준비가 끝났으니 초기화 시작
+    initTTS();
+</script>
+
+<script>
+    // 이벤트 리스너 연결
+    document.getElementById('level').addEventListener('change', updateUIByLevel);
 </script>
 </body>
 </html>
