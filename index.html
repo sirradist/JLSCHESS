@@ -27,7 +27,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">음성 엔진 준비 완료 (시스템 최적화 모드)</div>
+        <div id="status-area">음성 엔진 준비 완료 (안정화 모드)</div>
     </header>
 
     <div class="setup-box">
@@ -64,51 +64,54 @@
     window.words = [];
     const synth = window.speechSynthesis;
 
-    // --- [최적화 1] 보이스 강제 매칭 ---
+    // --- [안정화 1] 목소리 강제 고정 ---
     let engVoice = null;
     let korVoice = null;
 
-    function loadVoices() {
+    function initVoices() {
         const voices = synth.getVoices();
-        // 영어: Google US English를 1순위로, 없으면 아무 영어 목소리나 선택
+        // 크롬/안드로이드에서 가장 안정적인 Google 보이스를 우선 선택
         engVoice = voices.find(v => v.name.includes('Google US English')) || 
-                   voices.find(v => v.lang.includes('en-US')) || 
-                   voices.find(v => v.lang.includes('en'));
+                   voices.find(v => v.lang.startsWith('en-US')) || 
+                   voices.find(v => v.lang.startsWith('en'));
         
-        // 한국어: Google 한국어를 1순위로
         korVoice = voices.find(v => v.name.includes('Google 한국어')) || 
-                   voices.find(v => v.lang.includes('ko-KR')) || 
-                   voices.find(v => v.lang.includes('ko'));
+                   voices.find(v => v.lang.startsWith('ko-KR')) || 
+                   voices.find(v => v.lang.startsWith('ko'));
     }
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
 
-    // --- [최적화 2] 끊김 방지 재생 함수 ---
+    // 보이스 로딩 대기
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = initVoices;
+    }
+    initVoices();
+
+    // --- [안정화 2] 끊김 방지 재생 로직 ---
     window.speakSafe = function(text, langType) {
-        // 이미 읽고 있다면 중단 (꼬임 방지)
+        // 기존 재생 중인 음성 즉시 중단
         synth.cancel();
 
         const utter = new SpeechSynthesisUtterance(text);
         utter.voice = langType === 'en' ? engVoice : korVoice;
         utter.lang = langType === 'en' ? 'en-US' : 'ko-KR';
-        utter.rate = 0.9; // 약간 천천히 읽어 정확도 향상
+        
+        // 속도를 살짝 늦춰서(0.9) 기기 부하를 줄이고 명확도를 높임
+        utter.rate = 0.9;
         utter.pitch = 1;
 
-        // 크롬 버그 방지: 재생 중 정지되지 않도록 강제 유지
-        const timer = setInterval(() => {
+        // [중요] 특정 기기에서 소리가 중간에 죽는 버그 방지
+        let keepAlive = setInterval(() => {
             if (!synth.speaking) {
-                clearInterval(timer);
+                clearInterval(keepAlive);
             } else {
-                synth.resume();
+                synth.resume(); // 브라우저에게 "아직 읽는 중이니 멈추지 마"라고 계속 신호 보냄
             }
-        }, 5000);
+        }, 3000);
 
         synth.speak(utter);
     };
 
-    // --- UI 및 데이터 로직 ---
+    // --- UI 로직 ---
     window.updateUIByLevel = function() {
         const lv = document.getElementById('level').value;
         if(!lv) return;
@@ -150,12 +153,4 @@
         area.innerHTML = window.words.map((w) => `
             <div class="word-card">
                 <button class="tts-icon" onclick="window.speakSafe('${w.en.replace(/'/g, "\\'")}', 'en')">🔈</button>
-                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
-                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
-                <button class="tts-icon" onclick="window.speakSafe('${w.ko.replace(/'/g, "\\'")}', 'ko')">🔊</button>
-            </div>
-        `).join('');
-    };
-</script>
-</body>
-</html>
+                <span
