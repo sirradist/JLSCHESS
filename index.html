@@ -69,17 +69,40 @@
 <script>
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
+    
+    // [TTS 정밀 점검 및 보정]
     const synth = window.speechSynthesis;
     let engVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
+        // 미국식 여성 음성 타겟팅 강화
         engVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google') && v.name.includes('Female')) || 
                    voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || 
-                   voices.find(v => v.lang.startsWith('en-US'));
+                   voices.find(v => v.lang.startsWith('en-US')) ||
+                   voices.find(v => v.lang.startsWith('en'));
     }
     if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
+
+    // 동사 과거형 인식을 위한 텍스트 처리 (하이픈을 쉼표로 변경하여 두 단어를 각각 읽게 유도)
+    function getSpeakText(text) {
+        if (!text) return "";
+        return text.replace(/\s*-\s*/g, ", ").trim(); // 'plant - planted' -> 'plant, planted'
+    }
+
+    function speak(t) {
+        synth.cancel();
+        if (!engVoice) initVoices();
+        
+        const speakText = getSpeakText(t);
+        const u = new SpeechSynthesisUtterance(speakText);
+        u.lang = 'en-US';
+        if (engVoice) u.voice = engVoice;
+        u.rate = 0.8; // 과거형까지 명확히 들리도록 속도 재조정
+        u.pitch = 1.1; 
+        synth.speak(u);
+    }
 
     function updateUI() {
         const v = document.getElementById('level').value; if(!v) return; curLv = v;
@@ -121,16 +144,11 @@
         if(t==='study') renderStudy(); if(t==='test') renderTest(); if(t==='puzzle') { curStage = 1; createCW(); }
     }
 
-    // [핵심 수정] 동사 원형-과거형을 자연스럽게 모두 읽도록 공백 처리 로직 추가
-    function getSpeakText(text) {
-        return text.replace(/-/g, ' ').trim(); // 'plant - planted' -> 'plant   planted'
-    }
-
     function renderStudy() {
         const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
         document.getElementById('study-list').innerHTML = cData.words.map(w => `
             <div class="card">
-                <button class="tts-icon" onclick="speak('${getSpeakText(w.en)}')">🔊</button>
+                <button class="tts-icon" onclick="speak('${w.en}')">🔊</button>
                 <div class="word-content">
                     <div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
                     <div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
@@ -144,14 +162,14 @@
             const type = Math.random() > 0.5 ? "E2K" : "K2E";
             const q = type === "E2K" ? w.en : w.ko, ans = type === "E2K" ? w.ko : w.en;
             const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5);
-            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${getSpeakText(w.en)}')">${o}</button>`).join('')}</div>`;
+            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
         }).join('');
     }
 
-    function checkAnswer(btn, choice, correct, speakText) {
+    function checkAnswer(btn, choice, correct, english) {
         if(choice === correct) {
             btn.classList.add('ok');
-            speak(speakText); // 정답 시 원형-과거형 모두 재생
+            speak(english); 
         } else btn.classList.add('no');
     }
 
@@ -192,39 +210,4 @@
             else h += `<div class="cell empty"></div>`;
         }
         box.innerHTML = h + `</div>`;
-        hBox.innerHTML = placed.map((p,i) => `<div class="h-item">${i+1}. ${p.h} (${p.d==='H'?'가로':'세로'}, ${p.a.length}자)</div>`).join('');
-    }
-
-    function checkCW() {
-        const inputs = document.querySelectorAll('.cell input');
-        let allOk = true;
-        inputs.forEach(i => {
-            if(i.value.toUpperCase() === i.dataset.ans) i.parentElement.classList.add('ok');
-            else { i.parentElement.classList.remove('ok'); allOk = false; }
-        });
-        if(allOk) {
-            alert(curStage === 1 ? "STAGE 1 성공! 다음 단어들로 넘어갑니다." : "전부 맞혔어요! 참 잘했어요!");
-            if(curStage === 1) { document.getElementById('cw-check-btn').style.display = 'none'; document.getElementById('cw-next-btn').style.display = 'block'; }
-        } else alert("틀린 칸이 있어요. 다시 확인해보세요!");
-    }
-
-    function nextStage() { curStage = 2; createCW(); }
-
-    function speak(t) {
-        synth.cancel();
-        if (!engVoice) initVoices();
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'en-US';
-        if (engVoice) u.voice = engVoice;
-        u.rate = 0.85; // 과거형까지 읽으므로 속도를 아주 미세하게 늦춰 명확하게 들리게 함
-        u.pitch = 1.1; 
-        synth.speak(u);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => { 
-        document.getElementById('level').addEventListener('change', updateUI); 
-        initVoices();
-    });
-</script>
-</body>
-</html>
+        hBox.innerHTML = placed.map((p,i) => `
