@@ -1,22 +1,25 @@
-[
-  { "en": "large", "ko": "큰", "def": "" },
-  { "en": "seed", "ko": "씨앗", "def": "" },
-  { "en": "plant - planted", "ko": "심다", "def": "" },
-  { "en": "grow - grew", "ko": "자라다", "def": "" },
-  { "en": "beet", "ko": "비트", "def": "" },
-  { "en": "pull - pulled", "ko": "당기다", "def": "" },
-  { "en": "eat - ate", "ko": "먹다", "def": "" },
-  { "en": "dinner", "ko": "저녁 식사", "def": "" },
-  { "en": "stay - stayed", "ko": "머무르다", "def": "" },
-  { "en": "ground", "ko": "땅", "def": "" },
-  { "en": "need - needed", "ko": "필요하다", "def": "" },
-  { "en": "more", "ko": "더", "def": "" },
-  { "en": "help", "ko": "도움", "def": "" },
-  { "en": "delicious", "ko": "맛있는", "def": "" },
-  { "en": "move - moved", "ko": "움직이다", "def": "" },
-  { "en": "pop - popped", "ko": "뻥 하고 튀다", "def": "" },
-  { "en": "at last", "ko": "마침내", "def": "" },
-  { "en": "fantastic", "ko": "환상적인", "def": "" },
-  { "en": "table", "ko": "식탁", "def": "" },
-  { "en": "together", "ko": "함께", "def": "" }
-]
+{
+  "subtitle": "The Farmer and the Beet",
+  "words": [
+    { "en": "large", "ko": "큰", "def": "" },
+    { "en": "seed", "ko": "씨앗", "def": "" },
+    { "en": "plant - planted", "ko": "심다", "def": "" },
+    { "en": "grow - grew", "ko": "자라다", "def": "" },
+    { "en": "beet", "ko": "비트", "def": "" },
+    { "en": "pull - pulled", "ko": "당기다", "def": "" },
+    { "en": "eat - ate", "ko": "먹다", "def": "" },
+    { "en": "dinner", "ko": "저녁 식사", "def": "" },
+    { "en": "stay - stayed", "ko": "머무르다", "def": "" },
+    { "en": "ground", "ko": "땅", "def": "" },
+    { "en": "need - needed", "ko": "필요하다", "def": "" },
+    { "en": "more", "ko": "더", "def": "" },
+    { "en": "help", "ko": "도움", "def": "" },
+    { "en": "delicious", "ko": "맛있는", "def": "" },
+    { "en": "move - moved", "ko": "움직이다", "def": "" },
+    { "en": "pop - popped", "ko": "뻥 하고 튀다", "def": "" },
+    { "en": "at last", "ko": "마침내", "def": "" },
+    { "en": "fantastic", "ko": "환상적인", "def": "" },
+    { "en": "table", "ko": "식탁", "def": "" },
+    { "en": "together", "ko": "함께", "def": "" }
+  ]
+}
