@@ -20,7 +20,6 @@
         header { text-align: center; padding: 15px 0; }
         h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -1px; }
         
-        /* 설정 박스 디자인 대폭 수정 */
         .setup-box {
             background: var(--card); padding: 20px; border-radius: 25px;
             box-shadow: 0 10px 25px rgba(74, 144, 226, 0.15); margin-bottom: 25px;
@@ -42,7 +41,6 @@
         }
         #btn-study:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 학습 컨트롤러 */
         #controls {
             display: none; justify-content: center; gap: 20px; margin-bottom: 20px;
             padding: 12px; background: rgba(255, 255, 255, 0.6); border-radius: 35px;
@@ -50,24 +48,20 @@
         }
         .control-item { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; color: var(--primary); }
 
-        /* 단어 카드 디자인 보강 */
         .word-card {
             background: var(--card); padding: 18px; border-radius: 22px; display: flex;
             align-items: center; gap: 15px; margin-bottom: 15px; border: 2px solid #fff;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.04); transition: transform 0.2s;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.04);
         }
         .word-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
         .word-text { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
         .mean-text { font-size: 1.15rem; font-weight: 700; color: #636e72; }
 
-        /* 가리기 효과 전용 스타일 */
         .hidden { background-color: var(--secondary) !important; color: transparent !important; border-radius: 10px; cursor: pointer; position: relative; min-height: 1.4em; }
         .hidden::after { content: '👀 Click!'; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; font-weight: 800; }
 
-        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #ddd; }
+        .tts-icon { width: 50px; height: 50px; border-radius: 50%; border: none; background: #F8F9FA; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #ddd; border: 2px solid #DFF9FB; }
         .tts-icon:active { transform: translateY(2px); box-shadow: none; }
-        .en-btn { border: 2px solid #DFF9FB; }
-        .ko-btn { border: 2px solid #FFF5D7; }
     </style>
 </head>
 <body>
@@ -79,7 +73,7 @@
 
     <div class="setup-box">
         <select id="level" onchange="window.updateUIByLevel()">
-            <option value="">레벨을 골라주세요!</option>
+            <option value="">레벨 선택 (Select Level)</option>
             <optgroup label="⭐ DS Level">
                 <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
                 <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
@@ -96,7 +90,7 @@
                 <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
             </optgroup>
         </select>
-        <select id="book"><option value="">Book</option></select>
+        <select id="book"><option value="">교재 선택</option></select>
         <select id="lesson"><option value="">Lesson</option></select>
         <button id="btn-study" onclick="window.fetchAndLoad()">학습 시작! START</button>
     </div>
@@ -112,10 +106,16 @@
 <script>
     window.words = [];
     const synth = window.speechSynthesis;
-    let engVoice = null, korVoice = null;
+    let engVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
         engVoice = voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang.startsWith('en'));
-        korVoice = voices.find(v => v.name.includes('Google 한국어')) || voices.find(v => v.lang.startsWith('ko'));
     }
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
+    initVoices();
+
+    window.speakSafe = function(text) {
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.voice = eng
