@@ -92,7 +92,13 @@
     <div id="lesson-subtitle"></div>
     <div id="study-area"><div id="study-options" style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
     <div id="test-area"><button class="btn-action" onclick="renderTest()" style="margin-bottom:15px; background:var(--p); color:#fff; box-shadow: 0 4px 0 #357ABD;">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
-    <div id="puzzle-area"><div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div><div class="cw-wrap" id="cw-box"></div><button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button><button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button><div class="h-box" id="cw-hints" style="margin-top:15px;"></div></div>
+    <div id="puzzle-area">
+        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
+        <div class="cw-wrap" id="cw-box"></div>
+        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button>
+        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button>
+        <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
+    </div>
 </div>
 
 <script>
@@ -112,15 +118,15 @@
     function updateUIByBook() {
         const v = document.getElementById('level').value, b = parseInt(document.getElementById('book').value), lSel = document.getElementById('lesson');
         if(!v || isNaN(b)) return;
+        
         const is2 = v.endsWith("2") && !v.startsWith("MS");
         let lessons = [];
 
-        // [핵심 로직] DS 모든 레벨(DSB, DSC, DSD)에 대해 권당 4개 레슨 적용
+        // [수정 핵심] v.startsWith("DS") 조건을 최상단으로 올려 모든 DS 레벨(DSB, DSC, DSD)이 4개씩 끊기도록 고정
         if (v.startsWith("DS")) {
             const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1;
             lessons = Array.from({length: 4}, (_, i) => start + i);
         } else {
-            // LS, MS는 기존 로직 유지
             const t = v.startsWith("MS")?"MS":"LS", c = CONFIG[t];
             lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1));
         }
@@ -160,13 +166,10 @@
     async function startStudy() {
         const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
         if(!v||!b||!l) return alert("모두 선택하세요!");
-        
-        // [예외 처리] DSD 레벨만 11, 12, 23, 24 시험 제한 (DSB, DSC는 허용)
         if (v.startsWith("DSD") && [11, 12, 23, 24].includes(parseInt(l))) {
             alert("해당 레슨은 단어 시험이 없습니다.");
             return;
         }
-
         try {
             const res = await fetch(`data/${v}_${b}_${l}.json`);
             const d = await res.json(); cData = d.words ? d : { words: d };
