@@ -283,8 +283,10 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
+                    // 단어 칸에만 'active' 클래스 부여
                     h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}" oninput="this.value = this.value.toUpperCase()"></div>`;
                 } else {
+                    // 빈 칸은 'empty' 클래스로 배경색 통일
                     h += `<div class="cell empty"></div>`;
                 }
             }
@@ -301,12 +303,13 @@
         let ok = true;
         ins.forEach(i => { 
             const val = i.value.trim().toUpperCase();
-            const ansArr = i.dataset.ans.split(","); 
+            const ansArr = i.dataset.ans.split(","); // 교차점 후보군 매칭
             if(val !== "" && ansArr.includes(val)) { 
                 i.parentElement.classList.add('ok'); 
                 i.parentElement.classList.remove('no');
             } else { 
-                ok = false; i.parentElement.classList.remove('ok');
+                ok = false; 
+                i.parentElement.classList.remove('ok');
                 if(val !== "") i.parentElement.classList.add('no');
             } 
         });
