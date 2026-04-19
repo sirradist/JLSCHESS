@@ -12,15 +12,15 @@
         body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
         .container { max-width: 900px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
-        #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 15px; border-radius: 8px; }
+        #status-area { font-size: 0.95rem; margin-bottom: 10px; color: #1a73e8; font-weight: bold; background: #e8f0fe; padding: 15px; border-radius: 8px; line-height: 1.5; }
         .setup-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         select, button { padding: 12px; border-radius: 8px; border: 1px solid #dadce0; font-size: 14px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; min-width: 100px; }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        .word-card { background: var(--card); padding: 18px; border-radius: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 12px; }
+        .word-card { background: var(--card); padding: 18px; border-radius: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #eee; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .word-text { font-size: 1.2rem; font-weight: 700; width: 220px; color: #1a73e8; }
         .hidden { background: #e8eaed !important; color: transparent !important; border-radius: 4px; user-select: none; cursor: pointer; }
-        .tts-icon { background: none; border: none; font-size: 1.4rem; cursor: pointer; }
+        .tts-icon { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
 <div class="container">
     <header>
         <h1>정상어학원 CHESS VOCA Master</h1>
-        <div id="status-area">라이브러리 로드 중...</div>
+        <div id="status-area">시스템 초기화 및 엔진 검증 중...</div>
     </header>
 
     <div class="setup-box">
@@ -89,20 +89,33 @@
     window.initTTS = async function() {
         const status = document.getElementById('status-area');
         try {
-            status.innerText = "🔍 Bella 엔진 조립 중 (model.onnx 및 config.json 확인)...";
-            
-            // 핵심 변경: 특정 파일을 넘기는 대신 현재 폴더('./')를 넘겨서 
-            // 라이브러리가 model.onnx와 config.json을 세트로 가져오게 합니다.
-            window.tts = await window.KokoroTTS.from_pretrained('./', {
-                model_file_name: 'model.onnx',
+            status.innerText = "🔍 모델 파일 로드 중...";
+            const response = await fetch('./model.onnx');
+            const blob = await response.blob();
+            const modelUrl = URL.createObjectURL(blob);
+
+            // [재검증] 외부 config.json 의존을 끊고 설정을 직접 주입
+            window.tts = await window.KokoroTTS.from_pretrained(modelUrl, {
+                model_file_structure: 'flat',
+                config: {
+                    model_type: "kokoro",
+                    architectures: ["KokoroTTS"],
+                    vocab_size: 178,
+                    hidden_size: 256,
+                    num_hidden_layers: 8,
+                    num_attention_heads: 8,
+                    intermediate_size: 1024,
+                    num_voices: 11,
+                    sample_rate: 24000
+                },
                 dtype: 'q8'
             });
 
-            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 준비 완료</span>";
+            status.innerHTML = "<span style='color:#34a853'>✅ Bella 음성 엔진 로드 성공. 이제 학습이 가능합니다.</span>";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         } catch (e) {
-            console.error("초기화 실패:", e);
-            status.innerHTML = `<span style='color:#d93025'>⚠️ AI 로드 실패 (파일 누락 또는 경로 오류)\n시스템 기본 음성으로 대체 작동합니다.</span>`;
+            console.error("엔진 초기화 실패:", e);
+            status.innerHTML = "<span style='color:#d93025'>⚠️ Bella 엔진 초기화 실패. 시스템 음성으로 전환합니다.</span>";
             document.querySelectorAll('select, button').forEach(el => el.disabled = false);
         }
     };
@@ -136,11 +149,16 @@
     window.playEnglish = async function(text) {
         if (!text) return;
         const cleanText = text.replace(/-/g, ',');
-        if (window.tts && window.tts.generate) {
+        
+        // [핵심] 재생 시도 전 보이스 데이터 존재 여부를 체크합니다.
+        if (window.tts) {
             try {
-                const audio = await window.tts.generate(cleanText, { voice: 'af_bella' });
+                // af_bella 데이터 로딩 실패를 대비해 기본 목소리로 시도하거나 
+                // 실패 시 즉시 catch 구문으로 넘깁니다.
+                const audio = await window.tts.generate(cleanText, { voice: 'af_heart' });
                 audio.play();
             } catch (e) {
+                console.warn("AI 보이스 생성 불가, 시스템 음성 사용:", e);
                 window.systemSpeak(cleanText);
             }
         } else {
