@@ -38,11 +38,10 @@
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
         
-        /* 크로스워드 셀 스타일 개선 */
         .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; }
         .cw-grid { display: grid; gap: 1px; background: #ccc; border: 1px solid #ccc; margin: 0 auto; }
         .cell { width: 28px; height: 28px; background: #34495e; position: relative; display: flex; align-items: center; justify-content: center; }
-        .cell.active { background: #fff; } /* 단어가 들어가는 칸만 흰색 */
+        .cell.active { background: #fff; }
         .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; padding: 0; outline: none; }
         .cell.ok { background: #e8f5e9 !important; }
         .cell-num { position: absolute; top: 0px; left: 1px; font-size: 0.45rem; color: #999; font-weight: 700; pointer-events: none; }
@@ -121,10 +120,8 @@
     function updateUIByBook() {
         const v = document.getElementById('level').value, b = parseInt(document.getElementById('book').value), lSel = document.getElementById('lesson');
         if(!v || isNaN(b)) return;
-        
         const is2 = v.endsWith("2") && !v.startsWith("MS");
         let lessons = [];
-
         if (v.startsWith("DS")) {
             const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1;
             lessons = Array.from({length: 4}, (_, i) => start + i);
@@ -132,7 +129,6 @@
             const t = v.startsWith("MS")?"MS":"LS", c = CONFIG[t];
             lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1));
         }
-
         lSel.innerHTML = lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
         updateBookImage();
     }
@@ -169,8 +165,7 @@
         const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
         if(!v||!b||!l) return alert("모두 선택하세요!");
         if (v.startsWith("DSD") && [11, 12, 23, 24].includes(parseInt(l))) {
-            alert("해당 레슨은 단어 시험이 없습니다.");
-            return;
+            alert("해당 레슨은 단어 시험이 없습니다."); return;
         }
         try {
             const res = await fetch(`data/${v}_${b}_${l}.json`);
@@ -207,7 +202,6 @@
 
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    // 크로스워드 가시성 개선 버전
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
@@ -225,7 +219,10 @@
                             let over = 0, fail = false;
                             for(let i=0; i<w.a.length; i++) {
                                 let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0);
-                                if(grid[rr][cc]) { if(grid[rr][cc].char===w.a[i]) over++; else fail=true; }
+                                if(grid[rr][cc]) { 
+                                    if(grid[rr][cc].char===w.a[i]) over++; 
+                                    else fail=true; 
+                                }
                             }
                             if(!fail && over>0) { best = { r, c, d }; break outer; }
                         }
@@ -235,7 +232,12 @@
             if(!best) best = { r: (placed.length*2)%sz, c: 1, d: 'H' };
             for(let i=0; i<w.a.length; i++) {
                 let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
-                grid[rr][cc] = { char: w.a[i], n: (i===0?placed.length+1:(grid[rr][cc]?grid[rr][cc].n:null)) };
+                // 중복 칸 처리: 기존 글자가 있다면 data-ans에 콤마로 추가
+                let existing = grid[rr][cc];
+                grid[rr][cc] = { 
+                    char: existing ? existing.char + "," + w.a[i] : w.a[i], 
+                    n: (i===0?placed.length+1:(existing?existing.n:null)) 
+                };
             }
             placed.push({ ...best, ...w });
         });
@@ -244,10 +246,8 @@
         for(let r=0; r<sz; r++) {
             for(let c=0; c<sz; c++) {
                 if(grid[r][c]) {
-                    // 단어가 들어가는 칸만 'active' 클래스를 주어 흰색 배경 적용
                     h += `<div class="cell active">${grid[r][c].n?`<span class="cell-num">${grid[r][c].n}</span>`:''}<input type="text" maxlength="1" data-ans="${grid[r][c].char}"></div>`;
                 } else {
-                    // 나머지는 'empty' 클래스로 어두운 배경색 유지
                     h += `<div class="cell empty"></div>`;
                 }
             }
@@ -257,10 +257,22 @@
     }
 
     function checkCW() {
-        const ins = document.querySelectorAll('.cell.active input'); let ok = true;
-        ins.forEach(i => { if(i.value.toUpperCase() === i.dataset.ans) i.parentElement.classList.add('ok'); else { ok = false; i.parentElement.classList.remove('ok'); } });
-        if(ok) { alert(curStage===1?"STAGE 1 완료! 다음으로!":"학습 완료!"); if(curStage===1){ document.getElementById('cw-check-btn').style.display='none'; document.getElementById('cw-next-btn').style.display='block'; } }
-        else alert("틀린 칸이 있어요!");
+        const ins = document.querySelectorAll('.cell.active input'); 
+        let ok = true;
+        ins.forEach(i => { 
+            const val = i.value.toUpperCase();
+            const ansArr = i.dataset.ans.split(","); // 콤마로 구분된 가능한 정답 리스트
+            // 입력값이 정답 후보 중 하나라도 일치하면 통과
+            if(val !== "" && ansArr.includes(val)) { 
+                i.parentElement.classList.add('ok'); 
+            } else { 
+                ok = false; i.parentElement.classList.remove('ok'); 
+            } 
+        });
+        if(ok) { 
+            alert(curStage===1?"STAGE 1 완료! 다음으로!":"학습 완료!"); 
+            if(curStage===1){ document.getElementById('cw-check-btn').style.display='none'; document.getElementById('cw-next-btn').style.display='block'; } 
+        } else alert("틀린 칸이 있어요!");
     }
     function nextStage() { curStage = 2; createCW(); }
 </script>
