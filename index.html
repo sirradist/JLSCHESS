@@ -58,9 +58,7 @@
         </div>
         <button class="btn-main" onclick="startStudy()">START!</button>
     </div>
-    <div id="book-image-container">
-        <img id="book-cover" src="" alt="Book Cover">
-    </div>
+    <div id="book-image-container"><img id="book-cover" src="" alt="Book Cover"></div>
     <div class="tab-menu" id="main-tabs"><button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button><button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button><button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button></div>
     <div id="lesson-subtitle"></div>
     <div id="study-area"><div style="display:flex; justify-content:center; gap:10px; margin-bottom:12px; font-size:0.8rem; font-weight:800; color:var(--p);"><label><input type="checkbox" id="chkE" onchange="renderStudy()"> 단어 가리기</label><label><input type="checkbox" id="chkK" onchange="renderStudy()"> 뜻 가리기</label></div><div id="study-list"></div></div>
@@ -71,19 +69,15 @@
 <script>
     const CONFIG = { DS: { b: [1,2,3], l: 10 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1;
-
     const synth = window.speechSynthesis;
     let engVoice = null;
 
     function initVoices() {
         const voices = synth.getVoices();
-        // 1순위: Google 미국 여성, 2순위: 미국 영어 전체, 3순위: en-US 포함된 모든 음성
         engVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google') && v.name.includes('Female')) || 
                    voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || 
                    voices.find(v => v.lang.startsWith('en-US'));
     }
-    
-    // 음성 목록 로딩을 위한 이벤트 처리
     if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
     initVoices();
 
@@ -97,18 +91,13 @@
     }
 
     function updateBookImage() {
-        const lv = document.getElementById('level').value;
-        const bk = document.getElementById('book').value;
-        const container = document.getElementById('book-image-container');
-        const img = document.getElementById('book-cover');
+        const lv = document.getElementById('level').value, bk = document.getElementById('book').value;
+        const container = document.getElementById('book-image-container'), img = document.getElementById('book-cover');
         if (lv && bk) {
-            const imgPath = `data/${lv}_${bk}.jpg`;
-            img.src = imgPath;
+            img.src = `data/${lv}_${bk}.jpg`;
             img.onload = () => container.style.display = 'block';
             img.onerror = () => container.style.display = 'none';
-        } else {
-            container.style.display = 'none';
-        }
+        } else container.style.display = 'none';
     }
 
     async function startStudy() {
@@ -118,10 +107,9 @@
             const res = await fetch(`data/${v}_${b}_${l}.json`);
             const d = await res.json(); cData = d.words ? d : { words: d };
             const sub = document.getElementById('lesson-subtitle');
-            if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else { sub.style.display="none"; }
+            if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else sub.style.display="none";
             document.getElementById('main-tabs').style.display = "grid"; 
-            curStage = 1;
-            switchTab('study');
+            curStage = 1; switchTab('study');
         } catch(e) { alert("데이터 로드 실패"); }
     }
 
@@ -130,14 +118,24 @@
         document.getElementById('tab-'+t).classList.add('active');
         ['study-area','test-area','puzzle-area'].forEach(id => document.getElementById(id).style.display='none');
         document.getElementById(t+'-area').style.display='block';
-        if(t==='study') renderStudy(); 
-        if(t==='test') renderTest(); 
-        if(t==='puzzle') { curStage = 1; createCW(); }
+        if(t==='study') renderStudy(); if(t==='test') renderTest(); if(t==='puzzle') { curStage = 1; createCW(); }
+    }
+
+    // [핵심 수정] 동사 원형-과거형을 자연스럽게 모두 읽도록 공백 처리 로직 추가
+    function getSpeakText(text) {
+        return text.replace(/-/g, ' ').trim(); // 'plant - planted' -> 'plant   planted'
     }
 
     function renderStudy() {
         const e = document.getElementById('chkE').checked, k = document.getElementById('chkK').checked;
-        document.getElementById('study-list').innerHTML = cData.words.map(w => `<div class="card"><button class="tts-icon" onclick="speak('${w.en.split('-')[0].trim()}')">🔊</button><div class="word-content"><div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div><div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div></div></div>`).join('');
+        document.getElementById('study-list').innerHTML = cData.words.map(w => `
+            <div class="card">
+                <button class="tts-icon" onclick="speak('${getSpeakText(w.en)}')">🔊</button>
+                <div class="word-content">
+                    <div class="word-text ${e?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
+                    <div class="mean-text ${k?'hidden':''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
+                </div>
+            </div>`).join('');
     }
 
     function renderTest() {
@@ -146,32 +144,27 @@
             const type = Math.random() > 0.5 ? "E2K" : "K2E";
             const q = type === "E2K" ? w.en : w.ko, ans = type === "E2K" ? w.ko : w.en;
             const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5);
-            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${w.en}')">${o}</button>`).join('')}</div>`;
+            return `<div class="q-box"><div class="q-text">${i+1}. ${q}</div>${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this, '${o}', '${ans}', '${getSpeakText(w.en)}')">${o}</button>`).join('')}</div>`;
         }).join('');
     }
 
-    function checkAnswer(btn, choice, correct, english) {
+    function checkAnswer(btn, choice, correct, speakText) {
         if(choice === correct) {
             btn.classList.add('ok');
-            // 정답 시 해당 단어 영어 발음 재생
-            speak(english.split('-')[0].trim());
-        } else {
-            btn.classList.add('no');
-        }
+            speak(speakText); // 정답 시 원형-과거형 모두 재생
+        } else btn.classList.add('no');
     }
 
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 16;
         const allW = cData.words.map(w => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko }));
-        const half = Math.ceil(allW.length / 2);
-        const ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
+        const half = Math.ceil(allW.length / 2), ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (단어 ${ws.length}개)`;
-        document.getElementById('cw-next-btn').style.display = 'none';
-        document.getElementById('cw-check-btn').style.display = 'block';
+        document.getElementById('cw-next-btn').style.display = 'none'; document.getElementById('cw-check-btn').style.display = 'block';
         let grid = Array(sz).fill().map(() => Array(sz).fill(null)), placed = [];
         ws.forEach(w => {
             let best = null;
-            if(placed.length === 0) { best = { r: 7, c: 4, d: 'H' }; }
+            if(placed.length === 0) best = { r: 7, c: 4, d: 'H' };
             else {
                 for(let r=0; r<sz; r++) for(let c=0; c<sz; c++) {
                     ['H','V'].forEach(d => {
@@ -186,7 +179,7 @@
                     }); if(best) break;
                 }
             }
-            if(!best) { best = { r: (placed.length*2)%sz, c: 1, d: 'H' }; }
+            if(!best) best = { r: (placed.length*2)%sz, c: 1, d: 'H' };
             for(let i=0; i<w.a.length; i++) {
                 let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0);
                 grid[rr][cc] = { char: w.a[i], n: (i===0?placed.length+1:(grid[rr][cc]?grid[rr][cc].n:null)) };
@@ -219,19 +212,18 @@
 
     function speak(t) {
         synth.cancel();
-        if (!engVoice) initVoices(); // 음성이 없으면 다시 초기화 시도
-        
+        if (!engVoice) initVoices();
         const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'en-US'; // 미국 영어 언어 코드 고정
+        u.lang = 'en-US';
         if (engVoice) u.voice = engVoice;
-        u.rate = 0.9;
+        u.rate = 0.85; // 과거형까지 읽으므로 속도를 아주 미세하게 늦춰 명확하게 들리게 함
         u.pitch = 1.1; 
         synth.speak(u);
     }
 
     document.addEventListener('DOMContentLoaded', () => { 
         document.getElementById('level').addEventListener('change', updateUI); 
-        initVoices(); // 페이지 로드 시 즉시 음성 로드 시도
+        initVoices();
     });
 </script>
 </body>
