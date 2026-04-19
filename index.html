@@ -13,9 +13,9 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Nanum Round', sans-serif; background-color: var(--bg);
-            margin: 0; padding: 15px; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh;
+            margin: 0; padding: 15px; color: var(--text); display: flex; align-items: flex-start; justify-content: center; min-height: 100vh;
         }
-        .container { width: 100%; max-width: 450px; text-align: center; }
+        .container { width: 100%; max-width: 450px; text-align: center; padding-top: 20px; }
         h1 { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
         
         .setup-box {
@@ -36,6 +36,12 @@
             box-shadow: 0 5px 0 #357ABD; transition: all 0.1s; margin-top: 10px;
         }
         #btn-study:active { transform: translateY(3px); box-shadow: none; }
+
+        /* 부제목 스타일 */
+        #lesson-subtitle {
+            margin: 10px 0 20px; font-size: 1.1rem; font-weight: 800; color: #576574;
+            display: none; background: #fff; padding: 10px; border-radius: 15px; border: 2px dashed var(--primary);
+        }
 
         #controls {
             display: none; justify-content: center; gap: 20px; margin-bottom: 20px;
@@ -91,6 +97,8 @@
         <button id="btn-study">학습 시작! START</button>
     </div>
 
+    <div id="lesson-subtitle"></div>
+
     <div id="controls">
         <label class="control-item"><input type="checkbox" id="chkEng"> English 👀</label>
         <label class="control-item"><input type="checkbox" id="chkKor"> 한글 👀</label>
@@ -106,7 +114,7 @@
         MS: { books: [1,2], lessons: [1,2,4,5,7,8,10,11,13,14,16,17] }
     };
 
-    let words = [];
+    let wordData = { subtitle: "", words: [] };
     const synth = window.speechSynthesis;
     let engVoice = null;
 
@@ -121,26 +129,16 @@
         const lv = document.getElementById('level').value;
         const bookSel = document.getElementById('book');
         const lessonSel = document.getElementById('lesson');
-
         if (!lv) return;
-
         const type = lv.startsWith("MS") ? "MS" : (lv.startsWith("LS") ? "LS" : "DS");
         const c = CONFIG[type];
-
-        // Chess Book 업데이트
         const isLevel2 = lv.endsWith("2") && type !== "MS";
         const books = isLevel2 ? [4,5,6] : c.books;
         bookSel.innerHTML = books.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
-
-        // Lesson 업데이트
         let lessons = [];
-        if (isLevel2) {
-            for(let i=13; i<=22; i++) lessons.push(i);
-        } else if (Array.isArray(c.lessons)) {
-            lessons = c.lessons;
-        } else {
-            for(let i=1; i<=10; i++) lessons.push(i);
-        }
+        if (isLevel2) { for(let i=13; i<=22; i++) lessons.push(i); }
+        else if (Array.isArray(c.lessons)) { lessons = c.lessons; }
+        else { for(let i=1; i<=10; i++) lessons.push(i); }
         lessonSel.innerHTML = lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
     }
 
@@ -152,7 +150,24 @@
 
         try {
             const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
-            words = await res.json();
+            const data = await res.json();
+            
+            // 데이터 형식이 객체인지 배열인지 체크 (호환성 유지)
+            if (data.words) {
+                wordData = data;
+            } else {
+                wordData = { subtitle: "", words: data };
+            }
+
+            // 부제목 표시 로직
+            const subTitleEl = document.getElementById('lesson-subtitle');
+            if (wordData.subtitle) {
+                subTitleEl.innerText = "📖 " + wordData.subtitle;
+                subTitleEl.style.display = "block";
+            } else {
+                subTitleEl.style.display = "none";
+            }
+
             document.getElementById('controls').style.display = "flex";
             render();
         } catch(e) { alert("파일을 찾을 수 없습니다."); }
@@ -163,31 +178,6 @@
         const hE = document.getElementById('chkEng').checked;
         const hK = document.getElementById('chkKor').checked;
         
-        area.innerHTML = words.map(w => `
+        area.innerHTML = wordData.words.map(w => `
             <div class="word-card">
-                <button class="tts-icon" onclick="speak('${w.en.replace(/'/g, "\\'")}')">🔊</button>
-                <div class="word-content">
-                    <div class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</div>
-                    <div class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function speak(text) {
-        synth.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = engVoice;
-        utter.lang = 'en-US';
-        utter.rate = 0.9;
-        synth.speak(utter);
-    }
-
-    // 이벤트 바인딩
-    document.getElementById('level').addEventListener('change', updateUI);
-    document.getElementById('btn-study').addEventListener('click', startStudy);
-    document.getElementById('chkEng').addEventListener('change', render);
-    document.getElementById('chkKor').addEventListener('change', render);
-</script>
-</body>
-</html>
+                <button class="tts-icon" onclick="speak('${w.en.replace(/'
