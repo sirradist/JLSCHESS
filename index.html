@@ -131,3 +131,59 @@
         let lHtml = "";
         if(lv.endsWith("2") && !lv.startsWith("MS")) {
             for(let i=13; i<=22; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        } else if (Array.isArray(config.lessons)) {
+            lHtml = config.lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+        } else {
+            for(let i=1; i<=10; i++) lHtml += `<option value="${i}">Lesson ${i}</option>`;
+        }
+        document.getElementById('lesson').innerHTML = lHtml;
+    }
+
+    async function fetchAndLoad() {
+        const lv = document.getElementById('level').value;
+        const bk = document.getElementById('book').value;
+        const ls = document.getElementById('lesson').value;
+        try {
+            const res = await fetch(`data/${lv}_${bk}_${ls}.json`);
+            words = await res.json();
+            document.getElementById('controls').style.display = "flex";
+            renderWords();
+        } catch(e) { alert("JSON 데이터를 불러올 수 없습니다."); }
+    }
+
+    function renderWords() {
+        const area = document.getElementById('display-area');
+        const hE = document.getElementById('chkEng').checked;
+        const hK = document.getElementById('chkKor').checked;
+
+        area.innerHTML = words.map((w) => `
+            <div class="word-card">
+                <button class="tts-icon" onclick="playEnglish('${w.en}')">🔈</button>
+                <span class="word-text ${hE ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.en}</span>
+                <span class="mean-text ${hK ? 'hidden' : ''}" onclick="this.classList.toggle('hidden')">${w.ko}</span>
+                <button class="tts-icon" onclick="playKorean('${w.ko}')">🔊</button>
+            </div>
+        `).join('');
+    }
+
+    async function playEnglish(text) {
+        if (!text) return;
+        const cleanText = text.replace(/-/g, ',');
+        if (kokoro) {
+            const audio = await kokoro.generate(cleanText, { voice: 'af_bella' });
+            audio.play();
+        } else {
+            const utter = new SpeechSynthesisUtterance(cleanText);
+            utter.lang = 'en-US';
+            window.speechSynthesis.speak(utter);
+        }
+    }
+
+    function playKorean(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        window.speechSynthesis.speak(utter);
+    }
+</script>
+</body>
+</html>
