@@ -89,7 +89,7 @@
 </div>
 
 <script>
-    /* [보존] CONFIG 및 초기 로딩 */
+    /* [보존] 사용자 원본 CONFIG 및 초기 로딩 흐름 복구 */
     const CONFIG = { DS: { b: [1,2,3], l: 12 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1, lastDir = 'H';
 
@@ -100,15 +100,15 @@
         const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
         const books = is2 ? [4,5,6] : c.b;
         bSel.innerHTML = books.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
-        updateUIByBook();
+        updateUIByBook(); // 레슨 목록 즉시 갱신 보장
     }
     function updateUIByBook() {
         const v = document.getElementById('level').value, b = parseInt(document.getElementById('book').value), lSel = document.getElementById('lesson');
         if(!v || isNaN(b)) return;
-        const is2 = v.endsWith("2") && !v.startsWith("MS");
+        const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), is2 = v.endsWith("2")&&t!=="MS";
         let lessons = [];
-        if (v.startsWith("DS")) { const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1; lessons = Array.from({length: 4}, (_, i) => start + i); }
-        else { const t = v.startsWith("MS")?"MS":"LS", c = CONFIG[t]; lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1)); }
+        if (t === "DS") { const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1; lessons = Array.from({length: 4}, (_, i) => start + i); }
+        else { const c = CONFIG[t]; lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1)); }
         lSel.innerHTML = lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
         updateBookImage();
     }
@@ -136,21 +136,24 @@
     function renderTest() { const list = [...cData.words].sort(() => Math.random() - 0.5).slice(0, 10); document.getElementById('test-list').innerHTML = list.map((w, i) => { const type = Math.random() > 0.5 ? "E2K" : "K2E"; const ans = type === "E2K" ? w.ko : w.en; const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5); return `<div class="q-box"><div class="q-text">${i+1}. ${type==="E2K"?w.en:w.ko}</div><div class="q-opts">${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this,'${o}','${ans}','${w.en}')">${o}</button>`).join('')}</div></div>`; }).join(''); }
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
-    /* [패치] 크로스워드 로직 (번호 병합 및 힌트 동기화) */
+    /* [패치] 고성능 크로스워드 로직 (대량 데이터 및 번호 병합 대응) */
     function createCW() {
-        const sz = 20; 
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints');
         const allW = cData.words.map((w, i) => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko, id: i + 1 }));
         const half = Math.ceil(allW.length / 2);
         let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
+        
+        // [대량 대응] 단어 수에 따라 격자 크기 조절 (20~25)
+        const sz = ws.length > 12 ? 25 : 20; 
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
+        document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
         
         let grid, placed;
         for(let attempt = 0; attempt < 50; attempt++) {
             grid = Array(sz).fill().map(() => Array(sz).fill(null)); placed = [];
-            let sortedWs = [...ws].sort((a,b) => a.id - b.id); // 번호 순으로 배치 시도
-            
+            let sortedWs = [...ws].sort((a,b) => a.id - b.id);
             let first = sortedWs.shift();
-            let startR = 5, startC = 2;
+            let startR = Math.floor(sz/4), startC = 2;
             applyToGrid(grid, first, startR, startC, 'H');
             placed.push({ ...first, r: startR, c: startC, d: 'H' });
 
@@ -187,26 +190,23 @@
 
     function canPlace(grid, word, r, c, d, sz, isolated = false) {
         if(r < 0 || c < 0 || (d === 'H' && c + word.length > sz) || (d === 'V' && r + word.length > sz)) return false;
-        let connections = 0;
+        let con = 0;
         for(let i = 0; i < word.length; i++) {
-            let currR = d === 'V' ? r + i : r, currC = d === 'H' ? c + i : c;
-            if(grid[currR][currC]) { if(grid[currR][currC].char !== word[i]) return false; connections++; }
+            let cr = d === 'V' ? r + i : r, cc = d === 'H' ? c + i : c;
+            if(grid[cr][cc]) { if(grid[cr][cc].char !== word[i]) return false; con++; }
             else {
-                if(d === 'H') { if((grid[currR-1] && grid[currR-1][currC]) || (grid[currR+1] && grid[currR+1][currC])) return false; }
-                else { if((grid[currR][currC-1]) || (grid[currR][currC+1])) return false; }
+                if(d === 'H') { if((grid[cr-1] && grid[cr-1][cc]) || (grid[cr+1] && grid[cr+1][cc])) return false; }
+                else { if((grid[cr][cc-1]) || (grid[cr][cc+1])) return false; }
             }
         }
-        return isolated ? true : connections > 0;
+        return isolated ? true : con > 0;
     }
 
     function applyToGrid(grid, w, r, c, d) {
         for(let i=0; i<w.a.length; i++) {
-            let currR = d==='V'?r+i:r, currC = d==='H'?c+i:c;
-            if(!grid[currR]) grid[currR] = [];
-            let existing = grid[currR][currC];
-            let numObj = existing ? {...existing.nums} : {};
-            if(i===0) numObj[d] = w.id; // 시작 칸이면 번호 추가 (가로/세로 구분)
-            grid[currR][currC] = { char: w.a[i], nums: numObj, d: existing ? 'HV' : d };
+            let cr = d==='V'?r+i:r, cc = d==='H'?c+i:c, ex = grid[cr][cc];
+            let numObj = ex ? {...ex.nums} : {}; if(i===0) numObj[d] = w.id;
+            grid[cr][cc] = { char: w.a[i], nums: numObj, d: ex ? 'HV' : d };
         }
     }
 
@@ -215,20 +215,17 @@
         box.innerHTML = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 30px);">` + grid.map((row, r) => row.map((cell, c) => {
             if(!cell) return `<div class="cell empty"></div>`;
             let ns = Object.values(cell.nums).sort((a,b)=>a-b);
-            let label = ns.length > 0 ? ns.join('/') : ""; // 번호가 여러 개면 1/3 식으로 병합
+            let label = ns.length > 0 ? ns.join('/') : "";
             return `<div class="cell active">${label?`<span class="cell-num" style="font-size:0.4rem; top:0; left:1px;">${label}</span>`:''}<input type="text" maxlength="1" data-ans="${cell.char}" data-r="${r}" data-c="${c}" data-dir="${cell.d}" onfocus="setDir(this)" oninput="smartMove(this)"></div>`;
         }).join('')).join('') + `</div>`;
-        
-        // 힌트 목록 동기화 (실제 배치된 방향을 실시간 반영)
         hBox.innerHTML = ws.map(w => {
             const p = placed.find(pl => pl.id === w.id);
-            const actualDirText = p ? (p.d === 'H' ? '가로' : '세로') : '미배치';
-            return `<div style="margin-bottom:8px; font-weight:700; color:#555;">${w.id}. ${w.h} (${actualDirText}, ${w.a.length}자)</div>`;
+            const actualDir = p ? (p.d === 'H' ? '가로' : '세로') : '미배치';
+            return `<div style="margin-bottom:8px; font-weight:700; color:#555;">${w.id}. ${w.h} (${actualDir}, ${w.a.length}자)</div>`;
         }).join('');
     }
 
     function setDir(el) { const d = el.dataset.dir; if(d.length === 1) lastDir = d; setTimeout(() => { if(el === document.activeElement) el.select(); }, 50); }
-    
     function smartMove(el) {
         const val = el.value.toUpperCase();
         if (val.length >= 1) {
@@ -239,13 +236,32 @@
             if (nextInput) setTimeout(() => nextInput.focus(), 10);
         }
     }
-    
+
+    /* [패치] 종료 로직 강화 (학습 완료 알림) */
     function checkCW() {
-        const ins = document.querySelectorAll('.cell.active input'); let ok = true;
-        ins.forEach(i => { const val = i.value.trim().toUpperCase(), ansArr = i.dataset.ans.split(","); if(val !== "" && ansArr.includes(val)) { i.parentElement.classList.add('ok'); i.parentElement.classList.remove('no'); } else { ok = false; i.parentElement.classList.remove('ok'); if(val !== "") i.parentElement.classList.add('no'); } });
-        if(ok) { alert(curStage===1?"STAGE 1 완료! 다음으로!":"학습 완료!"); if(curStage===1){ document.getElementById('cw-check-btn').style.display='none'; document.getElementById('cw-next-btn').style.display='block'; } } else alert("틀린 칸이 있어요!");
+        const ins = document.querySelectorAll('.cell.active input'); 
+        let ok = true, empty = false;
+        ins.forEach(i => { 
+            const val = i.value.trim().toUpperCase(), ansArr = i.dataset.ans.split(","); 
+            if(val === "") { ok = false; empty = true; return; }
+            if(ansArr.includes(val)) { i.parentElement.classList.add('ok'); i.parentElement.classList.remove('no'); } 
+            else { ok = false; i.parentElement.classList.remove('ok'); i.parentElement.classList.add('no'); } 
+        });
+        if(ok) { 
+            if(curStage === 1) {
+                alert("STAGE 1 완료! 대단해요! 🎉"); 
+                document.getElementById('cw-check-btn').style.display='none'; 
+                document.getElementById('cw-next-btn').style.display='block'; 
+            } else {
+                alert("축하합니다! 학습 완료! 🏆");
+                document.getElementById('cw-check-btn').innerText = "학습 완료 ✨";
+                document.getElementById('cw-check-btn').disabled = true;
+            }
+        } else {
+            if(empty) alert("아직 빈 칸이 있어요!"); else alert("틀린 칸이 있어요!");
+        }
     }
-    function nextStage() { curStage = 2; createCW(); }
+    function nextStage() { if(curStage === 1) { curStage = 2; createCW(); window.scrollTo({top: 0, behavior: 'smooth'}); } }
 </script>
 </body>
 </html>
