@@ -7,11 +7,11 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        /* [배색 전면 수정] 화사한 화이트/블루 테마 */
+        /* [배색 전면 교체] 아이들의 눈이 편안한 화이트 테마 */
         :root { 
             --p: #4A90E2; 
             --s: #FFD93D; 
-            --bg: #F0F5FA; /* 화사하고 부드러운 배경색 */
+            --bg: #F5F9FF; /* 밝고 깨끗한 하늘색 배경 */
             --c: #FFFFFF; 
             --t: #2D3436; 
             --err: #FF6B6B; 
@@ -27,92 +27,86 @@
         .logo-img { height: 100%; width: auto; object-fit: contain; }
         h1 { font-size: 1.5rem; color: var(--p); margin: 0; font-weight: 800; }
 
-        /* 셋업 박스 밝게 */
-        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); }
-        select, .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid var(--line); font-size: 16px; font-family: inherit; outline: none; background: #fff; }
-        .row { display: flex; gap: 10px; } .row select { flex: 1; }
-        .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
+        /* [수정] 셋업 박스 배경을 화이트로 고정 */
+        .setup-box { background: var(--c); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(74, 144, 226, 0.08); margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); }
+        select { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid var(--line); font-size: 16px; font-family: inherit; outline: none; background: #fff; color: #555; font-weight: 700; }
+        .btn-main { width: 100%; padding: 14px; border-radius: 15px; border: none; font-size: 16px; font-family: inherit; background: var(--p); color: #fff; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #357ABD; }
         
         #book-image-container { display: none; margin: 10px 0 15px; }
-        #book-cover { max-width: 120px; border-radius: 10px; border: 1px solid var(--line); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #book-cover { max-width: 120px; border-radius: 10px; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* 탭 디자인 화사하게 */
         .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .tab-btn { padding: 12px; border-radius: 12px; border: none; background: #DDE4EB; color: #7F8C8D; font-weight: 800; cursor: pointer; }
+        .tab-btn { padding: 12px; border-radius: 12px; border: none; background: #E1E8EE; color: #7F8C8D; font-weight: 800; cursor: pointer; }
         .tab-btn.active { background: var(--p); color: #fff; box-shadow: 0 4px 10px rgba(74, 144, 226, 0.2); }
 
-        #lesson-subtitle { margin: 0 0 15px; font-size: 1.1rem; font-weight: 800; color: var(--p); display: none; background: #fff; padding: 12px; border-radius: 15px; border: 2px dashed var(--p); }
+        /* [수정] 부제목 바 색상 밝게 */
+        #lesson-subtitle { margin: 0 0 15px; font-size: 1.1rem; font-weight: 800; color: var(--p); display: none; background: #fff; padding: 12px; border-radius: 15px; border: 2px dashed #BBD6F2; }
 
-        /* 카드 및 텍스트 밝게 */
-        .card { background: var(--c); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); text-align: left; border: 1px solid #E9EFF5; }
+        /* [수정] 카드 디자인 - 어두운 선 제거하고 화사하게 */
+        .card { background: var(--c); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(74, 144, 226, 0.05); text-align: left; border: 1px solid #E9EFF5; }
         .word-text { font-size: 1.25rem; font-weight: 800; color: var(--p); }
         .mean-text { font-size: 1.05rem; font-weight: 700; color: #636e72; }
-        .tts-icon { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #E1EEFA; background: #F8FBFF; font-size: 1.2rem; cursor: pointer; color: var(--p); }
+        .tts-icon { width: 44px; height: 44px; border-radius: 12px; border: none; background: #F0F7FF; font-size: 1.2rem; cursor: pointer; color: var(--p); }
 
-        /* 테스트 영역 */
-        .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); border: 1px solid var(--line); }
-        .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; text-align: center; color: #333; }
-        .q-opts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        /* 퀴즈 박스 */
+        .q-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--line); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); }
+        .q-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; color: #333; }
         .q-opt { padding: 8px 12px; border-radius: 10px; border: 2px solid var(--line); background: #fff; font-weight: 700; cursor: pointer; color: #555; }
         .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
         .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
 
-        /* 퍼즐 격자 - 가시성 극대화 */
+        /* [수정] 퍼즐 격자 - 가시성 극대화 */
         .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid var(--line); }
-        .cw-grid { display: grid; gap: 1px; background: #BDC7D1; border: 1px solid #BDC7D1; margin: 0 auto; width: max-content; }
+        .cw-grid { display: grid; gap: 1px; background: #D1DCEB; border: 1px solid #D1DCEB; margin: 0 auto; width: max-content; }
         .cell { width: 32px; height: 32px; position: relative; display: flex; align-items: center; justify-content: center; }
-        .cell.empty { background: #F4F7FA !important; } /* 빈 칸을 밝은 회색으로 변경 */
-        .cell.active { background: #FFFFFF !important; } /* 입력 칸은 순백색 */
+        .cell.empty { background: #F1F4F9 !important; } /* 아주 연한 회색 */
+        .cell.active { background: #FFFFFF !important; }
         .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; outline: none; }
-        .cell input:focus { background: #E1F0FF; }
-        .cell.ok { background: #E8F9E9 !important; }
-        .cell.no { background: #FFF0F0 !important; }
-        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.45rem; color: #95A5A6; font-weight: 800; pointer-events: none; z-index: 5; line-height: 1; }
+        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.45rem; color: #AAB7C4; font-weight: 800; pointer-events: none; z-index: 5; }
         
         .h-box { text-align: left; background: #fff; padding: 20px; border-radius: 20px; border: 1px solid var(--line); }
-        .h-item { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: #444; line-height: 1.4; border-bottom: 1px dashed #eee; padding-bottom: 6px; }
-        .h-item:last-child { border: none; }
+        .h-item { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: #444; border-bottom: 1px dashed #eee; padding-bottom: 6px; }
 
-        .btn-action { background: var(--s); color: #5D5321; padding: 14px; border-radius: 15px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #D4B531; }
+        .btn-action { background: var(--s); color: #7D6B1A; padding: 14px; border-radius: 15px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #D4B531; }
         .btn-next { background: var(--ok); color: #fff; box-shadow: 0 4px 0 #529E5A; }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div class="logo-box"><img src="data/JLS%20Logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'"></div>
-        <h1>CHESS VOCA Master</h1>
-    </header>
-    <div class="setup-box">
-        <select id="level" onchange="updateUI()">
-            <option value="">레벨 선택</option>
-            <optgroup label="DS"><option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option><option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option><option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option></optgroup>
-            <optgroup label="LS"><option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option><option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option><option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option><option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option></optgroup>
-            <optgroup label="MS"><option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option><option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option></optgroup>
-        </select>
-        <div class="row"><select id="book" onchange="updateUIByBook()"></select><select id="lesson"></select></div>
-        <button class="btn-main" onclick="startStudy()">START!</button>
+    <div class="container">
+        <header>
+            <div class="logo-box"><img src="data/JLS%20Logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'"></div>
+            <h1>CHESS VOCA Master</h1>
+        </header>
+        <div class="setup-box">
+            <select id="level" onchange="updateUI()">
+                <option value="">레벨 선택</option>
+                <optgroup label="DS"><option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option><option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option><option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option></optgroup>
+                <optgroup label="LS"><option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option><option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option><option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option><option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option></optgroup>
+                <optgroup label="MS"><option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option><option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option></optgroup>
+            </select>
+            <div class="row"><select id="book" onchange="updateUIByBook()"></select><select id="lesson"></select></div>
+            <button class="btn-main" onclick="startStudy()">START!</button>
+        </div>
+        <div id="book-image-container"><img id="book-cover" src="" alt="Cover"></div>
+        <div class="tab-menu" id="main-tabs">
+            <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
+            <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
+            <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
+        </div>
+        <div id="lesson-subtitle"></div>
+        <div id="study-area"><div id="study-list"></div></div>
+        <div id="test-area"><button class="btn-action" style="background:var(--p); color:#fff; box-shadow:0 4px 0 #357ABD; margin-bottom:20px;" onclick="renderTest()">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
+        <div id="puzzle-area">
+            <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
+            <div class="cw-wrap" id="cw-box"></div>
+            <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button>
+            <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button>
+            <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
+        </div>
     </div>
-    <div id="book-image-container"><img id="book-cover" src="" alt="Cover"></div>
-    <div class="tab-menu" id="main-tabs">
-        <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
-        <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
-        <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
-    </div>
-    <div id="lesson-subtitle"></div>
-    <div id="study-area"><div id="study-list"></div></div>
-    <div id="test-area"><button class="btn-action btn-test-refresh" style="background:var(--p); color:#fff; box-shadow:0 4px 0 #357ABD; margin-bottom:20px;" onclick="renderTest()">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
-    <div id="puzzle-area">
-        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:10px;"></div>
-        <div class="cw-wrap" id="cw-box"></div>
-        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button>
-        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button>
-        <div class="h-box" id="cw-hints" style="margin-top:15px;"></div>
-    </div>
-</div>
 
 <script>
-    /* [원본 보존] 모든 스크립트 로직 유지 */
+    /* [기존 검증된 script 로직 전체 유지 - 누락 방지/번호 병합/종료 로직 포함] */
     const CONFIG = { DS: { b: [1,2,3], l: 12 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1, lastDir = 'H';
 
