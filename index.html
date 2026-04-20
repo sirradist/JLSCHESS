@@ -7,6 +7,7 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
+        /* [보존] 사용자 원본 디자인 스타일 */
         :root { --p: #4A90E2; --s: #FFD93D; --bg: #F0F7FF; --c: #FFFFFF; --t: #2D3436; --err: #FF6B6B; --ok: #6BCB77; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
@@ -59,16 +60,33 @@
         <div class="logo-box"><img src="data/JLS%20Logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'"></div>
         <h1>CHESS VOCA Master</h1>
     </header>
+
     <div class="setup-box">
         <select id="level" onchange="updateUI()">
             <option value="">레벨 선택</option>
-            <optgroup label="DS"><option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option><option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option><option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option></optgroup>
-            <optgroup label="LS"><option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option><option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option><option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option><option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option></optgroup>
-            <optgroup label="MS"><option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option><option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option></optgroup>
+            <optgroup label="DS">
+                <option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option>
+                <option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option>
+                <option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option>
+            </optgroup>
+            <optgroup label="LS">
+                <option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option>
+                <option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option>
+                <option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option>
+                <option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option>
+            </optgroup>
+            <optgroup label="MS">
+                <option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option>
+                <option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option>
+            </optgroup>
         </select>
-        <div class="row"><select id="book" onchange="updateUIByBook()"></select><select id="lesson"></select></div>
+        <div class="row">
+            <select id="book" onchange="updateUIByBook()"></select>
+            <select id="lesson"></select>
+        </div>
         <button class="btn-main" onclick="startStudy()">START!</button>
     </div>
+
     <div id="book-image-container"><img id="book-cover" src="" alt="Cover"></div>
     <div class="tab-menu" id="main-tabs">
         <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
@@ -76,6 +94,7 @@
         <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
     </div>
     <div id="lesson-subtitle"></div>
+
     <div id="study-area"><div id="study-list"></div></div>
     <div id="test-area"><button class="btn-action btn-test-refresh" onclick="renderTest()">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
     <div id="puzzle-area">
@@ -88,6 +107,7 @@
 </div>
 
 <script>
+    // [보존] 사용자 원본 CONFIG 및 초기 로딩 함수
     const CONFIG = { DS: { b: [1,2,3], l: 12 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
     let cData = { words: [] }, curLv = "", curStage = 1, lastDir = 'H';
 
@@ -134,36 +154,109 @@
     function renderTest() { const list = [...cData.words].sort(() => Math.random() - 0.5).slice(0, 10); document.getElementById('test-list').innerHTML = list.map((w, i) => { const type = Math.random() > 0.5 ? "E2K" : "K2E"; const ans = type === "E2K" ? w.ko : w.en; const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => type === "E2K" ? x.ko : x.en)].sort(() => Math.random() - 0.5); return `<div class="q-box"><div class="q-text">${i+1}. ${type==="E2K"?w.en:w.ko}</div><div class="q-opts">${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this,'${o}','${ans}','${w.en}')">${o}</button>`).join('')}</div></div>`; }).join(''); }
     function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
 
+    // [신규] 진짜 크로스워드 생성 로직 (교차성 극대화 및 데이터 일치)
     function createCW() {
         const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints'), sz = 20; 
         const allW = cData.words.map((w, i) => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko, id: i + 1 }));
         const half = Math.ceil(allW.length / 2);
         let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
         document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
-        document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
+        
         let grid, placed;
-        for(let attempt=0; attempt<50; attempt++) {
-            grid = Array(sz).fill().map(() => Array(sz).fill(null)); placed = [];
-            let tempWs = [...ws].sort((a,b) => b.a.length - a.a.length);
-            for(let w of tempWs) {
-                let best = null, possibilities = [];
-                for(let r=0; r<sz; r++) { for(let c=0; c<sz; c++) { for(let d of ['H', 'V']) { if((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz)) { let over = 0, fail = false; for(let i=0; i<w.a.length; i++) { let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0); if(grid[rr][cc]) { if(!grid[rr][cc].char.split(',').includes(w.a[i])) fail = true; else over += 100; } } if(!fail && over > 0) possibilities.push({ r, c, d, over }); } } } }
-                if(possibilities.length > 0) { possibilities.sort((a,b) => b.over - a.over); best = possibilities[0]; }
-                else { let found = false; for(let r=0; r<sz && !found; r++) { for(let c=0; c<sz && !found; c++) { for(let d of ['V', 'H']) { if(!found && ((d==='H' && c+w.a.length<=sz) || (d==='V' && r+w.a.length<=sz))) { let can = true; for(let i=0; i<w.a.length; i++) { let rr = r+(d==='V'?i:0), cc = c+(d==='H'?i:0); if(grid[rr][cc]) { can = false; break; } } if(can) { best = { r, c, d, over: 0 }; found = true; } } } } } }
-                if(best) {
-                    for(let i=0; i<w.a.length; i++) {
-                        let rr = best.r+(best.d==='V'?i:0), cc = best.c+(best.d==='H'?i:0), existing = grid[rr][cc];
-                        let numObj = existing ? {...existing.nums} : {}; if(i===0) numObj[best.d] = w.id;
-                        grid[rr][cc] = { char: (existing?existing.char+','+w.a[i]:w.a[i]), nums: numObj, d: existing ? (existing.d.includes(best.d) ? existing.d : existing.d + best.d) : best.d };
+        for(let attempt = 0; attempt < 50; attempt++) {
+            grid = Array(sz).fill().map(() => Array(sz).fill(null));
+            placed = [];
+            let sortedWs = [...ws].sort((a,b) => b.a.length - a.a.length);
+            
+            // 첫 단어 배치 (중앙 근처 가로)
+            let first = sortedWs.shift();
+            let startR = 5, startC = 2;
+            for(let i=0; i<first.a.length; i++) {
+                grid[startR][startC+i] = { char: first.a[i], nums: i===0?{'H':first.id}:{}, d: 'H' };
+            }
+            placed.push({ ...first, r: startR, c: startC, d: 'H' });
+
+            for(let w of sortedWs) {
+                let matches = [];
+                for(let r=0; r<sz; r++) {
+                    for(let c=0; c<sz; c++) {
+                        if(grid[r][c]) {
+                            let charAtGrid = grid[r][c].char;
+                            let charIdx = w.a.indexOf(charAtGrid);
+                            while(charIdx !== -1) {
+                                let newDir = grid[r][c].d.includes('H') ? 'V' : 'H';
+                                let rootR = (newDir === 'V') ? r - charIdx : r;
+                                let rootC = (newDir === 'H') ? c - charIdx : c;
+                                if(canPlace(grid, w.a, rootR, rootC, newDir, sz)) {
+                                    matches.push({ r: rootR, c: rootC, d: newDir });
+                                }
+                                charIdx = w.a.indexOf(charAtGrid, charIdx + 1);
+                            }
+                        }
                     }
-                    placed.push({ ...best, ...w });
+                }
+                if(matches.length > 0) {
+                    let best = matches[0];
+                    applyToGrid(grid, w, best.r, best.c, best.d);
+                    placed.push({ ...w, ...best });
+                } else {
+                    // 교차 실패 시 빈 공간에 격리 배치
+                    let found = false;
+                    for(let r=1; r<sz-1 && !found; r+=2) {
+                        for(let c=1; c<sz-1 && !found; c+=2) {
+                            if(canPlace(grid, w.a, r, c, 'H', sz, true)) {
+                                applyToGrid(grid, w, r, c, 'H');
+                                placed.push({ ...w, r, c, d: 'H' });
+                                found = true;
+                            }
+                        }
+                    }
                 }
             }
-            if(placed.length === ws.length) break; 
+            if(placed.length === ws.length) break;
         }
-        box.innerHTML = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 30px);">` + grid.map((row, r) => row.map((cell, c) => { if(!cell) return `<div class="cell empty"></div>`; let ns = Object.values(cell.nums), label = ns.length > 0 ? Math.min(...ns) : ""; return `<div class="cell active">${label?`<span class="cell-num">${label}</span>`:''}<input type="text" maxlength="1" data-ans="${cell.char}" data-r="${r}" data-c="${c}" data-dir="${cell.d}" onfocus="setDir(this)" oninput="smartMove(this)"></div>`; }).join('')).join('') + `</div>`;
-        hBox.innerHTML = ws.map(w => { const p = placed.find(pl => pl.id === w.id); const actualDir = p ? (p.d === 'H' ? '가로' : '세로') : '미배치'; return `<div style="margin-bottom:8px; font-weight:700;">${w.id}. ${w.h} (${actualDir}, ${w.a.length}자)</div>`; }).join('');
+        renderPuzzle(grid, placed, ws, sz);
     }
+
+    function canPlace(grid, word, r, c, d, sz, isolated = false) {
+        if(r < 0 || c < 0 || (d === 'H' && c + word.length > sz) || (d === 'V' && r + word.length > sz)) return false;
+        let connections = 0;
+        for(let i = 0; i < word.length; i++) {
+            let currR = d === 'V' ? r + i : r, currC = d === 'H' ? c + i : c;
+            if(grid[currR][currC]) {
+                if(grid[currR][currC].char !== word[i]) return false;
+                connections++;
+            } else {
+                if(d === 'H') { if((grid[currR-1] && grid[currR-1][currC]) || (grid[currR+1] && grid[currR+1][currC])) return false; }
+                else { if((grid[currR][currC-1]) || (grid[currR][currC+1])) return false; }
+            }
+        }
+        return isolated ? true : connections > 0;
+    }
+
+    function applyToGrid(grid, w, r, c, d) {
+        for(let i=0; i<w.a.length; i++) {
+            let currR = d==='V'?r+i:r, currC = d==='H'?c+i:c;
+            let existing = grid[currR][currC];
+            let numObj = existing ? {...existing.nums} : {};
+            if(i===0) numObj[d] = w.id;
+            grid[currR][currC] = { char: w.a[i], nums: numObj, d: existing ? 'HV' : d };
+        }
+    }
+
+    function renderPuzzle(grid, placed, ws, sz) {
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints');
+        box.innerHTML = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 30px);">` + grid.map((row, r) => row.map((cell, c) => {
+            if(!cell) return `<div class="cell empty"></div>`;
+            let ns = Object.values(cell.nums), label = ns.length > 0 ? Math.min(...ns) : "";
+            return `<div class="cell active">${label?`<span class="cell-num">${label}</span>`:''}<input type="text" maxlength="1" data-ans="${cell.char}" data-r="${r}" data-c="${c}" data-dir="${cell.d}" onfocus="setDir(this)" oninput="smartMove(this)"></div>`;
+        }).join('')).join('') + `</div>`;
+        hBox.innerHTML = ws.map(w => {
+            const p = placed.find(pl => pl.id === w.id);
+            return `<div style="margin-bottom:8px; font-weight:700;">${w.id}. ${w.h} (${p?(p.d.includes('H')?'가로':'세로'):'미배치'}, ${w.a.length}자)</div>`;
+        }).join('');
+    }
+
     function setDir(el) { const d = el.dataset.dir; if(d.length === 1) lastDir = d; setTimeout(() => { if(el === document.activeElement) el.select(); }, 50); }
     function smartMove(el) {
         const val = el.value.toUpperCase();
