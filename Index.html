@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JLS CHESS VOCA Master</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Round:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* [디자인 변경] 화사한 초등부 전용 테마 */
+        :root { 
+            --p: #4A90E2; 
+            --s: #FFD93D; 
+            --bg: #F8FBFF; /* 밝고 화사한 배경색 */
+            --c: #FFFFFF; 
+            --t: #444444; 
+            --err: #FF8E8E; 
+            --ok: #87D48D; 
+            --line: #E1EAF5;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Nanum Round', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--t); display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 600px; text-align: center; }
+        
+        header { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 15px 0; }
+        .logo-box { height: 45px; display: flex; align-items: center; }
+        .logo-img { height: 100%; width: auto; object-fit: contain; }
+        h1 { font-size: 1.6rem; color: var(--p); margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+
+        .setup-box { background: var(--c); padding: 20px; border-radius: 25px; box-shadow: 0 10px 25px rgba(74, 144, 226, 0.08); margin-bottom: 20px; border: 2px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+        select, .btn-main { width: 100%; padding: 15px; border-radius: 18px; border: 2px solid var(--line); font-size: 16px; font-family: inherit; outline: none; transition: 0.3s; color: #555; font-weight: 700; }
+        select:focus { border-color: var(--p); }
+        .row { display: flex; gap: 10px; } .row select { flex: 1; }
+        .btn-main { background: var(--p); color: #fff; border: none; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #357ABD; margin-top: 5px; }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #357ABD; }
+
+        #book-image-container { display: none; margin: 10px 0 20px; }
+        #book-cover { max-width: 130px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 4px solid #fff; }
+
+        .tab-menu { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 14px; border-radius: 18px; border: none; background: #E0E7EE; color: #8899A6; font-weight: 800; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .tab-btn.active { background: var(--p); color: #fff; box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3); }
+
+        #lesson-subtitle { margin: 0 0 20px; font-size: 1.15rem; font-weight: 800; color: var(--p); display: none; background: #fff; padding: 15px; border-radius: 20px; border: 2px dashed #BBD6F2; }
+
+        /* 카드 스타일 */
+        .card { background: var(--c); padding: 18px; border-radius: 22px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: left; border: 1px solid var(--line); }
+        .word-text { font-size: 1.3rem; font-weight: 800; color: var(--p); }
+        .mean-text { font-size: 1.05rem; font-weight: 700; color: #777; margin-top: 3px; }
+        .tts-icon { width: 44px; height: 44px; border-radius: 15px; border: none; background: #F0F7FF; font-size: 1.2rem; cursor: pointer; color: var(--p); }
+
+        /* 문제풀이 스타일 */
+        .q-box { background: #fff; padding: 25px; border-radius: 25px; margin-bottom: 15px; border: 2px solid var(--line); box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .q-text { font-size: 1.25rem; font-weight: 800; margin-bottom: 18px; color: #333; line-height: 1.4; }
+        .q-opts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .q-opt { padding: 12px 20px; border-radius: 15px; border: 2px solid var(--line); background: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #666; }
+        .q-opt.ok { background: var(--ok) !important; color: #fff; border-color: var(--ok); }
+        .q-opt.no { background: var(--err) !important; color: #fff; border-color: var(--err); }
+
+        /* 퍼즐 격자 스타일 (화사하게 변경) */
+        .cw-wrap { overflow-x: auto; background: #fff; padding: 15px; border-radius: 25px; margin-bottom: 20px; border: 2px solid var(--line); box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
+        .cw-grid { display: grid; gap: 1px; background: #D1DCEB; border: 1px solid #D1DCEB; margin: 0 auto; width: max-content; }
+        .cell { width: 32px; height: 32px; position: relative; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .cell.empty { background: #F1F4F9 !important; }
+        .cell.active { background: #fff !important; }
+        .cell input { width: 100%; height: 100%; border: none; text-align: center; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; color: var(--p); background: transparent; outline: none; }
+        .cell.ok { background: #E8F9E9 !important; }
+        .cell.no { background: #FFF0F0 !important; }
+        .cell-num { position: absolute; top: 1px; left: 2px; font-size: 0.45rem; color: #AAB7C4; font-weight: 800; pointer-events: none; z-index: 5; line-height: 1; }
+
+        .h-box { text-align: left; background: #fff; padding: 20px; border-radius: 25px; border: 2px solid var(--line); }
+        .h-item { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: #555; line-height: 1.5; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+        .h-item:last-child { border: none; }
+
+        .btn-action { background: var(--s); color: #7D6B1A; padding: 16px; border-radius: 20px; border: none; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 0 #D4B531; font-size: 1.1rem; }
+        .btn-action:active { transform: translateY(3px); box-shadow: 0 2px 0 #D4B531; }
+        .btn-next { background: var(--ok); color: #fff; box-shadow: 0 5px 0 #529E5A; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo-box"><img src="data/JLS%20Logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'"></div>
+        <h1>CHESS VOCA Master</h1>
+    </header>
+    <div class="setup-box">
+        <select id="level" onchange="updateUI()">
+            <option value="">레벨 선택</option>
+            <optgroup label="DS"><option value="DSB1">DSB 1</option><option value="DSB2">DSB 2</option><option value="DSC1">DSC 1</option><option value="DSC2">DSC 2</option><option value="DSD1">DSD 1</option><option value="DSD2">DSD 2</option></optgroup>
+            <optgroup label="LS"><option value="LSA1">LSA 1</option><option value="LSA2">LSA 2</option><option value="LSB1">LSB 1</option><option value="LSB2">LSB 2</option><option value="LSC1">LSC 1</option><option value="LSC2">LSC 2</option><option value="LSD1">LSD 1</option><option value="LSD2">LSD 2</option></optgroup>
+            <optgroup label="MS"><option value="MSA1">MSA 1</option><option value="MSA2">MSA 2</option><option value="MSB1">MSB 1</option><option value="MSB2">MSB 2</option></optgroup>
+        </select>
+        <div class="row"><select id="book" onchange="updateUIByBook()"></select><select id="lesson"></select></div>
+        <button class="btn-main" onclick="startStudy()">START!</button>
+    </div>
+    <div id="book-image-container"><img id="book-cover" src="" alt="Cover"></div>
+    <div class="tab-menu" id="main-tabs">
+        <button id="tab-study" class="tab-btn active" onclick="switchTab('study')">Study</button>
+        <button id="tab-test" class="tab-btn" onclick="switchTab('test')">Test</button>
+        <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">Puzzle</button>
+    </div>
+    <div id="lesson-subtitle"></div>
+    <div id="study-area"><div id="study-list"></div></div>
+    <div id="test-area"><button class="btn-main" style="margin-bottom:20px; background:#6CB2E6; box-shadow:0 5px 0 #4A90E2;" onclick="renderTest()">문제 다시 만들기 🔄</button><div id="test-list"></div></div>
+    <div id="puzzle-area">
+        <div id="cw-info" style="font-weight:800; color:var(--p); margin-bottom:12px; font-size:1.1rem;"></div>
+        <div class="cw-wrap" id="cw-box"></div>
+        <button class="btn-action" id="cw-check-btn" onclick="checkCW()">정답 확인 ✔️</button>
+        <button class="btn-action btn-next" id="cw-next-btn" onclick="nextStage()" style="display:none;">다음 스테이지 ➡️</button>
+        <div class="h-box" id="cw-hints" style="margin-top:20px;"></div>
+    </div>
+</div>
+
+<script>
+    const CONFIG = { DS: { b: [1,2,3], l: 12 }, LS: { b: [1,2,3], l: 10 }, MS: { b: [1,2], l: [1,2,4,5,7,8,10,11,13,14,16,17] } };
+    let cData = { words: [] }, curLv = "", curStage = 1, lastDir = 'H';
+
+    function updateUI() {
+        const v = document.getElementById('level').value, bSel = document.getElementById('book');
+        if(!v) { bSel.innerHTML = ""; document.getElementById('lesson').innerHTML = ""; return; }
+        curLv = v;
+        const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), c = CONFIG[t], is2 = v.endsWith("2")&&t!=="MS";
+        const books = is2 ? [4,5,6] : c.b;
+        bSel.innerHTML = books.map(b => `<option value="${b}">Chess Book ${b}</option>`).join('');
+        updateUIByBook();
+    }
+    function updateUIByBook() {
+        const v = document.getElementById('level').value, b = parseInt(document.getElementById('book').value), lSel = document.getElementById('lesson');
+        if(!v || isNaN(b)) return;
+        const t = v.startsWith("MS")?"MS":(v.startsWith("LS")?"LS":"DS"), is2 = v.endsWith("2")&&t!=="MS";
+        let lessons = [];
+        if (t === "DS") { const start = is2 ? (b - 4) * 4 + 13 : (b - 1) * 4 + 1; lessons = Array.from({length: 4}, (_, i) => start + i); }
+        else { const c = CONFIG[t]; lessons = is2 ? Array.from({length: 10}, (_, i) => i + 13) : (Array.isArray(c.l) ? c.l : Array.from({length: 10}, (_, i) => i + 1)); }
+        lSel.innerHTML = lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+        updateBookImage();
+    }
+    function updateBookImage() {
+        const lv = document.getElementById('level').value, bk = document.getElementById('book').value;
+        const container = document.getElementById('book-image-container'), img = document.getElementById('book-cover');
+        if (lv && bk) { img.src = `data/${lv}_${bk}.jpg`; img.onload = () => container.style.display = 'block'; img.onerror = () => container.style.display = 'none'; } else container.style.display = 'none';
+    }
+    const synth = window.speechSynthesis;
+    let engVoice = null;
+    function initVoices() {
+        const voices = synth.getVoices();
+        engVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google') && v.name.includes('Female')) || voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+    }
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = initVoices;
+    initVoices();
+    function speak(t) { synth.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/\s*-\s*/g, ", ")); u.lang = 'en-US'; if (engVoice) u.voice = engVoice; u.rate = 0.8; u.pitch = 1.1; synth.speak(u); }
+    
+    async function startStudy() {
+        const v = document.getElementById('level').value, b = document.getElementById('book').value, l = document.getElementById('lesson').value;
+        if(!v||!b||!l) return alert("레벨과 레슨을 선택해주세요! 😊");
+        try { 
+            const res = await fetch(`data/${v}_${b}_${l}.json`); 
+            const d = await res.json(); 
+            cData = d.words ? d : { words: d }; 
+            const sub = document.getElementById('lesson-subtitle'); 
+            if(cData.subtitle) { sub.innerText = "📖 " + cData.subtitle; sub.style.display="block"; } else sub.style.display="none"; 
+            document.getElementById('main-tabs').style.display = "grid"; 
+            curStage = 1; switchTab('study'); 
+        } catch(e) { alert("파일을 찾을 수 없어요. 😢"); }
+    }
+
+    function switchTab(t) { 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+        document.getElementById('tab-'+t).classList.add('active'); 
+        ['study-area','test-area','puzzle-area'].forEach(id => document.getElementById(id).style.display='none'); 
+        document.getElementById(t+'-area').style.display='block'; 
+        if(t==='study') renderStudy(); 
+        if(t==='test') renderTest(); 
+        if(t==='puzzle') { curStage = 1; createCW(); } 
+    }
+
+    function renderStudy() { 
+        document.getElementById('study-list').innerHTML = cData.words.map(w => `
+            <div class="card">
+                <button class="tts-icon" onclick="speak('${w.en}')">🔊</button>
+                <div class="word-content">
+                    <div class="word-text">${w.en}</div>
+                    <div class="mean-text">${w.ko}${w.def ? ` <small style="color:#999; font-weight:400;">(${w.def})</small>` : ''}</div>
+                </div>
+            </div>`).join(''); 
+    }
+
+    /* [DSD 대응] 퀴즈 유형에 영어 뜻(Definition) 추가 */
+    function renderTest() { 
+        const list = [...cData.words].sort(() => Math.random() - 0.5).slice(0, 10); 
+        document.getElementById('test-list').innerHTML = list.map((w, i) => { 
+            let type = Math.random() > 0.5 ? "E2K" : "K2E";
+            // 데이터에 def가 있으면 33% 확률로 영어 정의 퀴즈 출현
+            if(w.def && Math.random() > 0.6) type = "D2E"; 
+
+            const ans = (type === "E2K") ? w.ko : w.en;
+            const question = (type === "E2K") ? w.en : (type === "K2E" ? w.ko : w.def);
+            
+            const opts = [ans, ...cData.words.filter(x => x.en !== w.en).sort(() => Math.random() - 0.5).slice(0, 3).map(x => (type === "E2K") ? x.ko : x.en)].sort(() => Math.random() - 0.5); 
+            
+            return `<div class="q-box">
+                <div class="q-text">${i+1}. ${question}</div>
+                <div class="q-opts">${opts.map(o => `<button class="q-opt" onclick="checkAnswer(this,'${o}','${ans}','${w.en}')">${o}</button>`).join('')}</div>
+            </div>`; 
+        }).join(''); 
+    }
+
+    function checkAnswer(btn, choice, correct, en) { if(choice === correct) { btn.classList.add('ok'); speak(en); } else btn.classList.add('no'); }
+
+    /* [대량/DSD 대응] 크로스워드 로직 (격자 확장 및 듀얼 힌트) */
+    function createCW() {
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints');
+        const allW = cData.words.map((w, i) => ({ a: w.en.split('-')[0].trim().toUpperCase().replace(/[^A-Z]/g,''), h: w.ko, d: w.def, id: i + 1 }));
+        const half = Math.ceil(allW.length / 2);
+        let ws = (curStage === 1) ? allW.slice(0, half) : allW.slice(half);
+        
+        const sz = ws.length > 12 ? 25 : 20; 
+        document.getElementById('cw-info').innerText = `STAGE ${curStage} / 2 (${ws.length}단어)`;
+        document.getElementById('cw-next-btn').style.display='none'; document.getElementById('cw-check-btn').style.display='block';
+        document.getElementById('cw-check-btn').innerText = "정답 확인 ✔️";
+        document.getElementById('cw-check-btn').disabled = false;
+        
+        let grid, placed;
+        for(let attempt = 0; attempt < 50; attempt++) {
+            grid = Array(sz).fill().map(() => Array(sz).fill(null)); placed = [];
+            let sortedWs = [...ws].sort((a,b) => a.id - b.id);
+            let first = sortedWs.shift();
+            let startR = Math.floor(sz/4), startC = 2;
+            applyToGrid(grid, first, startR, startC, 'H');
+            placed.push({ ...first, r: startR, c: startC, d: 'H' });
+
+            for(let w of sortedWs) {
+                let matches = [];
+                for(let r=0; r<sz; r++) {
+                    for(let c=0; c<sz; c++) {
+                        if(grid[r][c]) {
+                            let charIdx = w.a.indexOf(grid[r][c].char);
+                            while(charIdx !== -1) {
+                                let newDir = grid[r][c].d.includes('H') ? 'V' : 'H';
+                                let rootR = (newDir === 'V') ? r - charIdx : r;
+                                let rootC = (newDir === 'H') ? c - charIdx : c;
+                                if(canPlace(grid, w.a, rootR, rootC, newDir, sz)) matches.push({ r: rootR, c: rootC, d: newDir });
+                                charIdx = w.a.indexOf(grid[r][c].char, charIdx + 1);
+                            }
+                        }
+                    }
+                }
+                if(matches.length > 0) { let best = matches[0]; applyToGrid(grid, w, best.r, best.c, best.d); placed.push({ ...w, ...best }); }
+                else {
+                    let found = false;
+                    for(let r=1; r<sz-1 && !found; r++) {
+                        for(let c=1; c<sz-1 && !found; c++) {
+                            if(canPlace(grid, w.a, r, c, 'H', sz, true)) { applyToGrid(grid, w, r, c, 'H'); placed.push({ ...w, r, c, d: 'H' }); found = true; }
+                        }
+                    }
+                }
+            }
+            if(placed.length === ws.length) break;
+        }
+        renderPuzzle(grid, placed, ws, sz);
+    }
+
+    function canPlace(grid, word, r, c, d, sz, isolated = false) {
+        if(r < 0 || c < 0 || (d === 'H' && c + word.length > sz) || (d === 'V' && r + word.length > sz)) return false;
+        let con = 0;
+        for(let i = 0; i < word.length; i++) {
+            let cr = d === 'V' ? r + i : r, cc = d === 'H' ? c + i : c;
+            if(grid[cr][cc]) { if(grid[cr][cc].char !== word[i]) return false; con++; }
+            else {
+                if(d === 'H') { if((grid[cr-1] && grid[cr-1][cc]) || (grid[cr+1] && grid[cr+1][cc])) return false; }
+                else { if((grid[cr][cc-1]) || (grid[cr][cc+1])) return false; }
+            }
+        }
+        return isolated ? true : con > 0;
+    }
+
+    function applyToGrid(grid, w, r, c, d) {
+        for(let i=0; i<w.a.length; i++) {
+            let cr = d==='V'?r+i:r, cc = d==='H'?c+i:c;
+            if(!grid[cr]) grid[cr] = [];
+            let ex = grid[cr][cc];
+            let numObj = ex ? {...ex.nums} : {};
+            if(i===0) numObj[d] = w.id;
+            grid[cr][cc] = { char: w.a[i], nums: numObj, d: ex ? 'HV' : d };
+        }
+    }
+
+    function renderPuzzle(grid, placed, ws, sz) {
+        const box = document.getElementById('cw-box'), hBox = document.getElementById('cw-hints');
+        box.innerHTML = `<div class="cw-grid" style="grid-template-columns: repeat(${sz}, 32px);">` + grid.map((row, r) => row.map((cell, c) => {
+            if(!cell) return `<div class="cell empty"></div>`;
+            let ns = Object.values(cell.nums).sort((a,b)=>a-b);
+            let label = ns.length > 0 ? ns.join('/') : "";
+            return `<div class="cell active">${label?`<span class="cell-num">${label}</span>`:''}<input type="text" maxlength="1" data-ans="${cell.char}" data-r="${r}" data-c="${c}" data-dir="${cell.d}" onfocus="setDir(this)" oninput="smartMove(this)"></div>`;
+        }).join('')).join('') + `</div>`;
+        
+        // [DSD 대응] 영어 뜻 병기 힌트 시스템
+        hBox.innerHTML = ws.map(w => {
+            const p = placed.find(pl => pl.id === w.id);
+            const actualDir = p ? (p.d === 'H' ? '가로' : '세로') : '미배치';
+            const hintText = w.d ? `${w.h} <br><small style="color:#888;">&nbsp;&nbsp;(${w.d})</small>` : w.h;
+            return `<div class="h-item">${w.id}. ${hintText} <span style="color:var(--p); float:right;">[${actualDir}, ${w.a.length}자]</span></div>`;
+        }).join('');
+    }
+
+    function setDir(el) { const d = el.dataset.dir; if(d.length === 1) lastDir = d; setTimeout(() => { if(el === document.activeElement) el.select(); }, 50); }
+    function smartMove(el) {
+        const val = el.value.toUpperCase();
+        if (val.length >= 1) {
+            el.value = val.charAt(val.length - 1);
+            const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
+            let nextR = (lastDir === 'H') ? r : r + 1, nextC = (lastDir === 'H') ? c + 1 : c;
+            const nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
+            if (nextInput) setTimeout(() => nextInput.focus(), 10);
+        }
+    }
+
+    function checkCW() {
+        const ins = document.querySelectorAll('.cell.active input'); 
+        let ok = true, empty = false;
+        ins.forEach(i => { 
+            const val = i.value.trim().toUpperCase(), ansArr = i.dataset.ans.split(","); 
+            if(val === "") { ok = false; empty = true; return; }
+            if(ansArr.includes(val)) { i.parentElement.classList.add('ok'); i.parentElement.classList.remove('no'); } 
+            else { ok = false; i.parentElement.classList.remove('ok'); i.parentElement.classList.add('no'); } 
+        });
+        if(ok) { 
+            if(curStage === 1) {
+                alert("STAGE 1 완료! 최고예요! 🥳"); 
+                document.getElementById('cw-check-btn').style.display='none'; 
+                document.getElementById('cw-next-btn').style.display='block'; 
+            } else {
+                alert("축하합니다! 모든 퍼즐을 다 맞췄어요! 🏆");
+                document.getElementById('cw-check-btn').innerText = "학습 완료 ✨";
+                document.getElementById('cw-check-btn').disabled = true;
+            }
+        } else {
+            if(empty) alert("아직 채우지 못한 칸이 있어요! 📝"); else alert("어딘가 틀린 글자가 있어요. 다시 확인해볼까요? 🔍");
+        }
+    }
+    function nextStage() { if(curStage === 1) { curStage = 2; createCW(); window.scrollTo({top: 0, behavior: 'smooth'}); } }
+</script>
+</body>
+</html>
