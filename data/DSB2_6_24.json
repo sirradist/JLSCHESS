@@ -1,0 +1,25 @@
+{
+  "subtitle": "What do you want to be?",
+  "words": [
+    { "en": "want to be - wanted to be", "ko": "~가 되고 싶다", "def": "" },
+    { "en": "dancer", "ko": "댄서, 무용수", "def": "" },
+    { "en": "like - liked", "ko": "좋아하다", "def": "" },
+    { "en": "see - saw", "ko": "보다", "def": "" },
+    { "en": "stage", "ko": "무대", "def": "" },
+    { "en": "cool", "ko": "멋진", "def": "" },
+    { "en": "vet", "ko": "수의사", "def": "" },
+    { "en": "animal", "ko": "동물", "def": "" },
+    { "en": "hospital", "ko": "병원", "def": "" },
+    { "en": "kind", "ko": "친절한, 다정한", "def": "" },
+    { "en": "concert", "ko": "연주회, 콘서트", "def": "" },
+    { "en": "musician", "ko": "음악가, 뮤지션", "def": "" },
+    { "en": "grow up - grew up", "ko": "자라다", "def": "" },
+    { "en": "fashion", "ko": "패션", "def": "" },
+    { "en": "designer", "ko": "디자이너", "def": "" },
+    { "en": "design - designed", "ko": "디자인하다", "def": "" },
+    { "en": "clothes", "ko": "옷, 의복", "def": "" },
+    { "en": "baker", "ko": "제빵사", "def": "" },
+    { "en": "bake - baked", "ko": "(음식을) 굽다", "def": "" },
+    { "en": "pastry", "ko": "반죽을 여러 겹으로 구워 만든 빵", "def": "" }
+  ]
+}

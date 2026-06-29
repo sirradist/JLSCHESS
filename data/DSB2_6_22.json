@@ -1,0 +1,25 @@
+{
+  "subtitle": "What is her job?",
+  "words": [
+    { "en": "work - worked", "ko": "일하다", "def": "" },
+    { "en": "courthouse", "ko": "법원, 재판소", "def": "" },
+    { "en": "lawyer", "ko": "변호사", "def": "" },
+    { "en": "speak - spoke", "ko": "말하다", "def": "" },
+    { "en": "nice", "ko": "멋진", "def": "" },
+    { "en": "job", "ko": "일, 직업", "def": "" },
+    { "en": "office", "ko": "사무실", "def": "" },
+    { "en": "architect", "ko": "건축가", "def": "" },
+    { "en": "design - designed", "ko": "디자인(설계)하다", "def": "" },
+    { "en": "building", "ko": "건물", "def": "" },
+    { "en": "picture", "ko": "그림, 사진", "def": "" },
+    { "en": "smart", "ko": "멋진, 똑똑한", "def": "" },
+    { "en": "wear - wore", "ko": "(옷 등을) 입다", "def": "" },
+    { "en": "uniform", "ko": "제복, 유니폼", "def": "" },
+    { "en": "flight attendant", "ko": "(비행기) 승무원", "def": "" },
+    { "en": "airport", "ko": "공항", "def": "" },
+    { "en": "teacher", "ko": "교사, 선생님", "def": "" },
+    { "en": "art", "ko": "미술", "def": "" },
+    { "en": "academy", "ko": "(특수 분야의) 학교", "def": "" },
+    { "en": "after-school", "ko": "방과 후의", "def": "" }
+  ]
+}

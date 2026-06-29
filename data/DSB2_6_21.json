@@ -1,0 +1,25 @@
+{
+  "subtitle": "Pinocchio Learns to Love",
+  "words": [
+    { "en": "broken", "ko": "부러진", "def": "" },
+    { "en": "branch", "ko": "나뭇가지", "def": "" },
+    { "en": "puppet", "ko": "(인형극에 쓰는) 꼭두각시, 인형", "def": "" },
+    { "en": "shoulder", "ko": "어깨", "def": "" },
+    { "en": "window", "ko": "창문", "def": "" },
+    { "en": "real", "ko": "진짜의", "def": "" },
+    { "en": "nod - nodded", "ko": "(고개를) 끄덕이다", "def": "" },
+    { "en": "stiff", "ko": "뻣뻣한", "def": "" },
+    { "en": "divide - divided", "ko": "나누다, 나눗셈하다", "def": "" },
+    { "en": "scratch - scratched", "ko": "긁다", "def": "" },
+    { "en": "mirror", "ko": "거울", "def": "" },
+    { "en": "cheer up - cheered up", "ko": "격려하다", "def": "" },
+    { "en": "swing", "ko": "그녀", "def": "" },
+    { "en": "mistake", "ko": "실수", "def": "" },
+    { "en": "math", "ko": "수학", "def": "" },
+    { "en": "bump - bumped", "ko": "부딪치다", "def": "" },
+    { "en": "wall", "ko": "벽", "def": "" },
+    { "en": "make up - made up", "ko": "지어내다", "def": "" },
+    { "en": "lie - lied", "ko": "거짓말하다", "def": "" },
+    { "en": "rub - rubbed", "ko": "문지르다", "def": "" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "subtitle": "Rumpelstiltskin",
+  "words": [
+    { "en": "friendly", "ko": "친근한, 다정한", "def": "" },
+    { "en": "problem", "ko": "문제", "def": "" },
+    { "en": "gnome", "ko": "꼬마 도깨비", "def": "" },
+    { "en": "pointy", "ko": "뾰족한", "def": "" },
+    { "en": "strange", "ko": "이상한", "def": "" },
+    { "en": "smash - smashed", "ko": "부딪치다, 충돌하다", "def": "" },
+    { "en": "disappear - disappeared", "ko": "사라지다", "def": "" },
+    { "en": "scream - screamed", "ko": "비명을 지르다", "def": "" },
+    { "en": "mud", "ko": "진흙", "def": "" },
+    { "en": "drop - dropped", "ko": "~을 빠뜨리다", "def": "" },
+    { "en": "castle", "ko": "성", "def": "" },
+    { "en": "golden", "ko": "금빛의", "def": "" },
+    { "en": "hang - hung", "ko": "걸다, 매달다", "def": "" },
+    { "en": "snip - snipped", "ko": "싹뚝 자르다", "def": "" },
+    { "en": "giant", "ko": "거대한", "def": "" },
+    { "en": "cave", "ko": "동굴", "def": "" },
+    { "en": "grin - grinned", "ko": "(소리 없이) 활짝 웃다", "def": "" },
+    { "en": "grab - grabbed", "ko": "(단단히) 붙잡다", "def": "" },
+    { "en": "punishment", "ko": "벌칙, 벌", "def": "" },
+    { "en": "washer", "ko": "빨래하는 사람", "def": "" }
+  ]
+}
