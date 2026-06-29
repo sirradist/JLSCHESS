@@ -1,0 +1,25 @@
+{
+  "subtitle": "What are you playing?",
+  "words": [
+    { "en": "fast", "ko": "빠른", "def": "" },
+    { "en": "jump - jumped", "ko": "뛰다, 점프하다", "def": "" },
+    { "en": "tall", "ko": "키가 큰", "def": "" },
+    { "en": "hit - hit", "ko": "때리다, 치다", "def": "" },
+    { "en": "strong", "ko": "강한, 힘센", "def": "" },
+    { "en": "golf", "ko": "골프", "def": "" },
+    { "en": "high", "ko": "높이", "def": "" },
+    { "en": "field hockey", "ko": "필드하키", "def": "" },
+    { "en": "roll - rolled", "ko": "구르다, 굴러가다", "def": "" },
+    { "en": "far", "ko": "멀리", "def": "" },
+    { "en": "ballpark", "ko": "야구장", "def": "" },
+    { "en": "near", "ko": "(거리상으로) 가까운", "def": "" },
+    { "en": "interesting", "ko": "재미있는, 흥미로운", "def": "" },
+    { "en": "skateboard - skateboarded", "ko": "스케이트 보드를 타다", "def": "" },
+    { "en": "dangerous", "ko": "위험한", "def": "" },
+    { "en": "safe", "ko": "안전한", "def": "" },
+    { "en": "court", "ko": "(테니스) 경기장", "def": "" },
+    { "en": "awesome", "ko": "기가 막히게 좋은, 굉장한", "def": "" },
+    { "en": "racket", "ko": "(테니스 등의) 라켓", "def": "" },
+    { "en": "outside", "ko": "밖, 바깥", "def": "" }
+  ]
+}

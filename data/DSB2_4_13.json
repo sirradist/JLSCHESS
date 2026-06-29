@@ -1,0 +1,25 @@
+{
+  "subtitle": "The Boy Who Cried Wolf",
+  "words": [
+    { "en": "village", "ko": "(시골) 마을", "def": "" },
+    { "en": "sheep", "ko": "양, 양떼", "def": "" },
+    { "en": "field", "ko": "밭, 들판", "def": "" },
+    { "en": "boring", "ko": "재미없는, 지루한", "def": "" },
+    { "en": "villager", "ko": "(시골) 마을 사람", "def": "" },
+    { "en": "chase - chased", "ko": "쫓다, 뒤쫓다", "def": "" },
+    { "en": "stick", "ko": "막대기", "def": "" },
+    { "en": "joke", "ko": "농담, 장난", "def": "" },
+    { "en": "bring - brought", "ko": "가져오다", "def": "" },
+    { "en": "tease - teased", "ko": "놀리다, 장난하다", "def": "" },
+    { "en": "lie down - lay down", "ko": "눕다", "def": "" },
+    { "en": "bush", "ko": "덤불, 관목", "def": "" },
+    { "en": "escape - escaped", "ko": "달아나다", "def": "" },
+    { "en": "save - saved", "ko": "구하다", "def": "" },
+    { "en": "alone", "ko": "혼자", "def": "" },
+    { "en": "confused", "ko": "혼란스러운", "def": "" },
+    { "en": "believe - believed", "ko": "믿다", "def": "" },
+    { "en": "truth", "ko": "사실, 진실", "def": "" },
+    { "en": "lie", "ko": "거짓말", "def": "" },
+    { "en": "liar", "ko": "거짓말쟁이", "def": "" }
+  ]
+}

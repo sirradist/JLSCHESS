@@ -1,0 +1,25 @@
+{
+  "subtitle": "The Honest Woodcutter",
+  "words": [
+    { "en": "chop - chopped", "ko": "자르다", "def": "" },
+    { "en": "slip - slipped", "ko": "미끄러지다", "def": "" },
+    { "en": "lose - lost", "ko": "잃어버리다", "def": "" },
+    { "en": "bronze", "ko": "동", "def": "" },
+    { "en": "silver", "ko": "은", "def": "" },
+    { "en": "gold", "ko": "금", "def": "" },
+    { "en": "honest", "ko": "정직한", "def": "" },
+    { "en": "reward - rewarded", "ko": "상을 주다, 보상하다", "def": "" },
+    { "en": "keep - kept", "ko": "간직하다", "def": "" },
+    { "en": "amazing", "ko": "놀라운", "def": "" },
+    { "en": "sneaky", "ko": "교활한", "def": "" },
+    { "en": "greedy", "ko": "욕심이 많은", "def": "" },
+    { "en": "shiny", "ko": "빛나는", "def": "" },
+    { "en": "throw - threw", "ko": "던지다", "def": "" },
+    { "en": "pretend - pretended", "ko": "~인 척 하다", "def": "" },
+    { "en": "mine", "ko": "나의 것", "def": "" },
+    { "en": "turn - turned", "ko": "변하게 하다, 바꾸다", "def": "" },
+    { "en": "teach - taught", "ko": "가르치다", "def": "" },
+    { "en": "hop - hopped", "ko": "짱충짱충 뛰다", "def": "" },
+    { "en": "trouble", "ko": "문제, 곤란한 상황", "def": "" }
+  ]
+}
