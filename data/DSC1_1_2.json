@@ -1,0 +1,29 @@
+{
+  "subtitle": "What are you doing now?",
+  "words": [
+    { "en": "ring - rang", "ko": "전화벨이 울리다", "def": "" },
+    { "en": "call - called", "ko": "전화하다", "def": "" },
+    { "en": "hang up - hung up", "ko": "전화를 끊다", "def": "" },
+    { "en": "chess", "ko": "체스(서양 장기)", "def": "" },
+    { "en": "call back - called back", "ko": "다시 전화하다", "def": "" },
+    { "en": "wait - waited", "ko": "기다리다", "def": "" },
+    { "en": "forget - forgot", "ko": "잊다", "def": "" },
+    { "en": "math", "ko": "수학", "def": "" },
+    { "en": "homework", "ko": "숙제", "def": "" },
+    { "en": "textbook", "ko": "교과서, 교재", "def": "" },
+    { "en": "burn - burned", "ko": "불에 타다", "def": "" },
+    { "en": "kitchen", "ko": "부엌", "def": "" },
+    { "en": "drink - drank", "ko": "마시다", "def": "" },
+    { "en": "play - played", "ko": "(게임·놀이 등을) 하다", "def": "" },
+    { "en": "watch - watched", "ko": "보다, 지켜보다", "def": "" },
+    { "en": "eat - ate", "ko": "먹다", "def": "" },
+    { "en": "cross - crossed", "ko": "건너다", "def": "" },
+    { "en": "feed - fed", "ko": "먹이를 주다", "def": "" },
+    { "en": "bake - baked", "ko": "(음식을) 굽다", "def": "" },
+    { "en": "make - made", "ko": "만들다", "def": "" },
+    { "en": "sleep - slept", "ko": "(잠을) 자다", "def": "" },
+    { "en": "hit - hit", "ko": "때리다, 치다", "def": "" },
+    { "en": "swim - swam", "ko": "수영하다", "def": "" },
+    { "en": "run - ran", "ko": "달리다, 뛰다", "def": "" }
+  ]
+}

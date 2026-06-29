@@ -1,0 +1,29 @@
+{
+  "subtitle": "I'd like to leave a Message",
+  "words": [
+    { "en": "go out - went out", "ko": "외출하다", "def": "" },
+    { "en": "soccer", "ko": "축구", "def": "" },
+    { "en": "leave - left", "ko": "남기다, 떠나다", "def": "" },
+    { "en": "message", "ko": "메시지", "def": "" },
+    { "en": "yoga", "ko": "요가", "def": "" },
+    { "en": "speak - spoke", "ko": "말하다", "def": "" },
+    { "en": "outside", "ko": "밖에", "def": "" },
+    { "en": "hour", "ko": "시간", "def": "" },
+    { "en": "know - knew", "ko": "알다", "def": "" },
+    { "en": "practice", "ko": "연습", "def": "" },
+    { "en": "problem", "ko": "문제", "def": "" },
+    { "en": "move - moved", "ko": "이사하다", "def": "" },
+    { "en": "cook - cooked", "ko": "요리하다", "def": "" },
+    { "en": "draw - drew", "ko": "그리다", "def": "" },
+    { "en": "adopt - adopted", "ko": "입양하다", "def": "" },
+    { "en": "learn - learned", "ko": "배우다", "def": "" },
+    { "en": "clean - cleaned", "ko": "청소하다", "def": "" },
+    { "en": "repair - repaired", "ko": "수리하다", "def": "" },
+    { "en": "buy - bought", "ko": "사다", "def": "" },
+    { "en": "take - took", "ko": "(약을) 복용하다", "def": "" },
+    { "en": "study - studied", "ko": "공부하다", "def": "" },
+    { "en": "sing - sang", "ko": "노래하다", "def": "" },
+    { "en": "ride - rode", "ko": "타다", "def": "" },
+    { "en": "travel - traveled", "ko": "여행하다", "def": "" }
+  ]
+}
