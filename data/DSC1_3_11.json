@@ -1,0 +1,29 @@
+{
+  "subtitle": "The Puss in Boots",
+  "words": [
+    { "en": "sloppy", "ko": "엉성한", "def": "" },
+    { "en": "rope", "ko": "밧줄", "def": "" },
+    { "en": "silver ring", "ko": "은 반지", "def": "" },
+    { "en": "cook - cooked", "ko": "요리하다", "def": "" },
+    { "en": "garbage", "ko": "쓰레기", "def": "" },
+    { "en": "slip - slipped", "ko": "미끄러지다", "def": "" },
+    { "en": "mess", "ko": "엉망인 상태", "def": "" },
+    { "en": "peel", "ko": "(과일, 채소) 껍질", "def": "" },
+    { "en": "wonder - wondered", "ko": "궁금해 하다", "def": "" },
+    { "en": "catch - caught", "ko": "잡다", "def": "" },
+    { "en": "fine", "ko": "질 좋은, 멋진", "def": "" },
+    { "en": "politely", "ko": "예의 바르게", "def": "" },
+    { "en": "play tricks - played tricks", "ko": "장난을 치다", "def": "" },
+    { "en": "tired", "ko": "지친", "def": "" },
+    { "en": "floor", "ko": "바닥", "def": "" },
+    { "en": "drop - dropped", "ko": "떨어뜨리다", "def": "" },
+    { "en": "crack - cracked", "ko": "깨지다", "def": "" },
+    { "en": "shoot - shot", "ko": "쏘다", "def": "" },
+    { "en": "naughty", "ko": "버릇없는, 못된", "def": "" },
+    { "en": "grab - grabbed", "ko": "잡다", "def": "" },
+    { "en": "snatch - snatched", "ko": "와락 붙잡다, 잡아채다", "def": "" },
+    { "en": "honest", "ko": "정직한", "def": "" },
+    { "en": "polish - polished", "ko": "광을 내다", "def": "" },
+    { "en": "proper", "ko": "제대로 된", "def": "" }
+  ]
+}

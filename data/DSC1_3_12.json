@@ -1,0 +1,29 @@
+{
+  "subtitle": "How was your weekend?",
+  "words": [
+    { "en": "Saturday", "ko": "토요일", "def": "" },
+    { "en": "rain - rained", "ko": "비가 오다", "def": "" },
+    { "en": "mind - minded", "ko": "상관하다", "def": "" },
+    { "en": "bring - brought", "ko": "가져오다", "def": "" },
+    { "en": "terrible", "ko": "끔찍한, 지독한", "def": "" },
+    { "en": "weekend", "ko": "주말", "def": "" },
+    { "en": "hear - heard", "ko": "듣다", "def": "" },
+    { "en": "Sunday", "ko": "일요일", "def": "" },
+    { "en": "sick", "ko": "아픈", "def": "" },
+    { "en": "stomachache", "ko": "복통", "def": "" },
+    { "en": "medicine", "ko": "약", "def": "" },
+    { "en": "hope - hoped", "ko": "바라다, 기대하다", "def": "" },
+    { "en": "glad", "ko": "기쁜", "def": "" },
+    { "en": "sad", "ko": "슬픈", "def": "" },
+    { "en": "lonely", "ko": "외로운", "def": "" },
+    { "en": "happy", "ko": "행복한", "def": "" },
+    { "en": "surprised", "ko": "놀란", "def": "" },
+    { "en": "bored", "ko": "심심한", "def": "" },
+    { "en": "worried", "ko": "걱정하는", "def": "" },
+    { "en": "tired", "ko": "피곤한", "def": "" },
+    { "en": "proud", "ko": "자랑스러운", "def": "" },
+    { "en": "excited", "ko": "들뜬, 신이 난", "def": "" },
+    { "en": "angry", "ko": "화가 난", "def": "" },
+    { "en": "scared", "ko": "무서워하는, 겁에 질린", "def": "" }
+  ]
+}

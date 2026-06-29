@@ -1,0 +1,29 @@
+{
+  "subtitle": "What did you do last weekend?",
+  "words": [
+    { "en": "park", "ko": "공원", "def": "" },
+    { "en": "friend", "ko": "친구", "def": "" },
+    { "en": "movie", "ko": "영화", "def": "" },
+    { "en": "mountain", "ko": "산", "def": "" },
+    { "en": "envious", "ko": "질투하는", "def": "" },
+    { "en": "hang out - hung out", "ko": "-와 시간을 보내다", "def": "" },
+    { "en": "badminton", "ko": "배드민턴", "def": "" },
+    { "en": "balance", "ko": "균형", "def": "" },
+    { "en": "fall - fell", "ko": "넘어지다", "def": "" },
+    { "en": "hurt - hurt", "ko": "다치게(아프게)하다", "def": "" },
+    { "en": "ankle", "ko": "발목", "def": "" },
+    { "en": "bloody nose", "ko": "코피", "def": "" },
+    { "en": "listen - listened", "ko": "듣다", "def": "" },
+    { "en": "watch - watched", "ko": "보다, 시청하다", "def": "" },
+    { "en": "buy - bought", "ko": "사다", "def": "" },
+    { "en": "build - built", "ko": "짓다, 건설하다", "def": "" },
+    { "en": "study - studied", "ko": "공부하다", "def": "" },
+    { "en": "help - helped", "ko": "도와주다", "def": "" },
+    { "en": "read - read", "ko": "읽다", "def": "" },
+    { "en": "pack - packed", "ko": "(짐을) 싸다", "def": "" },
+    { "en": "write - wrote", "ko": "(글을) 쓰다", "def": "" },
+    { "en": "do - did", "ko": "하다", "def": "" },
+    { "en": "dance - danced", "ko": "춤 추다", "def": "" },
+    { "en": "hike - hiked", "ko": "하이킹을 하다", "def": "" }
+  ]
+}

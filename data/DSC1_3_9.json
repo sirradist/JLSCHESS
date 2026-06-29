@@ -1,0 +1,29 @@
+{
+  "subtitle": "The Emperor's New Clothes",
+  "words": [
+    { "en": "dresser", "ko": "의상 담당자", "def": "" },
+    { "en": "choose - chose", "ko": "고르다", "def": "" },
+    { "en": "spend - spent", "ko": "(돈을) 쓰다", "def": "" },
+    { "en": "magician", "ko": "마술사", "def": "" },
+    { "en": "thread", "ko": "실", "def": "" },
+    { "en": "excited", "ko": "흥분한", "def": "" },
+    { "en": "demand - demanded", "ko": "요구하다", "def": "" },
+    { "en": "weave - weaved", "ko": "(옷감을) 짜다", "def": "" },
+    { "en": "order - ordered", "ko": "명령하다", "def": "" },
+    { "en": "servant", "ko": "하인", "def": "" },
+    { "en": "carry - carried", "ko": "나르다", "def": "" },
+    { "en": "pretend - pretended", "ko": "~인 척 하다", "def": "" },
+    { "en": "go riding - went riding", "ko": "승마를 하러 가다", "def": "" },
+    { "en": "stretch - stretched", "ko": "펴다", "def": "" },
+    { "en": "nothing", "ko": "아무것도", "def": "" },
+    { "en": "carefully", "ko": "신중히", "def": "" },
+    { "en": "confused", "ko": "혼란스러워 하는", "def": "" },
+    { "en": "put on - put on", "ko": "(옷을) 입다", "def": "" },
+    { "en": "march - marched", "ko": "행진하다", "def": "" },
+    { "en": "show off - showed off", "ko": "자랑하다", "def": "" },
+    { "en": "underwear", "ko": "속옷", "def": "" },
+    { "en": "tease - teased", "ko": "놀리다", "def": "" },
+    { "en": "clap - clapped", "ko": "박수를 치다", "def": "" },
+    { "en": "realize - realized", "ko": "깨닫다", "def": "" }
+  ]
+}
