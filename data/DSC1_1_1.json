@@ -1,0 +1,29 @@
+{
+  "subtitle": "Goldilocks and the Three Bears",
+  "words": [
+    { "en": "neighbor", "ko": "이웃", "def": "" },
+    { "en": "visit - visited", "ko": "방문하다", "def": "" },
+    { "en": "knock - knocked", "ko": "(문을) 두드리다", "def": "" },
+    { "en": "inside", "ko": "안에", "def": "" },
+    { "en": "tidy", "ko": "잘 정돈된", "def": "" },
+    { "en": "sit - sat", "ko": "앉다", "def": "" },
+    { "en": "break - broke", "ko": "부서지다", "def": "" },
+    { "en": "just right", "ko": "딱 맞는, 적당한", "def": "" },
+    { "en": "porridge", "ko": "죽", "def": "" },
+    { "en": "taste - tasted", "ko": "맛을 보다", "def": "" },
+    { "en": "bowl", "ko": "(오목한) 그릇", "def": "" },
+    { "en": "sweet", "ko": "달콤한", "def": "" },
+    { "en": "yawn - yawned", "ko": "하품하다", "def": "" },
+    { "en": "lie down - lay down", "ko": "눕다", "def": "" },
+    { "en": "rest - rested", "ko": "쉬다", "def": "" },
+    { "en": "hard", "ko": "딱딱한, 단단한", "def": "" },
+    { "en": "soft", "ko": "부드러운, 폭신한", "def": "" },
+    { "en": "asleep", "ko": "잠이 든", "def": "" },
+    { "en": "scream - screamed", "ko": "비명을 지르다", "def": "" },
+    { "en": "surprised", "ko": "놀란", "def": "" },
+    { "en": "embarrassed", "ko": "당황스러운", "def": "" },
+    { "en": "promise - promised", "ko": "약속하다", "def": "" },
+    { "en": "share - shared", "ko": "함께 쓰다, 나누다", "def": "" },
+    { "en": "gentle", "ko": "온화한, 순한", "def": "" }
+  ]
+}
