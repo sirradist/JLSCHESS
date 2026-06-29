@@ -1,0 +1,29 @@
+{
+  "subtitle": "Is there enough food?",
+  "words": [
+    { "en": "enough", "ko": "충분한", "def": "" },
+    { "en": "balloon", "ko": "풍선", "def": "" },
+    { "en": "salad", "ko": "샐러드", "def": "" },
+    { "en": "dessert", "ko": "디저트, 후식", "def": "" },
+    { "en": "lemonade", "ko": "레모네이드", "def": "" },
+    { "en": "paper plate", "ko": "(일회용) 종이 접시", "def": "" },
+    { "en": "worry - worried", "ko": "걱정하다", "def": "" },
+    { "en": "store", "ko": "가게", "def": "" },
+    { "en": "party hat", "ko": "파티용 고깔모자", "def": "" },
+    { "en": "look at - looked at", "ko": "바라보다, 쳐다보다", "def": "" },
+    { "en": "chew - chewed", "ko": "씹다, 물어뜯다", "def": "" },
+    { "en": "silly", "ko": "바보 같은, 철없는", "def": "" },
+    { "en": "orange", "ko": "오렌지", "def": "" },
+    { "en": "tomato", "ko": "토마토", "def": "" },
+    { "en": "egg", "ko": "달걀", "def": "" },
+    { "en": "peach", "ko": "복숭아", "def": "" },
+    { "en": "cookie", "ko": "쿠키", "def": "" },
+    { "en": "sandwich", "ko": "샌드위치", "def": "" },
+    { "en": "juice", "ko": "주스", "def": "" },
+    { "en": "honey", "ko": "꿀", "def": "" },
+    { "en": "butter", "ko": "버터", "def": "" },
+    { "en": "flour", "ko": "밀가루", "def": "" },
+    { "en": "bread", "ko": "빵", "def": "" },
+    { "en": "meat", "ko": "고기", "def": "" }
+  ]
+}

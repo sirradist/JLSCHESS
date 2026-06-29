@@ -1,0 +1,29 @@
+{
+  "subtitle": "How many cookies do you want?",
+  "words": [
+    { "en": "fresh", "ko": "신선한, 갓 만든", "def": "" },
+    { "en": "smell - smelled", "ko": "냄새가 나다", "def": "" },
+    { "en": "celery", "ko": "샐러리", "def": "" },
+    { "en": "vegetable", "ko": "채소, 야채", "def": "" },
+    { "en": "birthday", "ko": "생일", "def": "" },
+    { "en": "pass - passed", "ko": "(제공받은 음식을) 안 먹고 넘기다", "def": "" },
+    { "en": "hungry", "ko": "배고픈", "def": "" },
+    { "en": "cake", "ko": "케이크", "def": "" },
+    { "en": "piece", "ko": "(나눠 놓은 것의) 한 부분, 조각", "def": "" },
+    { "en": "delicious", "ko": "아주 맛있는", "def": "" },
+    { "en": "fast", "ko": "빠르게", "def": "" },
+    { "en": "full", "ko": "배부른", "def": "" },
+    { "en": "a bunch of bananas", "ko": "바나나 한 송이", "def": "" },
+    { "en": "a box of cookies", "ko": "쿠키 한 상자", "def": "" },
+    { "en": "a bowl of cherries", "ko": "체리 한 그릇", "def": "" },
+    { "en": "a bag of chips", "ko": "과자 한 봉지", "def": "" },
+    { "en": "a can of beans", "ko": "콩 한 통", "def": "" },
+    { "en": "a carton of eggs", "ko": "달걀 한 곽", "def": "" },
+    { "en": "a loaf of bread", "ko": "빵 한 덩어리", "def": "" },
+    { "en": "a piece of cake", "ko": "케이크 한 조각", "def": "" },
+    { "en": "a bowl of rice", "ko": "밥 한 공기", "def": "" },
+    { "en": "a bag of flour", "ko": "밀가루 한 봉지", "def": "" },
+    { "en": "a can of soda", "ko": "탄산음료 한 캔", "def": "" },
+    { "en": "a carton of milk", "ko": "우유 한 곽", "def": "" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "subtitle": "Little Red",
+  "words": [
+    { "en": "hood", "ko": "(외투에 달린) 모자", "def": "" },
+    { "en": "basket", "ko": "바구니", "def": "" },
+    { "en": "forest", "ko": "숲", "def": "" },
+    { "en": "next to", "ko": "바로 옆에", "def": "" },
+    { "en": "pick - picked", "ko": "(꽃을) 꺾다", "def": "" },
+    { "en": "loud", "ko": "소리가 큰, 시끄러운", "def": "" },
+    { "en": "sneeze", "ko": "재채기", "def": "" },
+    { "en": "stranger", "ko": "낯선 사람", "def": "" },
+    { "en": "allergic", "ko": "알레르기가 있는", "def": "" },
+    { "en": "interesting", "ko": "흥미로운", "def": "" },
+    { "en": "show - showed", "ko": "보여주다", "def": "" },
+    { "en": "sand", "ko": "모래", "def": "" },
+    { "en": "follow - followed", "ko": "따라가다", "def": "" },
+    { "en": "sick", "ko": "아픈", "def": "" },
+    { "en": "hurt - hurt", "ko": "다치게 하다", "def": "" },
+    { "en": "close", "ko": "가까운", "def": "" },
+    { "en": "bring - brought", "ko": "가져오다", "def": "" },
+    { "en": "worry - worried", "ko": "걱정하다", "def": "" },
+    { "en": "look for - looked for", "ko": "~를 찾다", "def": "" },
+    { "en": "cupboard", "ko": "찬장, 벽장", "def": "" },
+    { "en": "tie up - tied up", "ko": "묶다", "def": "" },
+    { "en": "untie - untied", "ko": "풀다", "def": "" },
+    { "en": "hit - hit", "ko": "때리다", "def": "" },
+    { "en": "learn - learned", "ko": "배우다", "def": "" }
+  ]
+}
