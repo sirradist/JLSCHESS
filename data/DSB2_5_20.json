@@ -1,0 +1,25 @@
+{
+  "subtitle": "What did you make?",
+  "words": [
+    { "en": "cook - cooked", "ko": "요리하다", "def": "" },
+    { "en": "peel - peeled", "ko": "껍질을 벗기다", "def": "" },
+    { "en": "a few", "ko": "약간의 (셀 수 있는 것에 사용)", "def": "" },
+    { "en": "onion", "ko": "양파", "def": "" },
+    { "en": "chop - chopped", "ko": "잘게 썰다", "def": "" },
+    { "en": "fry - fried", "ko": "튀기다", "def": "" },
+    { "en": "a little", "ko": "약간의 (셀 수 없는 것에 사용)", "def": "" },
+    { "en": "stir - stirred", "ko": "젓다", "def": "" },
+    { "en": "soup", "ko": "수프", "def": "" },
+    { "en": "serve - served", "ko": "(음식을) 제공하다, 차려주다", "def": "" },
+    { "en": "shrimp", "ko": "새우", "def": "" },
+    { "en": "taco", "ko": "타코 (멕시코 음식)", "def": "" },
+    { "en": "potato", "ko": "감자", "def": "" },
+    { "en": "salad", "ko": "샐러드", "def": "" },
+    { "en": "dessert", "ko": "디저트, 후식", "def": "" },
+    { "en": "use - used", "ko": "쓰다, 사용하다", "def": "" },
+    { "en": "sour cream", "ko": "사워크림", "def": "" },
+    { "en": "cucumber", "ko": "오이", "def": "" },
+    { "en": "salt", "ko": "소금", "def": "" },
+    { "en": "sugar", "ko": "설탕", "def": "" }
+  ]
+}

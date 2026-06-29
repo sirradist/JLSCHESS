@@ -1,0 +1,25 @@
+{
+  "subtitle": "What was wrong?",
+  "words": [
+    { "en": "cold", "ko": "감기", "def": "" },
+    { "en": "take - took", "ko": "데리고 가다", "def": "" },
+    { "en": "pharmacist", "ko": "약사", "def": "" },
+    { "en": "stomachache", "ko": "위통, 복통", "def": "" },
+    { "en": "nurse", "ko": "간호사", "def": "" },
+    { "en": "fever", "ko": "열, 열병", "def": "" },
+    { "en": "doctor", "ko": "의사", "def": "" },
+    { "en": "toothache", "ko": "치통", "def": "" },
+    { "en": "terrible", "ko": "기분(몸)이 안 좋은", "def": "" },
+    { "en": "dentist", "ko": "치과 의사", "def": "" },
+    { "en": "yesterday", "ko": "어제", "def": "" },
+    { "en": "hospital", "ko": "병원", "def": "" },
+    { "en": "headache", "ko": "두통", "def": "" },
+    { "en": "study - studied", "ko": "공부하다, 배우다", "def": "" },
+    { "en": "hot wings", "ko": "매운 닭날개 요리", "def": "" },
+    { "en": "pasta", "ko": "파스타", "def": "" },
+    { "en": "rice", "ko": "쌀, 밥", "def": "" },
+    { "en": "medicine", "ko": "약, 치료제", "def": "" },
+    { "en": "junk food", "ko": "(질 낮은) 군것질, 불량식품", "def": "" },
+    { "en": "doughnut", "ko": "도넛", "def": "" }
+  ]
+}
