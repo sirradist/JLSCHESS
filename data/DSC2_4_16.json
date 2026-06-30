@@ -1,0 +1,29 @@
+{
+  "subtitle": "He moves slowly.",
+  "words": [
+    { "en": "smile - smiled", "ko": "미소 짓다", "def": "" },
+    { "en": "lazy", "ko": "게으른", "def": "" },
+    { "en": "smart", "ko": "똑똑한", "def": "" },
+    { "en": "voice", "ko": "목소리", "def": "" },
+    { "en": "outgoing", "ko": "외향적인, 사교적인", "def": "" },
+    { "en": "cheerful", "ko": "발랄한", "def": "" },
+    { "en": "easily", "ko": "쉽게", "def": "" },
+    { "en": "treat - treated", "ko": "대하다, 여기다", "def": "" },
+    { "en": "teacher", "ko": "선생님", "def": "" },
+    { "en": "relaxed", "ko": "느긋한", "def": "" },
+    { "en": "finish - finished", "ko": "끝내다", "def": "" },
+    { "en": "mystery", "ko": "수수께끼, 미스터리", "def": "" },
+    { "en": "loud", "ko": "(소리가) 큰", "def": "" },
+    { "en": "quiet", "ko": "조용한", "def": "" },
+    { "en": "slow", "ko": "느린", "def": "" },
+    { "en": "quick", "ko": "빠른", "def": "" },
+    { "en": "shy", "ko": "수줍은", "def": "" },
+    { "en": "confident", "ko": "자신감 있는", "def": "" },
+    { "en": "wise", "ko": "현명한", "def": "" },
+    { "en": "careful", "ko": "신중한", "def": "" },
+    { "en": "kind", "ko": "친절한", "def": "" },
+    { "en": "brave", "ko": "용감한", "def": "" },
+    { "en": "polite", "ko": "예의 바른", "def": "" },
+    { "en": "patient", "ko": "참을성 있는", "def": "" }
+  ]
+}

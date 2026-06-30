@@ -1,0 +1,29 @@
+{
+  "subtitle": "Let's go camping!",
+  "words": [
+    { "en": "adventurous", "ko": "모험심이 강한", "def": "" },
+    { "en": "caring", "ko": "배려하는, 보살피는", "def": "" },
+    { "en": "special", "ko": "특별한", "def": "" },
+    { "en": "squirrel", "ko": "다람쥐", "def": "" },
+    { "en": "get lost - got lost", "ko": "길을 잃다", "def": "" },
+    { "en": "lake", "ko": "호수", "def": "" },
+    { "en": "still", "ko": "잔잔한", "def": "" },
+    { "en": "mirror", "ko": "거울", "def": "" },
+    { "en": "tall", "ko": "높은", "def": "" },
+    { "en": "coconut", "ko": "코코넛", "def": "" },
+    { "en": "branch", "ko": "나뭇가지", "def": "" },
+    { "en": "beehive", "ko": "벌집", "def": "" },
+    { "en": "narrow", "ko": "좁은", "def": "" },
+    { "en": "wide", "ko": "넓은", "def": "" },
+    { "en": "thick", "ko": "두꺼운", "def": "" },
+    { "en": "thin", "ko": "얇은", "def": "" },
+    { "en": "short", "ko": "짧은", "def": "" },
+    { "en": "long", "ko": "긴", "def": "" },
+    { "en": "dry", "ko": "마른", "def": "" },
+    { "en": "wet", "ko": "젖은", "def": "" },
+    { "en": "bright", "ko": "밝은", "def": "" },
+    { "en": "dark", "ko": "어두운", "def": "" },
+    { "en": "light", "ko": "가벼운", "def": "" },
+    { "en": "heavy", "ko": "무거운", "def": "" }
+  ]
+}

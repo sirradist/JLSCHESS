@@ -1,0 +1,29 @@
+{
+  "subtitle": "The Book Monster",
+  "words": [
+    { "en": "monster", "ko": "괴물", "def": "" },
+    { "en": "wait - waited", "ko": "기다리다", "def": "" },
+    { "en": "letter", "ko": "글자", "def": "" },
+    { "en": "shout - shouted", "ko": "외치다", "def": "" },
+    { "en": "picture", "ko": "그림", "def": "" },
+    { "en": "empty", "ko": "비어 있는", "def": "" },
+    { "en": "shocked", "ko": "충격을 받은", "def": "" },
+    { "en": "find - found", "ko": "찾다, 발견하다", "def": "" },
+    { "en": "search - searched", "ko": "찾아보다, 탐색하다", "def": "" },
+    { "en": "garden", "ko": "정원", "def": "" },
+    { "en": "binoculars", "ko": "쌍안경", "def": "" },
+    { "en": "bush", "ko": "덤불", "def": "" },
+    { "en": "point - pointed", "ko": "~를 가리키다", "def": "" },
+    { "en": "frightened", "ko": "무서워하는", "def": "" },
+    { "en": "move around - moved around", "ko": "돌아다니다", "def": "" },
+    { "en": "hide - hid", "ko": "숨다", "def": "" },
+    { "en": "scared", "ko": "겁먹은", "def": "" },
+    { "en": "take away - took away", "ko": "제거하다", "def": "" },
+    { "en": "float - floated", "ko": "둥둥 뜨다", "def": "" },
+    { "en": "ride - rode", "ko": "~를 타다", "def": "" },
+    { "en": "swing - swung", "ko": "휘두르다", "def": "" },
+    { "en": "fairy", "ko": "요정", "def": "" },
+    { "en": "giant", "ko": "거대한", "def": "" },
+    { "en": "rescue - rescued", "ko": "구출하다", "def": "" }
+  ]
+}
