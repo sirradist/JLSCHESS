@@ -1,0 +1,29 @@
+{
+  "subtitle": "You should use a fork.",
+  "words": [
+    { "en": "horse", "ko": "말", "def": "" },
+    { "en": "stroller", "ko": "유모차", "def": "" },
+    { "en": "fork", "ko": "포크", "def": "" },
+    { "en": "spaghetti", "ko": "스파게티", "def": "" },
+    { "en": "invite - invited", "ko": "초대하다", "def": "" },
+    { "en": "dinner", "ko": "저녁식사", "def": "" },
+    { "en": "seafood", "ko": "해산물", "def": "" },
+    { "en": "favorite", "ko": "가장 좋아하는", "def": "" },
+    { "en": "spoon", "ko": "숟가락", "def": "" },
+    { "en": "chopsticks", "ko": "젓가락", "def": "" },
+    { "en": "fried rice", "ko": "볶음밥", "def": "" },
+    { "en": "teach - taught", "ko": "가르치다", "def": "" },
+    { "en": "count - counted", "ko": "숫자를 세다", "def": "" },
+    { "en": "spell - spelled", "ko": "철자를 맞게 쓰다", "def": "" },
+    { "en": "solve - solved", "ko": "해결하다", "def": "" },
+    { "en": "fix - fixed", "ko": "수리하다", "def": "" },
+    { "en": "lift - lifted", "ko": "들어 올리다", "def": "" },
+    { "en": "drive - drove", "ko": "운전하다", "def": "" },
+    { "en": "clear - cleared", "ko": "치우다", "def": "" },
+    { "en": "follow - followed", "ko": "(규칙을) 따르다", "def": "" },
+    { "en": "respect - respected", "ko": "존경하다, 존중하다", "def": "" },
+    { "en": "shout - shouted", "ko": "외치다, 소리치다", "def": "" },
+    { "en": "cheat - cheated", "ko": "부정행위를 하다", "def": "" },
+    { "en": "bully - bullied", "ko": "괴롭히다", "def": "" }
+  ]
+}

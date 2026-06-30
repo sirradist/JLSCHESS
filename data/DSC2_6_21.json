@@ -1,0 +1,29 @@
+{
+  "subtitle": "No Eggs Maria",
+  "words": [
+    { "en": "hen", "ko": "암탉", "def": "" },
+    { "en": "neck", "ko": "목", "def": "" },
+    { "en": "wing", "ko": "날개", "def": "" },
+    { "en": "nest", "ko": "둥지", "def": "" },
+    { "en": "paint - painted", "ko": "(그림 물감으로) 그리다", "def": "" },
+    { "en": "lay - laid", "ko": "(알을) 낳다", "def": "" },
+    { "en": "collect - collected", "ko": "모으다", "def": "" },
+    { "en": "meal", "ko": "식사", "def": "" },
+    { "en": "imagine - imagined", "ko": "상상하다", "def": "" },
+    { "en": "practice - practiced", "ko": "연습하다", "def": "" },
+    { "en": "continue - continued", "ko": "(쉬지않고) 계속하다", "def": "" },
+    { "en": "stone", "ko": "돌", "def": "" },
+    { "en": "pick - picked", "ko": "고르다, 선택하다", "def": "" },
+    { "en": "pay - paid", "ko": "지불하다", "def": "" },
+    { "en": "shopkeeper", "ko": "가게 주인(운영자)", "def": "" },
+    { "en": "hold - held", "ko": "쥐다, 잡다", "def": "" },
+    { "en": "wash - washed", "ko": "씻다", "def": "" },
+    { "en": "rush - rushed", "ko": "급히 서두르다", "def": "" },
+    { "en": "steal - stole", "ko": "훔치다", "def": "" },
+    { "en": "sly", "ko": "교활한", "def": "" },
+    { "en": "bright", "ko": "밝은, 눈부신", "def": "" },
+    { "en": "rich", "ko": "부유한, 돈 많은", "def": "" },
+    { "en": "painter", "ko": "화가", "def": "" },
+    { "en": "artist", "ko": "예술가", "def": "" }
+  ]
+}

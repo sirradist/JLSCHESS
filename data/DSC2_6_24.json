@@ -1,0 +1,29 @@
+{
+  "subtitle": "Have you ever been on an airplane?",
+  "words": [
+    { "en": "airplane", "ko": "비행기", "def": "" },
+    { "en": "ferry", "ko": "여객선", "def": "" },
+    { "en": "Australia", "ko": "오스트레일리아, 호주", "def": "" },
+    { "en": "famous", "ko": "유명한", "def": "" },
+    { "en": "nature", "ko": "(동식물 등의) 자연", "def": "" },
+    { "en": "unique", "ko": "독특한", "def": "" },
+    { "en": "kangaroo", "ko": "캥거루", "def": "" },
+    { "en": "koala", "ko": "코알라", "def": "" },
+    { "en": "zoo", "ko": "동물원", "def": "" },
+    { "en": "landmark", "ko": "주요 지형지물, 랜드마크", "def": "" },
+    { "en": "luggage", "ko": "수화물, 여행 가방", "def": "" },
+    { "en": "security check", "ko": "보안 검사대", "def": "" },
+    { "en": "the Philippines", "ko": "필리핀", "def": "" },
+    { "en": "France", "ko": "프랑스", "def": "" },
+    { "en": "Canada", "ko": "캐나다", "def": "" },
+    { "en": "China", "ko": "중국", "def": "" },
+    { "en": "Italy", "ko": "이탈리아", "def": "" },
+    { "en": "Egypt", "ko": "이집트", "def": "" },
+    { "en": "rainbow", "ko": "무지개", "def": "" },
+    { "en": "shooting star", "ko": "별똥별", "def": "" },
+    { "en": "ghost", "ko": "유령", "def": "" },
+    { "en": "movie star", "ko": "영화 배우", "def": "" },
+    { "en": "unicorn", "ko": "유니콘", "def": "" },
+    { "en": "celebrity", "ko": "유명 인사", "def": "" }
+  ]
+}
