@@ -1,0 +1,29 @@
+{
+  "subtitle": "What are you going to do?",
+  "words": [
+    { "en": "vacation", "ko": "방학, 휴가", "def": "" },
+    { "en": "home", "ko": "집, 가정", "def": "" },
+    { "en": "island", "ko": "섬", "def": "" },
+    { "en": "family", "ko": "가족", "def": "" },
+    { "en": "volcano", "ko": "화산", "def": "" },
+    { "en": "enjoy - enjoyed", "ko": "즐기다", "def": "" },
+    { "en": "scuba diving", "ko": "스쿠버 다이빙", "def": "" },
+    { "en": "awesome", "ko": "아주 좋은, 굉장한", "def": "" },
+    { "en": "plan", "ko": "계획", "def": "" },
+    { "en": "musical", "ko": "뮤지컬", "def": "" },
+    { "en": "tour", "ko": "여행, 관광", "def": "" },
+    { "en": "far", "ko": "(거리가) 먼", "def": "" },
+    { "en": "plant - planted", "ko": "심다", "def": "" },
+    { "en": "stay - stayed", "ko": "머무르다", "def": "" },
+    { "en": "dry - dried", "ko": "(머리 등을) 말리다", "def": "" },
+    { "en": "swim - swam", "ko": "수영하다", "def": "" },
+    { "en": "climb - climbed", "ko": "오르다", "def": "" },
+    { "en": "tickle - tickled", "ko": "간지럼을 태우다", "def": "" },
+    { "en": "go - went", "ko": "가다", "def": "" },
+    { "en": "fold - folded", "ko": "(종이나 천을) 접다", "def": "" },
+    { "en": "surf - surfed", "ko": "인터넷을 검색하다", "def": "" },
+    { "en": "exercise - exercised", "ko": "운동하다", "def": "" },
+    { "en": "plan - planned", "ko": "계획하다", "def": "" },
+    { "en": "see - saw", "ko": "보다", "def": "" }
+  ]
+}

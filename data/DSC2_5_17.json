@@ -1,0 +1,29 @@
+{
+  "subtitle": "Same Day Sunday",
+  "words": [
+    { "en": "sea", "ko": "바다", "def": "" },
+    { "en": "chew - chewed", "ko": "씹다", "def": "" },
+    { "en": "blank", "ko": "(글자가 없는) 빈", "def": "" },
+    { "en": "wave", "ko": "파도", "def": "" },
+    { "en": "beach", "ko": "해변", "def": "" },
+    { "en": "surfboard", "ko": "서핑보드", "def": "" },
+    { "en": "dock", "ko": "부두", "def": "" },
+    { "en": "know - knew", "ko": "알다", "def": "" },
+    { "en": "mixed-up", "ko": "혼란스러운", "def": "" },
+    { "en": "arrive - arrived", "ko": "도착하다", "def": "" },
+    { "en": "decide - decided", "ko": "결심하다", "def": "" },
+    { "en": "yesterday", "ko": "어제", "def": "" },
+    { "en": "copy - copied", "ko": "~를 따라 그리다", "def": "" },
+    { "en": "join - joined", "ko": "함께 하다", "def": "" },
+    { "en": "fish - fished", "ko": "낚시하다", "def": "" },
+    { "en": "ignore - ignored", "ko": "무시하다", "def": "" },
+    { "en": "pack - packed", "ko": "(짐을) 싸다", "def": "" },
+    { "en": "feel sick - felt sick", "ko": "(속이) 메스껍다", "def": "" },
+    { "en": "in a row", "ko": "연달아", "def": "" },
+    { "en": "sick of", "ko": "~에 질린", "def": "" },
+    { "en": "imagination", "ko": "상상, 상상력", "def": "" },
+    { "en": "weigh - weighed", "ko": "무게가 나가다", "def": "" },
+    { "en": "downstairs", "ko": "아래층으로", "def": "" },
+    { "en": "get ready - got ready", "ko": "준비를 하다", "def": "" }
+  ]
+}

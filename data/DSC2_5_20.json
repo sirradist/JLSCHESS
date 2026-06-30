@@ -1,0 +1,29 @@
+{
+  "subtitle": "Where are you going to go?",
+  "words": [
+    { "en": "farm", "ko": "농장", "def": "" },
+    { "en": "chicken", "ko": "닭", "def": "" },
+    { "en": "afraid", "ko": "두려워하는", "def": "" },
+    { "en": "bet - bet", "ko": "장담하다", "def": "" },
+    { "en": "crowded", "ko": "붐비는", "def": "" },
+    { "en": "get - got", "ko": "이르다, 도달하다", "def": "" },
+    { "en": "bus", "ko": "버스", "def": "" },
+    { "en": "train", "ko": "기차", "def": "" },
+    { "en": "scenery", "ko": "경치, 풍경", "def": "" },
+    { "en": "weather forecast", "ko": "일기 예보", "def": "" },
+    { "en": "waterfall", "ko": "폭포", "def": "" },
+    { "en": "beautiful", "ko": "아름다운", "def": "" },
+    { "en": "garden", "ko": "정원", "def": "" },
+    { "en": "orchard", "ko": "과수원", "def": "" },
+    { "en": "playground", "ko": "운동장, 놀이터", "def": "" },
+    { "en": "swimming pool", "ko": "수영장", "def": "" },
+    { "en": "ice rink", "ko": "아이스 링크, 스케이트장", "def": "" },
+    { "en": "amusement park", "ko": "놀이공원", "def": "" },
+    { "en": "last week", "ko": "지난 주", "def": "" },
+    { "en": "last year", "ko": "작년", "def": "" },
+    { "en": "two months ago", "ko": "두 달 전", "def": "" },
+    { "en": "this weekend", "ko": "이번 주말", "def": "" },
+    { "en": "next week", "ko": "다음 주", "def": "" },
+    { "en": "next year", "ko": "내년", "def": "" }
+  ]
+}
