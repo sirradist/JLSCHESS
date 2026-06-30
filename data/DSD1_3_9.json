@@ -1,0 +1,29 @@
+{
+  "subtitle": "Mr. Mistako (Vocabulary 1, 2)",
+  "words": [
+    { "en": "lie - lay", "ko": "누워있다, 눕다", "def": "to be in a flat position on a surface" },
+    { "en": "rob - robbed", "ko": "빼앗다, 약탈하다", "def": "to steal or take something without permission" },
+    { "en": "bomb", "ko": "폭탄", "def": "a device that is designed to explode" },
+    { "en": "crash", "ko": "요란한 소리, 굉음", "def": "the sound of something hitting or breaking" },
+    { "en": "mistake", "ko": "실수", "def": "a wrong action or decision" },
+    { "en": "warn - warned", "ko": "경고하다", "def": "to tell someone about possible danger" },
+    { "en": "fail - failed", "ko": "실패하다", "def": "to not succeed" },
+    { "en": "lift up - lifted up", "ko": "들어올리다", "def": "to raise to a higher position" },
+    { "en": "cheer - cheered", "ko": "환호하다", "def": "to shout with joy or excitement" },
+    { "en": "save - saved", "ko": "구하다", "def": "to take someone away from danger" },
+    { "en": "win - won", "ko": "이기다", "def": "to achieve victory in a fight" },
+    { "en": "twin", "ko": "쌍둥이의", "def": "either one of two babies that are born at the same time" },
+    { "en": "good-looking", "ko": "잘 생긴", "def": "having a pleasing appearance" },
+    { "en": "usually", "ko": "보통, 대개", "def": "used to describe what happens most of the time" },
+    { "en": "hurt - hurt", "ko": "다치게 하다", "def": "to cause pain or injury to someone" },
+    { "en": "giant", "ko": "거대한", "def": "very large" },
+    { "en": "ahead", "ko": "앞선", "def": "in the lead in a race or competition" },
+    { "en": "fly - flew", "ko": "날다", "def": "to move through the air" },
+    { "en": "lesson", "ko": "수업, 교육", "def": "an activity you do to learn something" },
+    { "en": "turn", "ko": "차례, 순번", "def": "an opportunity to do before or after other people" },
+    { "en": "straight", "ko": "곧장, 곧바로", "def": "in a direct way" },
+    { "en": "opposite", "ko": "반대(되는 사람, 것)", "def": "completely different from something" },
+    { "en": "whole", "ko": "전체의, 모든", "def": "complete or full; entire" },
+    { "en": "crash - crashed", "ko": "충돌하다", "def": "to hit and break something" }
+  ]
+}
