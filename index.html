@@ -1342,18 +1342,27 @@ function showQuestion() {
     <button class="btn-action" style="margin-top:16px;background:#f0f0f0;color:#888;box-shadow:none;font-size:.9rem;padding:12px;" onclick="confirmEndGame()">🏁 학습 종료</button>
     <div style="height:90px;"></div>`;
 
-    setTimeout(()=>speakQuestion(), 300);
+    // 🔊 버튼을 눌러야 재생 (자동재생 없음)
 }
 
 function speakQuestion() {
     const word=gQueue[gQIdx];
     const btn=document.getElementById('speak-btn');
-    if(btn){btn.style.transform='scale(.85)';setTimeout(()=>btn.style.transform='',200);}
+    if(btn){
+        btn.style.transform='scale(.85)';
+        btn.style.background='rgba(255,255,255,0.4)';
+        setTimeout(()=>{ btn.style.transform=''; btn.style.background=''; },300);
+    }
+    synth.cancel();
     if(gMode==='ko'){
         const u=new SpeechSynthesisUtterance(word.ko);
-        u.lang='ko-KR'; u.rate=0.9; u.pitch=1.1;
-        synth.cancel(); synth.speak(u);
-    } else { speak(word.en); }
+        u.lang='ko-KR'; u.rate=0.85; u.pitch=1.1;
+        synth.speak(u);
+    } else {
+        const u=new SpeechSynthesisUtterance(word.en.replace(/\s*-\s*/g,', '));
+        u.lang='en-US'; if(engVoice) u.voice=engVoice; u.rate=0.8; u.pitch=1.1;
+        synth.speak(u);
+    }
 }
 
 function chooseAnswer(btn,chosen,correct) {
@@ -1365,19 +1374,28 @@ function chooseAnswer(btn,chosen,correct) {
         const pts=gBasePts*gCombo; gScore+=pts; gCorrect++;
         fireLaser(rect);
         showScorePopup(rect,`+${pts}`,'#4A90E2');
-        spawnBricks(btn, rect);          // 벽돌 파괴 이펙트
-        btn.classList.add('card-break'); // 카드 플래시+페이드
-        speak(gQueue[gQIdx].en);         // 정답 영어 단어 재생
+        spawnBricks(btn, rect);
+        btn.classList.add('card-break');
         const hc=document.getElementById('hud-combo');
         if(hc) hc.innerText=gCombo>1?`🔥 x${gCombo} COMBO!`:'';
-        setTimeout(()=>{gQIdx++;showQuestion();},600);
+        // 정답 영어 단어를 읽어주고, 끝나면 다음 문제로
+        synth.cancel();
+        const _wd = gQueue[gQIdx].en.replace(/\s*-\s*/g,', ');
+        const _u  = new SpeechSynthesisUtterance(_wd);
+        _u.lang='en-US'; if(engVoice) _u.voice=engVoice; _u.rate=0.8; _u.pitch=1.1;
+        _u.onend = () => { gQIdx++; showQuestion(); };
+        // onend가 발동 안 될 경우 fallback (1.8초)
+        const _fb = setTimeout(()=>{ synth.cancel(); gQIdx++; showQuestion(); }, 1800);
+        _u.onend = () => { clearTimeout(_fb); gQIdx++; showQuestion(); };
+        synth.speak(_u);
     } else {
         const deduct=gDiff==='easy'?3:gDiff==='normal'?5:8;
         gCombo=0; gScore=Math.max(0,gScore-deduct); gWrong++;
         btn.classList.add('card-wrong');
         showScorePopup(rect,`-${deduct}`,'#FF6B6B');
         document.querySelectorAll('.choice-card').forEach(b=>{if(b.textContent.trim()===correct) b.style.cssText='background:#E0F7E3;border-color:#6BCB77;color:#2E7D32;font-weight:900;';});
-        setTimeout(()=>{gQIdx++;showQuestion();},1300);
+        synth.cancel();
+        setTimeout(()=>{ gQIdx++; showQuestion(); }, 1300);
     }
 }
 
