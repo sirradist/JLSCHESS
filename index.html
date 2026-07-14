@@ -1213,26 +1213,57 @@ const JSONBIN_ACCESS_KEY = '$2a$10$s74iUZ/1HOkrIpG5468sceCZhWvJKUQa1M3pNrfndWeJX
 
 let gMode='', gDiff='', gScore=0, gCombo=0, gMaxCombo=0, gCorrect=0, gWrong=0, gQIdx=0, gQueue=[], gChoiceCount=3, gRunning=false, gRound=1, gBasePts=5;
 
-function lsKey() { return 'hisc_jls_chess'; }
-function loadLocalScores() { try { return JSON.parse(localStorage.getItem(lsKey())||'[]'); } catch(e){ return []; } }
-function saveLocalScore(e) { const l=loadLocalScores(); l.push(e); l.sort((a,b)=>b.score-a.score); localStorage.setItem(lsKey(),JSON.stringify(l.slice(0,20))); }
+/* ── 현재 선택된 레벨/북/레슨 키 ── */
+function currentLessonKey() {
+    const lv = document.getElementById('level').value  || '?';
+    const bk = document.getElementById('book').value   || '?';
+    const ls = document.getElementById('lesson').value || '?';
+    return `${lv}_Book${bk}_L${ls}`;   // e.g. "LSA1_Book1_L3"
+}
+function currentLessonLabel() {
+    const lv = document.getElementById('level').value  || '';
+    const bk = document.getElementById('book').value   || '';
+    const ls = document.getElementById('lesson').value || '';
+    return `${lv} · Book ${bk} · Lesson ${ls}`;
+}
 
-async function fetchRemoteScores() {
+/* ── localStorage: 레슨별 분리 저장 ── */
+function lsKey(lessonKey) { return `hisc_${lessonKey}`; }
+function loadLocalScores(lessonKey) {
+    try { return JSON.parse(localStorage.getItem(lsKey(lessonKey))||'[]'); } catch(e){ return []; }
+}
+function saveLocalScore(entry, lessonKey) {
+    const l = loadLocalScores(lessonKey);
+    l.push(entry); l.sort((a,b)=>b.score-a.score);
+    localStorage.setItem(lsKey(lessonKey), JSON.stringify(l.slice(0,20)));
+}
+
+/* ── JSONBin: 전체 데이터는 { "scores": { "LSA1_Book1_L3": [...], ... } } 구조 ── */
+async function fetchAllRemote() {
     try {
-        const r = await fetch(JSONBIN_URL+'/latest', { headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Access-Key':JSONBIN_ACCESS_KEY} });
+        const r = await fetch(JSONBIN_URL+'/latest', {
+            headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Access-Key':JSONBIN_ACCESS_KEY}
+        });
         if(!r.ok) return null;
         const j = await r.json();
-        return j.record?.scores || [];
+        return j.record?.scores || {};
     } catch(e){ return null; }
 }
-async function pushRemoteScore(entry) {
+async function fetchRemoteScores(lessonKey) {
+    const all = await fetchAllRemote();
+    return (all && all[lessonKey]) ? all[lessonKey] : null;
+}
+async function pushRemoteScore(entry, lessonKey) {
     try {
-        const cur = await fetchRemoteScores() || [];
-        cur.push(entry); cur.sort((a,b)=>b.score-a.score);
+        const all = await fetchAllRemote() || {};
+        if(!all[lessonKey]) all[lessonKey] = [];
+        all[lessonKey].push(entry);
+        all[lessonKey].sort((a,b)=>b.score-a.score);
+        all[lessonKey] = all[lessonKey].slice(0,30);
         await fetch(JSONBIN_URL, {
             method:'PUT',
             headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_API_KEY,'X-Access-Key':JSONBIN_ACCESS_KEY},
-            body: JSON.stringify({scores:cur.slice(0,30)})
+            body: JSON.stringify({scores: all})
         });
     } catch(e){}
 }
@@ -1482,55 +1513,162 @@ function animateSpace() {
 /* 포신 위치 헬퍼 (fireLaser·cannonFlash와 공유) */
 function cannonPos(W, H) {
     return {
-        bx: W - 38,          // 기반 중심 x (우측 하단 모서리)
-        by: H - 30,          // 기반 중심 y
-        angle: -Math.PI * 0.3   // 왼쪽 위 대각선 (~-54°, 포신이 왼쪽 위를 향함)
+        bx: W - 72,          // 탱크 중심 x
+        by: H - 36,          // 탱크 중심 y
+        angle: -Math.PI * 0.3   // 포신 각도 (왼쪽 위 ~-54°)
     };
 }
 
 function drawCannon(ctx, W, H) {
     const { bx, by, angle } = cannonPos(W, H);
-    const tubeLen = 48, tubeW = 14;
 
     ctx.save();
-    ctx.globalAlpha = 0.92;
+    ctx.globalAlpha = 0.93;
 
-    // 기반 (타원)
+    // ── 무한궤도 (좌우 바퀴) ──────────────────────────
+    const trackY = by + 22;
+    const trackW = 68, trackH = 14, trackR = 7;
+
+    // 궤도 외형
     ctx.beginPath();
-    ctx.ellipse(bx, by, 26, 9, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a3a6e';
+    ctx.roundRect(bx - trackW/2, trackY - trackH/2, trackW, trackH, trackR);
+    const trackGrad = ctx.createLinearGradient(0, trackY-7, 0, trackY+7);
+    trackGrad.addColorStop(0, '#1c3a1c');
+    trackGrad.addColorStop(0.5, '#2d5a2d');
+    trackGrad.addColorStop(1, '#1c3a1c');
+    ctx.fillStyle = trackGrad;
     ctx.fill();
-    ctx.strokeStyle = '#4A90E2';
+    ctx.strokeStyle = '#4a8a4a';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // 포신 튜브 (기반 중심 기준으로 회전)
-    ctx.translate(bx, by - 4);
+    // 궤도 패턴 (마디)
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 2;
+    for (let i = -3; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(bx + i * 10, trackY - trackH/2);
+        ctx.lineTo(bx + i * 10, trackY + trackH/2);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 바퀴 (작은 원 4개)
+    const wheelPositions = [-24, -8, 8, 24];
+    wheelPositions.forEach(wx => {
+        // 외륜
+        ctx.beginPath();
+        ctx.arc(bx + wx, trackY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#3a3a3a';
+        ctx.fill();
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // 허브
+        ctx.beginPath();
+        ctx.arc(bx + wx, trackY, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#888';
+        ctx.fill();
+    });
+
+    // ── 차체 (하부) ───────────────────────────────────
+    ctx.beginPath();
+    ctx.roundRect(bx - 32, by + 6, 64, 18, 4);
+    const bodyGrad = ctx.createLinearGradient(0, by+6, 0, by+24);
+    bodyGrad.addColorStop(0, '#3a6b3a');
+    bodyGrad.addColorStop(1, '#254525');
+    ctx.fillStyle = bodyGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#5a9a5a';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // ── 포탑 (상부 돔) ────────────────────────────────
+    // 포탑 베이스
+    ctx.beginPath();
+    ctx.ellipse(bx - 4, by + 4, 26, 10, 0, 0, Math.PI * 2);
+    const turretGrad = ctx.createRadialGradient(bx-8, by, 2, bx-4, by+4, 26);
+    turretGrad.addColorStop(0, '#5a9a5a');
+    turretGrad.addColorStop(0.6, '#3a7a3a');
+    turretGrad.addColorStop(1, '#254525');
+    ctx.fillStyle = turretGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#6ab86a';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 포탑 돔 (위쪽 반원)
+    ctx.beginPath();
+    ctx.ellipse(bx - 4, by + 2, 22, 14, 0, Math.PI, Math.PI * 2);
+    const domeGrad = ctx.createLinearGradient(0, by-12, 0, by+2);
+    domeGrad.addColorStop(0, '#6ab86a');
+    domeGrad.addColorStop(1, '#3a7a3a');
+    ctx.fillStyle = domeGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#7acc7a';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 해치 (작은 원)
+    ctx.beginPath();
+    ctx.arc(bx - 4, by - 4, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#2a5a2a';
+    ctx.fill();
+    ctx.strokeStyle = '#5a9a5a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // ── 포신 (회전) ───────────────────────────────────
+    ctx.save();
+    ctx.translate(bx - 4, by);
     ctx.rotate(angle);
 
-    // 튜브 몸체
+    const tubeLen = 44, tubeW = 9;
+
+    // 포신 몸체
     const tubeGrad = ctx.createLinearGradient(-tubeW/2, 0, tubeW/2, 0);
-    tubeGrad.addColorStop(0,   '#0d2c5e');
-    tubeGrad.addColorStop(0.45,'#3a6fd4');
-    tubeGrad.addColorStop(1,   '#0d2c5e');
+    tubeGrad.addColorStop(0,   '#1a4a1a');
+    tubeGrad.addColorStop(0.4, '#4a8a4a');
+    tubeGrad.addColorStop(1,   '#1a4a1a');
     ctx.beginPath();
-    ctx.roundRect(-tubeW/2, -tubeLen, tubeW, tubeLen, 5);
+    ctx.roundRect(-tubeW/2, -tubeLen, tubeW, tubeLen, 4);
     ctx.fillStyle = tubeGrad;
     ctx.fill();
-    ctx.strokeStyle = '#6aaef7';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#6ab86a';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 포신 끝 링 (머즐 브레이크)
+    ctx.beginPath();
+    ctx.roundRect(-tubeW/2 - 2, -tubeLen, tubeW + 4, 8, 3);
+    ctx.fillStyle = '#2a5a2a';
+    ctx.fill();
+    ctx.strokeStyle = '#5ab85a';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     // 포구 글로우
     ctx.beginPath();
-    ctx.arc(0, -tubeLen, 7, 0, Math.PI * 2);
-    const glow = ctx.createRadialGradient(0,-tubeLen,0,0,-tubeLen,9);
-    glow.addColorStop(0, 'rgba(150,210,255,0.6)');
-    glow.addColorStop(1, 'rgba(150,210,255,0)');
+    ctx.arc(0, -tubeLen, 6, 0, Math.PI * 2);
+    const glow = ctx.createRadialGradient(0,-tubeLen,0,0,-tubeLen,10);
+    glow.addColorStop(0, 'rgba(180,255,180,0.7)');
+    glow.addColorStop(1, 'rgba(100,220,100,0)');
     ctx.fillStyle = glow;
     ctx.fill();
 
+    ctx.restore(); // 포신 회전 해제
+
+    // ── 별/스타 마킹 ──────────────────────────────────
+    ctx.save();
+    ctx.translate(bx + 14, by + 12);
+    ctx.fillStyle = 'rgba(255,255,180,0.6)';
+    ctx.font = '9px serif';
+    ctx.fillText('★', -4, 4);
     ctx.restore();
+
+    ctx.restore(); // 전체 globalAlpha 해제
 }
 
 function stopSpaceBg() {
@@ -1566,9 +1704,9 @@ function fireLaser(targetRect) {
     const H    = _spaceCvs.height;
     // 포신 선단 좌표 (cannonPos 기반)
     const { bx, by, angle } = cannonPos(W, H);
-    const tubeLen = 48;
-    const x1 = bx + Math.sin(angle) * tubeLen;    // 포구 끝 x (왼쪽)
-    const y1 = (by - 4) - Math.cos(angle) * tubeLen; // 포구 끝 y (위쪽)
+    const tubeLen = 44;
+    const x1 = (bx - 4) + Math.sin(angle) * tubeLen;    // 포구 끝 x
+    const y1 = by - Math.cos(angle) * tubeLen;           // 포구 끝 y
     const x2   = targetRect.left + targetRect.width/2;
     const y2   = targetRect.top  + targetRect.height/2;
 
@@ -1639,9 +1777,9 @@ function fireLaser(targetRect) {
 
 function cannonFlash(ctx, W, H) {
     const { bx, by, angle } = cannonPos(W, H);
-    const tubeLen = 48;
-    const fx = bx + Math.sin(angle) * tubeLen;
-    const fy = (by - 4) - Math.cos(angle) * tubeLen;
+    const tubeLen = 44;
+    const fx = (bx - 4) + Math.sin(angle) * tubeLen;
+    const fy = by - Math.cos(angle) * tubeLen;
     let f=0;
     function flash(){
         if(f>6) return;
@@ -1710,6 +1848,7 @@ async function showGameOver(){
     area.innerHTML=`
     <div class="game-over-box">
         <div class="game-over-title">${rankEmoji} 게임 종료!</div>
+        <div style="font-size:.85rem;font-weight:800;color:var(--blue);background:var(--blue-l);padding:6px 14px;border-radius:99px;display:inline-block;margin-bottom:10px;">${currentLessonLabel()}</div>
         <div class="game-over-score">${gScore}점</div>
         <div class="game-over-detail">✅ 정답 ${gCorrect}개 &nbsp;❌ 오답 ${gWrong}개 &nbsp;🎯 정확도 ${acc}%<br>🔥 최대 콤보 x${gMaxCombo} &nbsp;🔄 ${gRound}라운드 완료<br><small style='color:#aaa;'>배점: 정답 ${gBasePts}×콤보 / 오답 ${gDiff==='easy'?3:gDiff==='normal'?5:8}점 감점</small></div>
         <div class="name-input-box">
@@ -1720,6 +1859,7 @@ async function showGameOver(){
         <button class="btn-action" style="background:var(--gray-l);color:var(--text-s);box-shadow:none;margin-bottom:0;" onclick="renderGame()">⚙️ 설정 변경</button>
         <div class="hiscore-board">
             <div class="hiscore-title">🏅 HIGH SCORE</div>
+            <div id="hiscore-lesson-label" style="text-align:center;font-size:0.8rem;font-weight:800;color:var(--blue);margin-bottom:10px;"></div>
             <div id="hiscore-list"><div style="text-align:center;color:var(--gray);font-size:.85rem;padding:10px;">불러오는 중...</div></div>
         </div>
     </div>`;
@@ -1728,17 +1868,23 @@ async function showGameOver(){
 
 async function loadHiScores(){
     const el=document.getElementById('hiscore-list');
+    const titleEl=document.getElementById('hiscore-lesson-label');
     if(!el) return;
-    let list=await fetchRemoteScores();
-    if(!list||!list.length) list=loadLocalScores();
-    if(!list||!list.length){el.innerHTML='<div style="text-align:center;color:var(--gray);font-size:.85rem;padding:10px;">아직 기록이 없어요!</div>';return;}
+    const lk = currentLessonKey();
+    if(titleEl) titleEl.innerText = currentLessonLabel();
+    let list = await fetchRemoteScores(lk);
+    if(!list||!list.length) list = loadLocalScores(lk);
+    if(!list||!list.length){
+        el.innerHTML='<div style="text-align:center;color:var(--gray);font-size:.85rem;padding:10px;">아직 기록이 없어요! 첫 번째 도전자가 되세요 🏆</div>';
+        return;
+    }
     const rankCls=['gold','silver','bronze'];
     el.innerHTML=list.slice(0,10).map((e,i)=>`
         <div class="hiscore-row">
             <div class="hiscore-rank ${rankCls[i]||''}">${i+1}</div>
             <div class="hiscore-name">${e.name}</div>
             <div class="hiscore-pts">${e.score}점</div>
-            <div class="hiscore-meta">${e.diff||''} · ${e.date||''}</div>
+            <div class="hiscore-meta">${e.diff||''} · ${e.mode||''} · ${e.date||''}</div>
         </div>`).join('');
 }
 
@@ -1746,9 +1892,10 @@ async function saveScore(){
     const nameEl=document.getElementById('player-name');
     const name=(nameEl?.value||'').trim();
     if(!name) return alert('이름을 입력해 주세요!');
-    const entry={name,score:gScore,correct:gCorrect,wrong:gWrong,mode:gMode==='ko'?'한국어':'영어',diff:gDiff,date:new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'})};
-    saveLocalScore(entry);
-    await pushRemoteScore(entry);
+    const lk = currentLessonKey();
+    const entry={name,score:gScore,correct:gCorrect,wrong:gWrong,mode:gMode==='ko'?'한국어':'영어',diff:gDiff,date:new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'}),lesson:lk};
+    saveLocalScore(entry, lk);
+    await pushRemoteScore(entry, lk);
     nameEl.disabled=true;
     document.querySelector('.btn-save-score').disabled=true;
     document.querySelector('.btn-save-score').innerText='저장됨 ✅';
