@@ -51,6 +51,67 @@
             margin-top: 10px; font-size: 0.82rem;
             color: #FF6B6B; font-weight: 700; min-height: 18px;
         }
+
+        /* ═══════════════════════════════════════
+           GAME STYLES
+        ═══════════════════════════════════════ */
+        #game-area { user-select: none; }
+        .game-setup { background:var(--white); border-radius:24px; padding:26px 20px; box-shadow:0 8px 30px var(--shadow); border:2px solid var(--line); }
+        .game-setup-title { font-size:1.1rem; font-weight:900; color:var(--blue); margin-bottom:18px; text-align:center; }
+        .game-option-label { font-size:0.78rem; font-weight:900; color:var(--gray); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+        .game-btn-row { display:grid; gap:8px; margin-bottom:18px; }
+        .game-btn-row.col2 { grid-template-columns:1fr 1fr; }
+        .game-btn-row.col3 { grid-template-columns:1fr 1fr 1fr; }
+        .gopt-btn { padding:13px 8px; border-radius:14px; border:2.5px solid var(--line); background:var(--gray-l); font-family:inherit; font-size:0.95rem; font-weight:800; color:var(--text-s); cursor:pointer; transition:all .15s; display:flex; flex-direction:column; align-items:center; gap:4px; }
+        .gopt-btn .gopt-icon { font-size:1.4rem; }
+        .gopt-btn.selected { border-color:var(--blue); background:var(--blue-l); color:var(--blue); box-shadow:0 3px 10px rgba(74,144,226,.2); }
+        .btn-game-start { width:100%; padding:16px; border-radius:16px; border:none; font-size:17px; font-family:inherit; font-weight:900; background:linear-gradient(135deg,#FF6B6B,#FF8E8E); color:#fff; cursor:pointer; box-shadow:0 5px 0 #D94F4F,0 8px 20px rgba(255,107,107,.25); transition:transform .1s,box-shadow .1s; letter-spacing:.5px; }
+        .btn-game-start:active { transform:translateY(3px); box-shadow:0 2px 0 #D94F4F; }
+        .game-hud { display:flex; align-items:center; justify-content:space-between; background:var(--white); border-radius:16px; padding:12px 18px; margin-bottom:14px; border:2px solid var(--line); box-shadow:0 4px 12px var(--shadow); }
+        .hud-score { font-size:1.1rem; font-weight:900; color:var(--blue); }
+        .hud-combo { font-size:0.85rem; font-weight:800; color:var(--coral); min-width:80px; text-align:center; }
+        .hud-q { font-size:0.85rem; font-weight:800; color:var(--text-s); }
+        .game-question-box { background:linear-gradient(135deg,var(--blue),#5BA3F5); border-radius:20px; padding:22px 18px; margin-bottom:16px; text-align:center; box-shadow:0 6px 20px rgba(74,144,226,.3); }
+        .game-q-mode-badge { display:inline-block; background:rgba(255,255,255,.25); color:#fff; border-radius:99px; font-size:0.72rem; font-weight:800; padding:3px 10px; margin-bottom:10px; }
+        .game-q-num { color:rgba(255,255,255,.7); font-size:0.8rem; font-weight:700; margin-bottom:6px; }
+        .game-speak-btn { background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.4); border-radius:50%; width:64px; height:64px; font-size:1.8rem; cursor:pointer; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; transition:transform .15s,background .15s; }
+        .game-speak-btn:active { transform:scale(.9); background:rgba(255,255,255,.35); }
+        .game-speak-hint { color:rgba(255,255,255,.75); font-size:0.78rem; font-weight:700; }
+        .game-choices { display:grid; gap:10px; }
+        .game-choices.col3 { grid-template-columns:1fr 1fr 1fr; }
+        .game-choices.col4 { grid-template-columns:1fr 1fr; }
+        .game-choices.col5 { grid-template-columns:1fr 1fr; }
+        .choice-card { background:var(--white); border:2.5px solid var(--line); border-radius:16px; padding:14px 8px; text-align:center; cursor:pointer; font-family:inherit; font-size:1rem; font-weight:800; color:var(--text); position:relative; overflow:hidden; transition:transform .12s,box-shadow .12s,border-color .12s; box-shadow:0 3px 10px var(--shadow); }
+        .choice-card:hover { border-color:var(--blue); background:var(--blue-l); color:var(--blue); }
+        @keyframes laserShot { 0%{transform:scaleX(0) translateY(-50%);opacity:1} 60%{transform:scaleX(1.2) translateY(-50%);opacity:1} 100%{transform:scaleX(1.5) translateY(-50%);opacity:0} }
+        @keyframes cardBreak { 0%{transform:scale(1);opacity:1;filter:brightness(1)} 30%{transform:scale(1.08);opacity:1;filter:brightness(2) saturate(3)} 60%{transform:scale(.9) rotate(4deg);opacity:.5} 100%{transform:scale(.4) rotate(-10deg);opacity:0} }
+        @keyframes cardWrong { 0%,100%{transform:translateX(0);border-color:var(--coral)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .card-break { animation:cardBreak .45s ease forwards; }
+        .card-wrong  { animation:cardWrong .4s ease forwards; background:#FFE5E5 !important; }
+        .laser-beam { position:fixed; height:4px; border-radius:2px; background:linear-gradient(90deg,transparent,#FFD93D,#FF6B6B); pointer-events:none; z-index:9999; transform-origin:left center; animation:laserShot .35s ease forwards; box-shadow:0 0 12px rgba(255,107,107,.8),0 0 24px rgba(255,217,61,.6); }
+        @keyframes scoreFloat { 0%{transform:translateY(0) scale(.8);opacity:1} 100%{transform:translateY(-70px) scale(1.1);opacity:0} }
+        .score-popup { position:fixed; font-size:1.4rem; font-weight:900; pointer-events:none; z-index:9998; animation:scoreFloat .7s ease forwards; }
+        .game-over-box { background:var(--white); border-radius:24px; padding:30px 22px; text-align:center; box-shadow:0 8px 30px var(--shadow); border:2px solid var(--line); }
+        .game-over-title { font-size:2rem; font-weight:900; margin-bottom:4px; }
+        .game-over-score { font-size:3rem; font-weight:900; color:var(--blue); margin:10px 0; }
+        .game-over-detail { font-size:0.9rem; color:var(--text-s); font-weight:700; margin-bottom:20px; }
+        .name-input-box { display:flex; gap:8px; margin-bottom:18px; }
+        .name-input-box input { flex:1; padding:13px 16px; border:2.5px solid var(--line); border-radius:14px; font-size:1rem; font-family:inherit; font-weight:700; outline:none; transition:border-color .2s; }
+        .name-input-box input:focus { border-color:var(--blue); }
+        .btn-save-score { padding:13px 18px; border-radius:14px; border:none; background:linear-gradient(135deg,var(--blue),#5BA3F5); color:#fff; font-family:inherit; font-size:0.95rem; font-weight:900; cursor:pointer; box-shadow:0 4px 0 var(--blue-d); white-space:nowrap; }
+        .btn-replay { width:100%; padding:15px; border-radius:16px; border:none; background:linear-gradient(135deg,var(--mint),#5DD9D0); color:#fff; font-family:inherit; font-size:1rem; font-weight:900; cursor:pointer; box-shadow:0 5px 0 var(--mint-d); margin-bottom:10px; }
+        .hiscore-board { background:var(--gray-l); border-radius:18px; padding:16px; margin-top:18px; text-align:left; }
+        .hiscore-title { font-size:0.8rem; font-weight:900; color:var(--gray); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; text-align:center; }
+        .hiscore-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1.5px dashed var(--line); font-size:0.9rem; font-weight:700; }
+        .hiscore-row:last-child { border-bottom:none; }
+        .hiscore-rank { min-width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:900; }
+        .hiscore-rank.gold   { background:#FFD93D; color:#7D5F00; }
+        .hiscore-rank.silver { background:#B0BEC5; color:#fff; }
+        .hiscore-rank.bronze { background:#CD7F32; color:#fff; }
+        .hiscore-name { flex:1; color:var(--text); }
+        .hiscore-pts  { font-weight:900; color:var(--blue); }
+        .hiscore-meta { font-size:0.75rem; color:var(--gray); }
+
     </style>
     <script>
     (function() {
@@ -311,7 +372,7 @@
         /* ── TAB MENU ── */
         .tab-menu {
             display: none;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 8px;
             margin-bottom: 18px;
             background: var(--white);
@@ -657,13 +718,74 @@
         }
 
         /* ── AREA VISIBILITY ── */
-        #test-area, #puzzle-area { display: none; }
+        #test-area, #puzzle-area, #game-area { display: none; }
         #study-area { display: block; }
 
         /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+
+        /* ═══════════════════════════════════════
+           GAME STYLES
+        ═══════════════════════════════════════ */
+        #game-area { user-select: none; }
+        .game-setup { background:var(--white); border-radius:24px; padding:26px 20px; box-shadow:0 8px 30px var(--shadow); border:2px solid var(--line); }
+        .game-setup-title { font-size:1.1rem; font-weight:900; color:var(--blue); margin-bottom:18px; text-align:center; }
+        .game-option-label { font-size:0.78rem; font-weight:900; color:var(--gray); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+        .game-btn-row { display:grid; gap:8px; margin-bottom:18px; }
+        .game-btn-row.col2 { grid-template-columns:1fr 1fr; }
+        .game-btn-row.col3 { grid-template-columns:1fr 1fr 1fr; }
+        .gopt-btn { padding:13px 8px; border-radius:14px; border:2.5px solid var(--line); background:var(--gray-l); font-family:inherit; font-size:0.95rem; font-weight:800; color:var(--text-s); cursor:pointer; transition:all .15s; display:flex; flex-direction:column; align-items:center; gap:4px; }
+        .gopt-btn .gopt-icon { font-size:1.4rem; }
+        .gopt-btn.selected { border-color:var(--blue); background:var(--blue-l); color:var(--blue); box-shadow:0 3px 10px rgba(74,144,226,.2); }
+        .btn-game-start { width:100%; padding:16px; border-radius:16px; border:none; font-size:17px; font-family:inherit; font-weight:900; background:linear-gradient(135deg,#FF6B6B,#FF8E8E); color:#fff; cursor:pointer; box-shadow:0 5px 0 #D94F4F,0 8px 20px rgba(255,107,107,.25); transition:transform .1s,box-shadow .1s; letter-spacing:.5px; }
+        .btn-game-start:active { transform:translateY(3px); box-shadow:0 2px 0 #D94F4F; }
+        .game-hud { display:flex; align-items:center; justify-content:space-between; background:var(--white); border-radius:16px; padding:12px 18px; margin-bottom:14px; border:2px solid var(--line); box-shadow:0 4px 12px var(--shadow); }
+        .hud-score { font-size:1.1rem; font-weight:900; color:var(--blue); }
+        .hud-combo { font-size:0.85rem; font-weight:800; color:var(--coral); min-width:80px; text-align:center; }
+        .hud-q { font-size:0.85rem; font-weight:800; color:var(--text-s); }
+        .game-question-box { background:linear-gradient(135deg,var(--blue),#5BA3F5); border-radius:20px; padding:22px 18px; margin-bottom:16px; text-align:center; box-shadow:0 6px 20px rgba(74,144,226,.3); }
+        .game-q-mode-badge { display:inline-block; background:rgba(255,255,255,.25); color:#fff; border-radius:99px; font-size:0.72rem; font-weight:800; padding:3px 10px; margin-bottom:10px; }
+        .game-q-num { color:rgba(255,255,255,.7); font-size:0.8rem; font-weight:700; margin-bottom:6px; }
+        .game-speak-btn { background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.4); border-radius:50%; width:64px; height:64px; font-size:1.8rem; cursor:pointer; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; transition:transform .15s,background .15s; }
+        .game-speak-btn:active { transform:scale(.9); background:rgba(255,255,255,.35); }
+        .game-speak-hint { color:rgba(255,255,255,.75); font-size:0.78rem; font-weight:700; }
+        .game-choices { display:grid; gap:10px; }
+        .game-choices.col3 { grid-template-columns:1fr 1fr 1fr; }
+        .game-choices.col4 { grid-template-columns:1fr 1fr; }
+        .game-choices.col5 { grid-template-columns:1fr 1fr; }
+        .choice-card { background:var(--white); border:2.5px solid var(--line); border-radius:16px; padding:14px 8px; text-align:center; cursor:pointer; font-family:inherit; font-size:1rem; font-weight:800; color:var(--text); position:relative; overflow:hidden; transition:transform .12s,box-shadow .12s,border-color .12s; box-shadow:0 3px 10px var(--shadow); }
+        .choice-card:hover { border-color:var(--blue); background:var(--blue-l); color:var(--blue); }
+        @keyframes laserShot { 0%{transform:scaleX(0) translateY(-50%);opacity:1} 60%{transform:scaleX(1.2) translateY(-50%);opacity:1} 100%{transform:scaleX(1.5) translateY(-50%);opacity:0} }
+        @keyframes cardBreak { 0%{transform:scale(1);opacity:1;filter:brightness(1)} 30%{transform:scale(1.08);opacity:1;filter:brightness(2) saturate(3)} 60%{transform:scale(.9) rotate(4deg);opacity:.5} 100%{transform:scale(.4) rotate(-10deg);opacity:0} }
+        @keyframes cardWrong { 0%,100%{transform:translateX(0);border-color:var(--coral)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .card-break { animation:cardBreak .45s ease forwards; }
+        .card-wrong  { animation:cardWrong .4s ease forwards; background:#FFE5E5 !important; }
+        .laser-beam { position:fixed; height:4px; border-radius:2px; background:linear-gradient(90deg,transparent,#FFD93D,#FF6B6B); pointer-events:none; z-index:9999; transform-origin:left center; animation:laserShot .35s ease forwards; box-shadow:0 0 12px rgba(255,107,107,.8),0 0 24px rgba(255,217,61,.6); }
+        @keyframes scoreFloat { 0%{transform:translateY(0) scale(.8);opacity:1} 100%{transform:translateY(-70px) scale(1.1);opacity:0} }
+        .score-popup { position:fixed; font-size:1.4rem; font-weight:900; pointer-events:none; z-index:9998; animation:scoreFloat .7s ease forwards; }
+        .game-over-box { background:var(--white); border-radius:24px; padding:30px 22px; text-align:center; box-shadow:0 8px 30px var(--shadow); border:2px solid var(--line); }
+        .game-over-title { font-size:2rem; font-weight:900; margin-bottom:4px; }
+        .game-over-score { font-size:3rem; font-weight:900; color:var(--blue); margin:10px 0; }
+        .game-over-detail { font-size:0.9rem; color:var(--text-s); font-weight:700; margin-bottom:20px; }
+        .name-input-box { display:flex; gap:8px; margin-bottom:18px; }
+        .name-input-box input { flex:1; padding:13px 16px; border:2.5px solid var(--line); border-radius:14px; font-size:1rem; font-family:inherit; font-weight:700; outline:none; transition:border-color .2s; }
+        .name-input-box input:focus { border-color:var(--blue); }
+        .btn-save-score { padding:13px 18px; border-radius:14px; border:none; background:linear-gradient(135deg,var(--blue),#5BA3F5); color:#fff; font-family:inherit; font-size:0.95rem; font-weight:900; cursor:pointer; box-shadow:0 4px 0 var(--blue-d); white-space:nowrap; }
+        .btn-replay { width:100%; padding:15px; border-radius:16px; border:none; background:linear-gradient(135deg,var(--mint),#5DD9D0); color:#fff; font-family:inherit; font-size:1rem; font-weight:900; cursor:pointer; box-shadow:0 5px 0 var(--mint-d); margin-bottom:10px; }
+        .hiscore-board { background:var(--gray-l); border-radius:18px; padding:16px; margin-top:18px; text-align:left; }
+        .hiscore-title { font-size:0.8rem; font-weight:900; color:var(--gray); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; text-align:center; }
+        .hiscore-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1.5px dashed var(--line); font-size:0.9rem; font-weight:700; }
+        .hiscore-row:last-child { border-bottom:none; }
+        .hiscore-rank { min-width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:900; }
+        .hiscore-rank.gold   { background:#FFD93D; color:#7D5F00; }
+        .hiscore-rank.silver { background:#B0BEC5; color:#fff; }
+        .hiscore-rank.bronze { background:#CD7F32; color:#fff; }
+        .hiscore-name { flex:1; color:var(--text); }
+        .hiscore-pts  { font-weight:900; color:var(--blue); }
+        .hiscore-meta { font-size:0.75rem; color:var(--gray); }
+
     </style>
 </head>
 <body>
@@ -729,6 +851,9 @@
         <button id="tab-puzzle" class="tab-btn" onclick="switchTab('puzzle')">
             <span class="tab-icon">🧩</span>Puzzle
         </button>
+        <button id="tab-game" class="tab-btn" onclick="switchTab('game')">
+            <span class="tab-icon">🎮</span>Game
+        </button>
     </div>
 
     <!-- SUBTITLE -->
@@ -761,6 +886,9 @@
             <div id="h-list"></div>
         </div>
     </div>
+
+    <!-- GAME -->
+    <div id="game-area"></div>
 
 </div>
 
@@ -839,11 +967,12 @@ async function startStudy() {
 function switchTab(t) {
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('tab-'+t).classList.add('active');
-    ['study-area','test-area','puzzle-area'].forEach(id=>document.getElementById(id).style.display='none');
+    ['study-area','test-area','puzzle-area','game-area'].forEach(id=>document.getElementById(id).style.display='none');
     document.getElementById(t+'-area').style.display='block';
     if(t==='study') renderStudy();
     if(t==='test') renderTest();
     if(t==='puzzle') { curStage=1; createCW(); }
+    if(t==='game') renderGame();
 }
 
 // CARD ACCENT COLORS
@@ -1048,6 +1177,225 @@ function checkCW(){
     }
 }
 function nextStage(){if(curStage===1){curStage=2;createCW();window.scrollTo({top:0,behavior:'smooth'});}}
+
+/* ═══════════════════════════════════════
+   WORD BLAST GAME
+═══════════════════════════════════════ */
+const JSONBIN_BIN_ID  = '6a55956df5f4af5e298b57f6';
+const JSONBIN_API_KEY = '$2a$10$e22p1UMHnOzV6YNAONo/Ruk7HYMeG51nGYgXWVwT3Jwl2qSiB0SkC';
+const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const JSONBIN_ACCESS_KEY = '$2a$10$s74iUZ/1HOkrIpG5468sceCZhWvJKUQa1M3pNrfndWeJXNxxrz2I.';
+
+let gMode='', gDiff='', gScore=0, gCombo=0, gMaxCombo=0, gCorrect=0, gWrong=0, gQIdx=0, gQueue=[], gChoiceCount=3, gRunning=false;
+
+function lsKey() { return 'hisc_jls_chess'; }
+function loadLocalScores() { try { return JSON.parse(localStorage.getItem(lsKey())||'[]'); } catch(e){ return []; } }
+function saveLocalScore(e) { const l=loadLocalScores(); l.push(e); l.sort((a,b)=>b.score-a.score); localStorage.setItem(lsKey(),JSON.stringify(l.slice(0,20))); }
+
+async function fetchRemoteScores() {
+    try {
+        const r = await fetch(JSONBIN_URL+'/latest', { headers:{'X-Master-Key':JSONBIN_API_KEY,'X-Access-Key':JSONBIN_ACCESS_KEY} });
+        if(!r.ok) return null;
+        const j = await r.json();
+        return j.record?.scores || [];
+    } catch(e){ return null; }
+}
+async function pushRemoteScore(entry) {
+    try {
+        const cur = await fetchRemoteScores() || [];
+        cur.push(entry); cur.sort((a,b)=>b.score-a.score);
+        await fetch(JSONBIN_URL, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_API_KEY,'X-Access-Key':JSONBIN_ACCESS_KEY},
+            body: JSON.stringify({scores:cur.slice(0,30)})
+        });
+    } catch(e){}
+}
+
+function renderGame() {
+    document.getElementById('game-area').innerHTML='';
+    gRunning=false;
+    showGameSetup();
+}
+
+function showGameSetup() {
+    document.getElementById('game-area').innerHTML = `
+    <div class="game-setup">
+        <div class="game-setup-title">🎮 Word Blast!</div>
+        <div class="game-option-label">🎯 모드 선택</div>
+        <div class="game-btn-row col2">
+            <button class="gopt-btn ${gMode==='ko'?'selected':''}" onclick="selectMode('ko',this)"><span class="gopt-icon">🇰🇷</span>한국어 듣기</button>
+            <button class="gopt-btn ${gMode==='en'?'selected':''}" onclick="selectMode('en',this)"><span class="gopt-icon">🇺🇸</span>영어 듣기</button>
+        </div>
+        <div class="game-option-label">⚡ 난이도 선택</div>
+        <div class="game-btn-row col3">
+            <button class="gopt-btn ${gDiff==='easy'?'selected':''}" onclick="selectDiff('easy',this)"><span class="gopt-icon">🌱</span>Easy<br><small style="font-size:.7rem;font-weight:700;color:#aaa;">3개</small></button>
+            <button class="gopt-btn ${gDiff==='normal'?'selected':''}" onclick="selectDiff('normal',this)"><span class="gopt-icon">🔥</span>Normal<br><small style="font-size:.7rem;font-weight:700;color:#aaa;">4개</small></button>
+            <button class="gopt-btn ${gDiff==='hard'?'selected':''}" onclick="selectDiff('hard',this)"><span class="gopt-icon">💀</span>Hard<br><small style="font-size:.7rem;font-weight:700;color:#aaa;">5개</small></button>
+        </div>
+        <button class="btn-game-start" onclick="startGame()">🚀 게임 시작!</button>
+    </div>`;
+}
+
+function selectMode(m,el){ gMode=m; el.closest('.game-btn-row').querySelectorAll('.gopt-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); }
+function selectDiff(d,el){ gDiff=d; el.closest('.game-btn-row').querySelectorAll('.gopt-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); }
+
+function startGame() {
+    if(!gMode) return alert('모드를 선택해 주세요!');
+    if(!gDiff) return alert('난이도를 선택해 주세요!');
+    if(!cData.words||cData.words.length<3) return alert('먼저 단어를 로드해 주세요!');
+    gScore=0; gCombo=0; gMaxCombo=0; gCorrect=0; gWrong=0; gQIdx=0;
+    gChoiceCount = gDiff==='easy'?3:gDiff==='normal'?4:5;
+    gQueue=[...cData.words].sort(()=>Math.random()-.5);
+    gRunning=true;
+    showQuestion();
+}
+
+function showQuestion() {
+    if(gQIdx>=gQueue.length){ showGameOver(); return; }
+    const area=document.getElementById('game-area');
+    const word=gQueue[gQIdx];
+    const total=gQueue.length;
+    const wrongPool=cData.words.filter(w=>w.en!==word.en).sort(()=>Math.random()-.5);
+    const choices=[word,...wrongPool.slice(0,gChoiceCount-1)].sort(()=>Math.random()-.5);
+    const colClass=gChoiceCount===3?'col3':gChoiceCount===4?'col4':'col5';
+
+    area.innerHTML=`
+    <div class="game-hud">
+        <div class="hud-score">⭐ ${gScore}점</div>
+        <div class="hud-combo" id="hud-combo">${gCombo>1?'🔥 x'+gCombo+' COMBO!':''}</div>
+        <div class="hud-q">${gQIdx+1} / ${total}</div>
+    </div>
+    <div class="game-question-box">
+        <div class="game-q-mode-badge">${gMode==='ko'?'🇰🇷 한국어 듣기':'🇺🇸 영어 듣기'}</div>
+        <div class="game-q-num">Q${gQIdx+1}</div>
+        <button class="game-speak-btn" id="speak-btn" onclick="speakQuestion()">🔊</button>
+        <div class="game-speak-hint">탭해서 다시 듣기</div>
+    </div>
+    <div class="game-choices ${colClass}" id="choices-wrap">
+        ${choices.map((w,i)=>`<button class="choice-card" id="cc-${i}" onclick="chooseAnswer(this,'${w.en.replace(/'/g,"&#39;")}','${word.en.replace(/'/g,"&#39;")}')">${w.en}</button>`).join('')}
+    </div>
+    <button class="btn-action" style="margin-top:16px;background:#f0f0f0;color:#888;box-shadow:none;font-size:.9rem;padding:12px;" onclick="confirmEndGame()">🏁 학습 종료</button>`;
+
+    setTimeout(()=>speakQuestion(), 300);
+}
+
+function speakQuestion() {
+    const word=gQueue[gQIdx];
+    const btn=document.getElementById('speak-btn');
+    if(btn){btn.style.transform='scale(.85)';setTimeout(()=>btn.style.transform='',200);}
+    if(gMode==='ko'){
+        const u=new SpeechSynthesisUtterance(word.ko);
+        u.lang='ko-KR'; u.rate=0.9; u.pitch=1.1;
+        synth.cancel(); synth.speak(u);
+    } else { speak(word.en); }
+}
+
+function chooseAnswer(btn,chosen,correct) {
+    if(!gRunning) return;
+    document.querySelectorAll('.choice-card').forEach(b=>b.onclick=null);
+    const rect=btn.getBoundingClientRect();
+    if(chosen===correct){
+        gCombo++; if(gCombo>gMaxCombo) gMaxCombo=gCombo;
+        const pts=10*gCombo; gScore+=pts; gCorrect++;
+        fireLaser(rect);
+        showScorePopup(rect,`+${pts}`,'#4A90E2');
+        btn.classList.add('card-break');
+        const hc=document.getElementById('hud-combo');
+        if(hc&&gCombo>1) hc.innerText=`🔥 x${gCombo} COMBO!`;
+        setTimeout(()=>{gQIdx++;showQuestion();},480);
+    } else {
+        gCombo=0; gScore=Math.max(0,gScore-5); gWrong++;
+        btn.classList.add('card-wrong');
+        showScorePopup(rect,'-5','#FF6B6B');
+        document.querySelectorAll('.choice-card').forEach(b=>{if(b.textContent.trim()===correct) b.style.cssText='background:#E0F7E3;border-color:#6BCB77;color:#2E7D32;';});
+        setTimeout(()=>{gQIdx++;showQuestion();},1200);
+    }
+}
+
+function confirmEndGame(){ if(confirm('학습을 종료하고 점수를 저장할까요?')){ gRunning=false; showGameOver(); } }
+
+function fireLaser(targetRect) {
+    const beam=document.createElement('div');
+    beam.className='laser-beam';
+    const startX=window.innerWidth/2;
+    const startY=targetRect.top+targetRect.height/2;
+    const endX=targetRect.left+targetRect.width/2;
+    const dist=Math.abs(endX-startX);
+    const dir=endX<startX?'right':'left';
+    beam.style.cssText=`left:${Math.min(startX,endX)}px;top:${startY}px;width:${dist}px;transform-origin:${dir} center;`;
+    document.body.appendChild(beam);
+    setTimeout(()=>beam.remove(),400);
+    burst({left:endX,top:startY,width:1,height:1});
+}
+
+function showScorePopup(rect,text,color){
+    const p=document.createElement('div');
+    p.className='score-popup';
+    p.style.cssText=`left:${rect.left+rect.width/2-20}px;top:${rect.top}px;color:${color};`;
+    p.innerText=text;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),750);
+}
+
+async function showGameOver(){
+    const area=document.getElementById('game-area');
+    const acc=gCorrect+gWrong>0?Math.round(gCorrect/(gCorrect+gWrong)*100):0;
+    const rankEmoji=gScore>=200?'🏆':gScore>=100?'🥈':gScore>=50?'🥉':'🎖️';
+    area.innerHTML=`
+    <div class="game-over-box">
+        <div class="game-over-title">${rankEmoji} 게임 종료!</div>
+        <div class="game-over-score">${gScore}점</div>
+        <div class="game-over-detail">✅ 정답 ${gCorrect}개 &nbsp;❌ 오답 ${gWrong}개 &nbsp;🎯 정확도 ${acc}%<br>🔥 최대 콤보 x${gMaxCombo}</div>
+        <div class="name-input-box">
+            <input type="text" id="player-name" placeholder="이름을 입력하세요" maxlength="12">
+            <button class="btn-save-score" onclick="saveScore()">저장 💾</button>
+        </div>
+        <button class="btn-replay" onclick="replayGame()">🔄 다시 하기</button>
+        <button class="btn-action" style="background:var(--gray-l);color:var(--text-s);box-shadow:none;margin-bottom:0;" onclick="renderGame()">⚙️ 설정 변경</button>
+        <div class="hiscore-board">
+            <div class="hiscore-title">🏅 HIGH SCORE</div>
+            <div id="hiscore-list"><div style="text-align:center;color:var(--gray);font-size:.85rem;padding:10px;">불러오는 중...</div></div>
+        </div>
+    </div>`;
+    loadHiScores();
+}
+
+async function loadHiScores(){
+    const el=document.getElementById('hiscore-list');
+    if(!el) return;
+    let list=await fetchRemoteScores();
+    if(!list||!list.length) list=loadLocalScores();
+    if(!list||!list.length){el.innerHTML='<div style="text-align:center;color:var(--gray);font-size:.85rem;padding:10px;">아직 기록이 없어요!</div>';return;}
+    const rankCls=['gold','silver','bronze'];
+    el.innerHTML=list.slice(0,10).map((e,i)=>`
+        <div class="hiscore-row">
+            <div class="hiscore-rank ${rankCls[i]||''}">${i+1}</div>
+            <div class="hiscore-name">${e.name}</div>
+            <div class="hiscore-pts">${e.score}점</div>
+            <div class="hiscore-meta">${e.diff||''} · ${e.date||''}</div>
+        </div>`).join('');
+}
+
+async function saveScore(){
+    const nameEl=document.getElementById('player-name');
+    const name=(nameEl?.value||'').trim();
+    if(!name) return alert('이름을 입력해 주세요!');
+    const entry={name,score:gScore,correct:gCorrect,wrong:gWrong,mode:gMode==='ko'?'한국어':'영어',diff:gDiff,date:new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'})};
+    saveLocalScore(entry);
+    await pushRemoteScore(entry);
+    nameEl.disabled=true;
+    document.querySelector('.btn-save-score').disabled=true;
+    document.querySelector('.btn-save-score').innerText='저장됨 ✅';
+    loadHiScores();
+}
+
+function replayGame(){
+    gScore=0;gCombo=0;gMaxCombo=0;gCorrect=0;gWrong=0;gQIdx=0;
+    gQueue=[...cData.words].sort(()=>Math.random()-.5);
+    gRunning=true; showQuestion();
+}
+
 </script>
 </body>
 </html>
