@@ -1,4 +1,0 @@
-F12 콘솔창에서 
-
-crypto.subtle.digest('SHA-256', new TextEncoder().encode('jls202606'))
-  .then(b => console.log(Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')))
